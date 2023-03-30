@@ -6,6 +6,7 @@ import pandas as pd
 # read the csv files into dataframes
 efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
 times = pd.read_csv('data/sleepdata_2.csv')
+print(efficiency)
 app = Dash(__name__)
 
 

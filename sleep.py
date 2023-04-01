@@ -1,7 +1,6 @@
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
-import statsmodels
 
 # read the csv files into dataframes
 EFFICIENCY = pd.read_csv('data/Sleep_Efficiency.csv')
@@ -12,9 +11,21 @@ app = Dash(__name__)
 app.layout = html.Div([
     html.H1("snoozless", style={'textAlign': 'center'}),
 
-    # div for Deep Sleep v. REM Percentages
+    # div for drop down filter for scatter and box plots
     html.Div([
-        html.H2('Deep Sleep vs. REM Percentages', style={'textAlign': 'center'}),
+        html.H2('Choose the dependent variable (sleep duration by default, including when invalid values are chosen)',
+                style={'textAlign': 'center'}),
+
+        # drop down menu to choose the value represented on the y-axis
+        dcc.Dropdown(['Bedtime', 'Wakeup time', 'Sleep duration', 'Sleep efficiency', 'REM sleep percentage',
+                      'Deep sleep percentage', 'Light sleep percentage', 'Awakenings', 'Caffeine consumption',
+                      'Alcohol consumption', 'Exercise frequency'], 'Sleep duration',
+                     id='sleep-stat')
+    ]),
+
+    # div for Deep Sleep vs. other variables
+    html.Div([
+        html.H2('Deep Sleep vs. Sleep Statistics', style={'textAlign': 'center'}),
         dcc.Graph(id='ds-rem', style={'display': 'inline-block'}),
 
         # checkbox to toggle trendline
@@ -38,12 +49,6 @@ app.layout = html.Div([
             ['Male', 'Female'],
             ['Male', 'Female'], id='ds-gender-options', inline=True
         ),
-
-        # dropdown menu to choose the data represented on the chart(s?)
-        dcc.Dropdown(['Bedtime', 'Wakeup time', 'Sleep duration', 'Sleep efficiency', 'REM sleep percentage',
-                      'Deep sleep percentage', 'Light sleep percentage', 'Awakenings', 'Caffeine consumption',
-                      'Alcohol consumption', 'Exercise frequency'], 'Deep sleep percentage',
-                     id='sleep-stat', clearable=False),
 
     ])
 
@@ -70,28 +75,63 @@ def filt_vals(df, vals, col, lcols):
     return df_update
 
 
+def _parse_times(sleep_df, sleep_stat):
+    """
+    Parses the bedtime and wake up time columns in the sleep data frame to contain decimals that represent times
+    Args:
+        sleep_df (Pandas data frame): a data frame containing sleep statistics for test subjects
+        sleep_stat (str): The statistic to be portrayed on the box plot
+    Returns:
+        sleep_df (Pandas data frame): a newer version of the data frame with the parsed times
+    """
+    # parse the bedtime columns to only include hours into the day
+    if sleep_stat == 'Bedtime':
+        sleep_df['Bedtime'] = sleep_df['Bedtime'].str.split().str[1]
+        sleep_df['Bedtime'] = sleep_df['Bedtime'].str[:2].astype(float) + sleep_df['Bedtime'].str[3:5].astype(float) / \
+                              60
+
+    # parse the wakeup time columns to only include hours into the day
+    elif sleep_stat == 'Wakeup time':
+        sleep_df['Wakeup time'] = sleep_df['Wakeup time'].str.split().str[1]
+        sleep_df['Wakeup time'] = sleep_df['Wakeup time'].str[:2].astype(float) + \
+                                  sleep_df['Wakeup time'].str[3:5].astype(float) / 60
+
+    # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
+    else:
+        None
+
+    return sleep_df
+
+
 @app.callback(
     Output('ds-rem', 'figure'),
     Input('ds-slide', 'value'),
-    Input('scatter_trendline', 'value')
+    Input('scatter_trendline', 'value'),
+    Input('sleep-stat', 'value')
 )
-def update_sleep_corr(deepsleep, show_trendline):
+def update_sleep_corr(deepsleep, show_trendline, sleep_stat):
+
+    if sleep_stat in [None, 'Deep sleep percentage']:
+        sleep_stat = 'Sleep duration'
+
     trendline = None
 
     # filter out appropriate values
-    cols = ['ID', 'Deep sleep percentage', 'REM sleep percentage']
+    cols = ['ID', 'Deep sleep percentage', sleep_stat]
     filt_deepsleep = filt_vals(EFFICIENCY, deepsleep, 'Deep sleep percentage', cols)
+
+    # change the times in the data frame to represent hours into a day as floats if they are getting plotted
+    filt_deepsleep = _parse_times(filt_deepsleep, sleep_stat)
 
     # plot the data
     x = filt_deepsleep['Deep sleep percentage']
-    y = filt_deepsleep['REM sleep percentage']
-   
+    y = filt_deepsleep[sleep_stat]
+
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(x, y, trendline=trendline, labels={'y': 'REM Sleep %',
-                                                    'x': 'Deep Sleep %'})
+    fig = px.scatter(x, y, trendline=trendline, labels={'x': 'Deep Sleep %', 'index': sleep_stat})
 
     return fig
 
@@ -110,11 +150,19 @@ def show_sleep_gender_stats(genders, sleep_stat):
     Returns:
         fig: the box and whisker chart
     """
+    fig = None
+    if sleep_stat in [None, 'Bedtime', 'Wakeup time', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
+                      'Exercise frequency']:
+        sleep_stat = 'Sleep duration'
+
+    ylabel = sleep_stat
+
     # filter the data based on the chosen genders
     sleep_gender = EFFICIENCY.loc[EFFICIENCY.Gender.isin(genders),]
 
     # plot the box and whisker chart
-    fig = px.box(sleep_gender, x='Gender', y=sleep_stat, color='Gender', color_discrete_sequence=['fuchsia', 'orange'])
+    fig = px.box(sleep_gender, x='Gender', y=sleep_stat, color='Gender',
+                 color_discrete_map={'Female': 'fuchsia', 'Male': 'orange'}, labels={sleep_stat: ylabel})
 
     return fig
 

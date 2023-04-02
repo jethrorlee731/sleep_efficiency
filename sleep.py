@@ -75,32 +75,32 @@ def filt_vals(df, vals, col, lcols):
     return df_update
 
 
-def _parse_times(sleep_df, sleep_stat):
+def _parse_times(df_sleep, sleep_stat):
     """
     Parses the bedtime and wake up time columns in the sleep data frame to contain decimals that represent times
     Args:
-        sleep_df (Pandas data frame): a data frame containing sleep statistics for test subjects
+        df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
         sleep_stat (str): The statistic to be portrayed on the box plot
     Returns:
         sleep_df (Pandas data frame): a newer version of the data frame with the parsed times
     """
     # parse the bedtime columns to only include hours into the day
     if sleep_stat == 'Bedtime':
-        sleep_df['Bedtime'] = sleep_df['Bedtime'].str.split().str[1]
-        sleep_df['Bedtime'] = sleep_df['Bedtime'].str[:2].astype(float) + sleep_df['Bedtime'].str[3:5].astype(float) / \
+        df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
+        df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / \
                               60
 
     # parse the wakeup time columns to only include hours into the day
     elif sleep_stat == 'Wakeup time':
-        sleep_df['Wakeup time'] = sleep_df['Wakeup time'].str.split().str[1]
-        sleep_df['Wakeup time'] = sleep_df['Wakeup time'].str[:2].astype(float) + \
-                                  sleep_df['Wakeup time'].str[3:5].astype(float) / 60
+        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
+        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
+                                  df_sleep['Wakeup time'].str[3:5].astype(float) / 60
 
     # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
     else:
         None
 
-    return sleep_df
+    return df_sleep
 
 
 @app.callback(
@@ -150,7 +150,6 @@ def show_sleep_gender_stats(genders, sleep_stat):
     Returns:
         fig: the box and whisker chart
     """
-    fig = None
     if sleep_stat in [None, 'Bedtime', 'Wakeup time', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                       'Exercise frequency']:
         sleep_stat = 'Sleep duration'

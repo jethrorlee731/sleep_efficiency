@@ -1,4 +1,4 @@
-# Build a random forest regressor to determine the attributes that best determine one's deep sleep percentage
+# Build a random forest regressor to determine the attributes that best determine one's sleep efficiency
 
 # Import statements
 import seaborn as sns
@@ -85,67 +85,84 @@ def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
     return feature_dict
 
 
-# Establish the theme of any visualizations
-sns.set()
+def main():
+    # Establish the features not used by the random forest regressor
+    unwanted_feats = ['ID', 'Gender', 'Smoking status', 'Sleep efficiency']
 
-# load sleep data
-df_sleep = pd.read_csv('data/Sleep_Efficiency.csv')
-df_sleep.dropna(axis=0, inplace=True)
+    # Establish the theme of any visualizations
+    sns.set()
 
-# we can represent binary categorical variables in single indicator tags
-df_sleep['is_female'] = df_sleep['Gender'] == 'Female'
-df_sleep['is_male'] = df_sleep['Gender'] == 'Male'
-df_sleep['is_smoker'] = df_sleep['Smoking status'] == 'Yes'
-df_sleep['is_not_smoker'] = df_sleep['Smoking status'] == 'No'
+    # load sleep data
+    df_sleep = pd.read_csv('data/Sleep_Efficiency.csv')
+    df_sleep.dropna(axis=0, inplace=True)
 
-# define the true and testing values
+    # parse the bedtime columns to only include hours into the day
+    df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
+    df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
 
-# the x features for the regressor should be quantitative and meaningful (e.g., no one can control their light sleep
-# percentages directly, so 'Light sleep percentage' is not included)
-x_feat_list = ['Age', 'is_female', 'is_male', 'Sleep duration', 'Caffeine consumption', 'Alcohol consumption',
-               'is_smoker', 'is_not_smoker', 'Exercise frequency']
+    # parse the wakeup time columns to only include hours into the day
+    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
+    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
+                              df_sleep['Wakeup time'].str[3:5].astype(float) / 60
 
-y_feat = 'Deep sleep percentage'
+    # we can represent binary categorical variables in single indicator tags
+    df_sleep['is_female'] = df_sleep['Gender'] == 'Female'
+    df_sleep['is_male'] = df_sleep['Gender'] == 'Male'
+    df_sleep['is_smoker'] = df_sleep['Smoking status'] == 'Yes'
+    df_sleep['is_not_smoker'] = df_sleep['Smoking status'] == 'No'
 
-# extract data from dataframe
-x = df_sleep.loc[:, x_feat_list].values
-y = df_sleep.loc[:, y_feat].values
+    # define the true and testing values
 
-# initialize a random forest regressor
-random_forest_reg = RandomForestRegressor()
-y_true = y
+    # the x features for the regressor should be quantitative
+    x_feat_list = list(df_sleep.columns)
+    for feat in unwanted_feats:
+        x_feat_list.remove(feat)
 
-# Cross-validation:
-# construction of (non-stratified) kfold object
-kfold = KFold(n_splits=10, shuffle=True)
+    y_feat = 'Sleep efficiency'
 
-# allocate an empty array to store predictions in
-y_pred = copy(y_true)
+    # extract data from dataframe
+    x = df_sleep.loc[:, x_feat_list].values
+    y = df_sleep.loc[:, y_feat].values
 
-for train_idx, test_idx in kfold.split(x, y_true):
-    # build arrays which correspond to x, y train /test
-    x_test = x[test_idx, :]
-    x_train = x[train_idx, :]
-    y_true_train = y_true[train_idx]
+    # initialize a random forest regressor
+    random_forest_reg = RandomForestRegressor()
+    y_true = y
 
-    # fit happens "inplace", we modify the internal state of
-    # random_forest_reg to remember all the training samples;
-    # gives the regressor the training data
-    random_forest_reg.fit(x_train, y_true_train)
+    # Cross-validation:
+    # construction of (non-stratified) kfold object
+    kfold = KFold(n_splits=10, shuffle=True)
 
-    # estimate the class of each test value
-    y_pred[test_idx] = random_forest_reg.predict(x_test)
+    # allocate an empty array to store predictions in
+    y_pred = copy(y_true)
 
-# computing R2 from sklearn
-r_squared = r2_score(y_true=y_true, y_pred=y_pred)
+    for train_idx, test_idx in kfold.split(x, y_true):
+        # build arrays which correspond to x, y train /test
+        x_test = x[test_idx, :]
+        x_train = x[train_idx, :]
+        y_true_train = y_true[train_idx]
 
-# show the cross validated r^2 value of the random forest regressor
-print('Cross-validated r^2:', r_squared)
+        # fit happens "inplace", we modify the internal state of
+        # random_forest_reg to remember all the training samples;
+        # gives the regressor the training data
+        random_forest_reg.fit(x_train, y_true_train)
 
-# plots the importance of features in determining a person's deep sleep percentage by the random forest regressor
-plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
-plt.gcf().set_size_inches(15, 7)
+        # estimate the class of each test value
+        y_pred[test_idx] = random_forest_reg.predict(x_test)
 
-# creates a dictionary that maps features to their importance value
-deep_sleep_important = make_feature_import_dict(x_feat_list, random_forest_reg.feature_importances_)
-print(deep_sleep_important)
+    # computing R2 from sklearn
+    r_squared = r2_score(y_true=y_true, y_pred=y_pred)
+
+    # show the cross validated r^2 value of the random forest regressor
+    print('Cross-validated r^2:', r_squared)
+
+    # creates a dictionary that maps features to their importance value
+    sleep_important = make_feature_import_dict(x_feat_list, random_forest_reg.feature_importances_)
+    print(sleep_important)
+
+    # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
+    plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
+    plt.gcf().set_size_inches(15, 7)
+
+
+if __name__ == '__main__':
+    main()

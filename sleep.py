@@ -23,20 +23,48 @@ app.layout = html.Div([
                       'Alcohol consumption', 'Exercise frequency'], value='Sleep duration', id='sleep-stat')
     ]),
 
-    # div for Deep Sleep vs. other variables
+    # div for Deep Sleep Percentage vs. other variables
     html.Div([
-        html.H2('Deep Sleep vs. Sleep Statistics', style={'textAlign': 'center'}),
+        html.H2('Deep Sleep Percentage vs. Sleep Statistics', style={'textAlign': 'center'}),
+        dcc.Graph(id='ds-deep', style={'display': 'inline-block'}),
+
+        # checkbox to toggle trendline
+        dcc.Checklist(
+            ['Show Trend Line'],
+            ['Show Trend Line'], id='scatter_trendline-deep', inline=True
+        ),
+
+        # deep sleep slider
+        html.P('Adjust Deep Sleep Percentage', style={'textAlign': 'left'}),
+        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide-deep')]),
+    # div for REM Sleep Percentage vs. other variables
+    html.Div([
+        html.H2('REM Sleep Percentage vs. Sleep Statistics', style={'textAlign': 'center'}),
         dcc.Graph(id='ds-rem', style={'display': 'inline-block'}),
 
         # checkbox to toggle trendline
         dcc.Checklist(
             ['Show Trend Line'],
-            ['Show Trend Line'], id='scatter_trendline', inline=True
+            ['Show Trend Line'], id='scatter_trendline-rem', inline=True
         ),
 
         # deep sleep slider
-        html.P('Adjust Deep Sleep Percentage', style={'textAlign': 'left'}),
-        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide')]),
+        html.P('Adjust REM Sleep Percentage', style={'textAlign': 'left'}),
+        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide-rem')]),
+    # div for Sleep Efficiency vs. other variables
+    html.Div([
+        html.H2('Sleep Efficiency vs. Sleep Statistics', style={'textAlign': 'center'}),
+        dcc.Graph(id='ds-sleep', style={'display': 'inline-block'}),
+
+        # checkbox to toggle trendline
+        dcc.Checklist(
+            ['Show Trend Line'],
+            ['Show Trend Line'], id='scatter_trendline-sleep', inline=True
+        ),
+
+        # deep sleep slider
+        html.P('Adjust Sleep Efficiency Percentage', style={'textAlign': 'left'}),
+        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide-sleep')]),
 
     # div for Box Plot Distributions by Gender
     html.Div([
@@ -150,12 +178,12 @@ def parse_times(df_sleep, sleep_stat):
 
 
 @app.callback(
-    Output('ds-rem', 'figure'),
-    Input('ds-slide', 'value'),
-    Input('scatter_trendline', 'value'),
+    Output('ds-deep', 'figure'),
+    Input('ds-slide-deep', 'value'),
+    Input('scatter_trendline-deep', 'value'),
     Input('sleep-stat', 'value')
 )
-def update_sleep_corr(deepsleep, show_trendline, sleep_stat):
+def update_deep_sleep(deepsleep, show_trendline, sleep_stat):
 
     if sleep_stat in [None, 'Deep sleep percentage']:
         sleep_stat = 'Sleep duration'
@@ -178,6 +206,70 @@ def update_sleep_corr(deepsleep, show_trendline, sleep_stat):
         trendline = 'ols'
 
     fig = px.scatter(x, y, trendline=trendline, labels={'x': 'Deep Sleep %', 'index': sleep_stat})
+
+    return fig
+
+@app.callback(
+    Output('ds-rem', 'figure'),
+    Input('ds-slide-rem', 'value'),
+    Input('scatter_trendline-rem', 'value'),
+    Input('sleep-stat', 'value')
+)
+def update_rem_sleep(remsleep, show_trendline, sleep_stat):
+
+    if sleep_stat in [None, 'REM sleep percentage']:
+        sleep_stat = 'Sleep duration'
+
+    trendline = None
+
+    # filter out appropriate values
+    cols = ['ID', 'REM sleep percentage', sleep_stat]
+    filt_remsleep = filt_vals(EFFICIENCY, remsleep, 'REM sleep percentage', cols)
+
+    # change the times in the data frame to represent hours into a day as floats if they are getting plotted
+    filt_remsleep = parse_times(filt_remsleep, sleep_stat)
+
+    # plot the data
+    x = filt_remsleep['REM sleep percentage']
+    y = filt_remsleep[sleep_stat]
+
+    # show a trend line or not based on the user's input
+    if 'Show Trend Line' in show_trendline:
+        trendline = 'ols'
+
+    fig = px.scatter(x, y, trendline=trendline, labels={'x': 'REM Sleep %', 'index': sleep_stat})
+
+    return fig
+
+@app.callback(
+    Output('ds-sleep', 'figure'),
+    Input('ds-slide-sleep', 'value'),
+    Input('scatter_trendline-sleep', 'value'),
+    Input('sleep-stat', 'value')
+)
+def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
+
+    if sleep_stat in [None, 'Sleep efficiency']:
+        sleep_stat = 'Sleep duration'
+
+    trendline = None
+
+    # filter out appropriate values
+    cols = ['ID', 'Sleep efficiency', sleep_stat]
+    filt_sleepeff = filt_vals(EFFICIENCY, sleepeff, 'Sleep efficiency', cols)
+
+    # change the times in the data frame to represent hours into a day as floats if they are getting plotted
+    filt_sleepeff = parse_times(filt_sleepeff, sleep_stat)
+
+    # plot the data
+    x = filt_sleepeff['Sleep efficiency'] * 100
+    y = filt_sleepeff[sleep_stat]
+
+    # show a trend line or not based on the user's input
+    if 'Show Trend Line' in show_trendline:
+        trendline = 'ols'
+
+    fig = px.scatter(x, y, trendline=trendline, labels={'x': 'Sleep efficiency %', 'index': sleep_stat})
 
     return fig
 

@@ -1,80 +1,76 @@
 
-# linear regression model for bedtime(s), wake-up time(s), and sleep duration(s) associated with
-# higher sleep efficiences, deep sleep percentages, and REM sleep percentages
-
-# ALSO TRY MULTIPLE LINEAR REGRESSION!
-
 from sklearn.linear_model import LinearRegression
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
+import pandas as pd
+import sleep
 
-def show_fit(x, y, slope, intercept):
-    plt.figure()
+def disp_regress(df, x_feat_list, y_feat, verbose=True):
+    """ linear regression, displays model w/ coef
 
-    # transform the input data into numpy arrays and flatten them for easier processing
-    x = np.array(x).ravel()
-    y = np.array(y).ravel()
+    Args:
+        df (pd.DataFrame): dataframe
+        x_feat_list (list): list of all features in model
+        y_feat (list): target feature
+        verbose (bool): toggles command line output
 
-    # plot the actual data
-    plt.scatter(x, y, label='y_true')
-
-    # compute linear predictions
-    # x is a numpy array so each element gets mulitplied by slope and intercept is added
-    y_pred = slope * x + intercept
-
-    # plot the linear fit
-    plt.plot(x, y_pred, color='black',
-             ls=':',
-             label='y_pred (regression)')
-
-    # for each data point plot the error
-    for idx, (x_i, y_i) in enumerate(zip(x, y)):
-        # compute predicted position
-        y_pred_i = slope * x_i + intercept
-
-        # plot error
-        plt.plot([x_i, x_i], [y_i, y_pred_i],
-                 ls='--', lw=3, color='tab:red',
-                 label='error' if idx == 0 else "")
-
-    plt.legend()
-    plt.xlabel('x')
-    plt.ylabel('y')
-
-    # # compute mean squared error
-    # y_pred = slope * x + intercept
-
-    # add title which shows model and MSE
-    plt.suptitle(f'y_hat = {slope:.2f} * x + {intercept:.2f}, MSE = {mse:.3f}')
-    plt.gcf().set_size_inches(10, 5)
-
-def main():
-    x = np.array([0, 1, 2, 3, 4, 5])
-    y = np.array([1, 3.5, 4, 5, 4.5, 6])
-
-    # reshape x to specify it is 1 feature and many samples
-    x = x.reshape((-1, 1))
-
-    # initialize sklearn model
+    Returns:
+        reg (LinearRegression): model fit to data
+    """
+    # initialize regression object
     reg = LinearRegression()
 
-    # fit the model
+    # get target variable
+    # (note: since we index with list -> garauanteed 2d x array, no reshape needed)
+    x = df.loc[:, x_feat_list].values
+    y = df.loc[:, y_feat].values
+
+    # fit regression
     reg.fit(x, y)
 
-    # same as a_1
-    slope = reg.coef_[0]
-
-    # same as a_0
-    intercept = reg.intercept_
-
-    # show_fit is basically plotting it
-    show_fit(x, y, slope, intercept)
-
+    # compute / store r2
     y_pred = reg.predict(x)
 
-    r2 = r2_score(y_true=y, y_pred=y_pred)
-    print(r2)
+    if verbose:
+        # print model
+        model_str = y_feat + f' = {reg.intercept_:.2f}'
+        for feat, coef in zip(x_feat_list, reg.coef_):
+            s_sign = ' - ' if coef < 0 else ' + '
+            model_str += s_sign + f'{np.abs(coef):.2f} {feat}'
+        print(model_str)
+
+        # compute / print r2
+        r2 = r2_score(y_true=y, y_pred=y_pred)
+        print(f'r2 = {r2:.3} (not cross validated)')
+
+    return reg
+
+def main():
+    # Establish the features not used by the random forest regressor
+    unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage']
+
+    # load sleep data
+    df_sleep = pd.read_csv('data/Sleep_Efficiency.csv')
+    df_sleep.dropna(axis=0, inplace=True)
+
+    # parse the bedtime columns to only include hours into the day
+    df_sleep = sleep.parse_times(df_sleep, 'Bedtime')
+
+    # parse the wakeup time columns to only include hours into the day
+    df_sleep = sleep.parse_times(df_sleep, 'Wakeup time')
+
+    # we can represent binary categorical variables in single indicator tags via one-hot encoding
+    df_sleep = pd.get_dummies(data=df_sleep, columns=['Gender', 'Smoking status'], drop_first=True)
+    print(df_sleep.columns)
+
+    # the x features for the regressor should be quantitative
+    x_feat_list = list(df_sleep.columns)
+    for feat in unwanted_feats:
+        x_feat_list.remove(feat)
+
+    disp_regress(df=df_sleep, x_feat_list=x_feat_list, y_feat='Sleep efficiency');
+    disp_regress(df=df_sleep, x_feat_list=x_feat_list, y_feat='REM sleep percentage');
+    disp_regress(df=df_sleep, x_feat_list=x_feat_list, y_feat='Deep sleep percentage');
 
 
 if __name__ == '__main__':

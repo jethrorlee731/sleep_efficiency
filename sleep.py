@@ -8,6 +8,7 @@ TIMES = pd.read_csv('data/sleepdata_2.csv')
 app = Dash(__name__)
 
 # layout for the dashboard
+# WE CAN DECIDE ON THE FORMAT OF THE LAYOUT LATER AND USE CHILDRENS TO REFORMAT
 app.layout = html.Div([
     html.H1("snoozless", style={'textAlign': 'center'}),
 
@@ -19,7 +20,7 @@ app.layout = html.Div([
         # drop down menu to choose the value represented on the y-axis
         dcc.Dropdown(['Bedtime', 'Wakeup time', 'Sleep duration', 'Sleep efficiency', 'REM sleep percentage',
                       'Deep sleep percentage', 'Light sleep percentage', 'Awakenings', 'Caffeine consumption',
-                      'Alcohol consumption', 'Exercise frequency'], 'Sleep duration',
+                      'Alcohol consumption', 'Exercise frequency'], value='Sleep duration',
                      id='sleep-stat')
     ]),
 
@@ -39,9 +40,9 @@ app.layout = html.Div([
         dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide')
     ]),
 
-    # div for Deep Sleep Box Plot Distributions by Gender
+    # div for Box Plot Distributions by Gender
     html.Div([
-        html.H2('Deep Sleep Distribution by Gender', style={'textAlign': 'center'}),
+        html.H2('Distribution by Gender', style={'textAlign': 'center'}),
         dcc.Graph(id='ds-gender', style={'display': 'inline-block'}),
 
         # gender checkbox
@@ -59,12 +60,13 @@ app.layout = html.Div([
 def filt_vals(df, vals, col, lcols):
     """
     Filter the user-selected values from the dataframe
-    :param df: (dataframe) a dataframe with the values we are seeking and additional attributes
-    :param vals: (list) two user-defined values, a min and max
-    :param col: (str) the column to filter by
-    :param lcols: (list) a list of column names to return
-    :return: df_updated: (dataframe) the dataframe filtered to just include the values
-            within the user specified range
+    Args:
+        df: (dataframe) a dataframe with the values we are seeking and additional attributes
+        vals (list): two user-defined values, a min and max
+        col (str): the column to filter by
+        lcols (list): a list of column names to return
+    Returns:
+        df_updated (dataframe): the dataframe filtered to just include the values within the user specified range
     """
     least = vals[0]
     most = vals[1]
@@ -75,9 +77,9 @@ def filt_vals(df, vals, col, lcols):
     return df_update
 
 
-def _parse_times(df_sleep, sleep_stat):
+def parse_times(df_sleep, sleep_stat):
     """
-    Parses the bedtime and wake up time columns in the sleep data frame to contain decimals that represent times
+    Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
     Args:
         df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
         sleep_stat (str): The statistic to be portrayed on the box plot
@@ -111,6 +113,8 @@ def _parse_times(df_sleep, sleep_stat):
 )
 def update_sleep_corr(deepsleep, show_trendline, sleep_stat):
 
+    # DS-SLIDE IS NOT INCLUDED IN THIS FUNCTION YET?
+
     if sleep_stat in [None, 'Deep sleep percentage']:
         sleep_stat = 'Sleep duration'
 
@@ -121,7 +125,7 @@ def update_sleep_corr(deepsleep, show_trendline, sleep_stat):
     filt_deepsleep = filt_vals(EFFICIENCY, deepsleep, 'Deep sleep percentage', cols)
 
     # change the times in the data frame to represent hours into a day as floats if they are getting plotted
-    filt_deepsleep = _parse_times(filt_deepsleep, sleep_stat)
+    filt_deepsleep = parse_times(filt_deepsleep, sleep_stat)
 
     # plot the data
     x = filt_deepsleep['Deep sleep percentage']
@@ -150,8 +154,7 @@ def show_sleep_gender_stats(genders, sleep_stat):
     Returns:
         fig: the box and whisker chart
     """
-    if sleep_stat in [None, 'Bedtime', 'Wakeup time', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                      'Exercise frequency']:
+    if sleep_stat in [None, 'Deep sleep percentage']:
         sleep_stat = 'Sleep duration'
 
     ylabel = sleep_stat

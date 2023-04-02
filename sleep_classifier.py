@@ -10,6 +10,7 @@ from copy import copy
 from sklearn.metrics import r2_score
 from sklearn.ensemble import RandomForestRegressor
 from collections import defaultdict
+import sleep
 
 
 def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
@@ -86,8 +87,11 @@ def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
 
 
 def main():
+
+    # WHY DON'T WE WANT TO USE GENDER, SMOKING STATUS?
     # Establish the features not used by the random forest regressor
-    unwanted_feats = ['ID', 'Gender', 'Smoking status', 'Sleep efficiency']
+    unwanted_feats = ['ID', 'Sleep efficiency']
+    # unwanted_feats = ['ID', 'Gender', 'Smoking status', 'Sleep efficiency']
 
     # Establish the theme of any visualizations
     sns.set()
@@ -97,22 +101,32 @@ def main():
     df_sleep.dropna(axis=0, inplace=True)
 
     # parse the bedtime columns to only include hours into the day
-    df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
-    df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
+    df_sleep = sleep.parse_times(df_sleep, 'Bedtime')
 
     # parse the wakeup time columns to only include hours into the day
-    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
-    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
-                              df_sleep['Wakeup time'].str[3:5].astype(float) / 60
+    df_sleep = sleep.parse_times(df_sleep, 'Wakeup time')
 
+    # I SIMPLIFIED THE FOLLOWING LINES BY USING THE PARSE_TIMES FUNCTION FROM THE SLEEP.PY FILE
+    # # parse the bedtime columns to only include hours into the day
+    # df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
+    # df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
+    #
+    # # parse the wakeup time columns to only include hours into the day
+    # df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
+    # df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
+    #                           df_sleep['Wakeup time'].str[3:5].astype(float) / 60
+
+    # I THINK TECHNICALLY WE SHOULD DO ONE HOT ENCODING HERE TO ENCODE CATEGORICAL VARIABLES
+    df_sleep = pd.get_dummies(data=df_sleep, columns=['Gender', 'Smoking status'], drop_first=True)
     # we can represent binary categorical variables in single indicator tags
-    df_sleep['is_female'] = df_sleep['Gender'] == 'Female'
-    df_sleep['is_male'] = df_sleep['Gender'] == 'Male'
-    df_sleep['is_smoker'] = df_sleep['Smoking status'] == 'Yes'
-    df_sleep['is_not_smoker'] = df_sleep['Smoking status'] == 'No'
+    # df_sleep['is_female'] = df_sleep['Gender'] == 'Female'
+    # df_sleep['is_male'] = df_sleep['Gender'] == 'Male'
+    # df_sleep['is_smoker'] = df_sleep['Smoking status'] == 'Yes'
+    # df_sleep['is_not_smoker'] = df_sleep['Smoking status'] == 'No'
 
     # define the true and testing values
 
+    # WHY ARE YOU DROPPING GENDER AND SMOKING STATUS IF YOU JUST ENCODED THEM IN THE LINES ABOVE?
     # the x features for the regressor should be quantitative
     x_feat_list = list(df_sleep.columns)
     for feat in unwanted_feats:

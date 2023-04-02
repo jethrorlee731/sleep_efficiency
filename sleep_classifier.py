@@ -1,4 +1,7 @@
-# Build a random forest regressor to determine the attributes that best determine one's sleep efficiency
+"""
+sleep_classifier.py: Build a random forest regressor to determine the attributes that best determine one's sleep
+                     efficiency
+"""
 
 # Import statements
 import seaborn as sns

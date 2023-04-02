@@ -13,15 +13,14 @@ app.layout = html.Div([
 
     # div for drop down filter for scatter and box plots
     html.Div([
-        html.H2('Choose the dependent variable (sleep duration by default, including when invalid values are chosen)',
+        html.P('Choose the dependent variable (sleep duration by default, including when invalid values are chosen)',
                 style={'textAlign': 'center'}),
 
         # drop down menu to choose the value represented on the y-axis
         dcc.Dropdown(['Bedtime', 'Wakeup time', 'Sleep duration', 'Sleep efficiency', 'REM sleep percentage',
                       'Deep sleep percentage', 'Light sleep percentage', 'Awakenings', 'Caffeine consumption',
                       'Alcohol consumption', 'Exercise frequency'], 'Sleep duration',
-                     id='sleep-stat')
-    ]),
+                     id='sleep-stat')]),
 
     # div for Deep Sleep vs. other variables
     html.Div([
@@ -36,8 +35,7 @@ app.layout = html.Div([
 
         # deep sleep slider
         html.P('Adjust Deep Sleep Percentage', style={'textAlign': 'left'}),
-        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide')
-    ]),
+        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide')]),
 
     # div for Deep Sleep Box Plot Distributions by Gender
     html.Div([
@@ -48,10 +46,56 @@ app.layout = html.Div([
         dcc.Checklist(
             ['Male', 'Female'],
             ['Male', 'Female'], id='ds-gender-options', inline=True
-        ),
+        )]),
+
+    # div for calculating sleep score
+    html.Div([
+        html.H2('Find your sleep score!', style={'textAlign': 'center'}),
+        # dcc.Graph(id='ds-gender', style={'display': 'inline-block'}),
+
+        # Ask user for information that could affect their sleep efficiency
+
+        # Ask for a user's age
+        html.P('How old are you? (years)', style={'textAlign': 'center'}),
+        dcc.Slider(0, 120, 1, value=0, marks=None, id='sleep-score-age',
+                   tooltip={"placement": "bottom", "always_visible": True}),
+
+        # Ask a user how many drinks of alcohol they consume, on average, per week
+        html.P('How many drinks of alcohol do you typically drink in a week?',
+               style={'textAlign': 'center'}),
+        html.P('Standard drinks:', style={'textAlign': 'center'}),
+        html.P('- 12 ounces of 5% alcohol by volume (ABV) like beer', style={'textAlign': 'center'}),
+        html.P('- 8 ounces of 7% ABV like malt liquor', style={'textAlign': 'center'}),
+        html.P('- 5 ounces of 12% ABV like wine', style={'textAlign': 'center'}),
+        html.P('- 1.5 ounces of 40% ABV (or 80 proof) distilled spirits like gin, rum and whiskey',
+               style={'textAlign': 'center'}),
+        dcc.Slider(0, 50, 1, value=0, marks=None, id='sleep-score-alcohol',
+                   tooltip={"placement": "bottom", "always_visible": True}),
+
+        # Ask a user about their exercise habits per week
+        html.P('How many hours of physical activity do you get in a week', style={'textAlign': 'center'}),
+        dcc.Slider(0, 168, 1, value=0, marks=None, id='sleep-score-exercise',
+                   tooltip={"placement": "bottom", "always_visible": True}),
+
+        # Ask a user about whether or not they smoke/vape
+        html.P('Do you smoke/vape?', style={'textAlign': 'center'}),
+        dcc.Dropdown(['Yes', 'No'], clearable=False, id='sleep-score-smoke'),
+
+        # Ask a user about how many hours of sleep they get, on average, per day
+        html.P('On average, how many hours do you sleep in a day?', style={'textAlign': 'center'}),
+        dcc.Slider(0, 24, 1, value=0, marks=None, id='sleep-score-duration',
+                   tooltip={"placement": "bottom", "always_visible": True}),
+
+        # Ask a user how many cups of caffeine they consume per week
+        html.P('On average, how many cups of caffeine do you consume per week?', style={'textAlign': 'center'}),
+        dcc.Slider(0, 100, 1, value=0, marks=None, id='sleep-score-caffeine',
+                   tooltip={"placement": "bottom", "always_visible": True}),
+
+        # Ask a user for they gender they identify with
+        html.P("What's your gender identity?", style={'textAlign': 'center'}),
+        dcc.Dropdown(['Male', 'Female', 'Non-binary'], clearable=False, id='sleep-score-gender'),
 
     ])
-
 ])
 
 
@@ -110,7 +154,6 @@ def _parse_times(df_sleep, sleep_stat):
     Input('sleep-stat', 'value')
 )
 def update_sleep_corr(deepsleep, show_trendline, sleep_stat):
-
     if sleep_stat in [None, 'Deep sleep percentage']:
         sleep_stat = 'Sleep duration'
 

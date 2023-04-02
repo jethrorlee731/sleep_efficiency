@@ -205,7 +205,8 @@ def update_deep_sleep(deepsleep, show_trendline, sleep_stat):
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(x, y, trendline=trendline, labels={'x': 'Deep Sleep %', 'index': sleep_stat})
+    fig = px.scatter(EFFICIENCY, x='Deep sleep percentage', y=sleep_stat, trendline=trendline,
+                     labels={'x': 'Deep Sleep %', 'index': sleep_stat})
 
     return fig
 
@@ -237,7 +238,8 @@ def update_rem_sleep(remsleep, show_trendline, sleep_stat):
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(x, y, trendline=trendline, labels={'x': 'REM Sleep %', 'index': sleep_stat})
+    fig = px.scatter(EFFICIENCY, x='REM sleep percentage', y=sleep_stat, trendline=trendline,
+                     labels={'x': 'REM Sleep %', 'index': sleep_stat})
 
     return fig
 
@@ -269,8 +271,8 @@ def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(x, y, trendline=trendline, labels={'x': 'Sleep efficiency %', 'index': sleep_stat})
-
+    fig = px.scatter(EFFICIENCY, x='Sleep efficiency', y=sleep_stat, trendline=trendline,
+                     labels={'x': 'Sleep Efficiency %', 'index': sleep_stat})
     return fig
 
 

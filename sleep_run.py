@@ -11,8 +11,7 @@ app = Dash(__name__)
 def main(deepsleep):
     sleep.update_sleep_corr(deepsleep)
 
-
-app.run_server(debug=True)
+    app.run_server(debug=True)
 
 
 # call functions to make the sankey diagrams

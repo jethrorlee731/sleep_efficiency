@@ -197,15 +197,11 @@ def update_deep_sleep(deepsleep, show_trendline, sleep_stat):
     # change the times in the data frame to represent hours into a day as floats if they are getting plotted
     filt_deepsleep = parse_times(filt_deepsleep, sleep_stat)
 
-    # plot the data
-    x = filt_deepsleep['Deep sleep percentage']
-    y = filt_deepsleep[sleep_stat]
-
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(EFFICIENCY, x='Deep sleep percentage', y=sleep_stat, trendline=trendline,
+    fig = px.scatter(filt_deepsleep, x='Deep sleep percentage', y=sleep_stat, trendline=trendline,
                      labels={'x': 'Deep Sleep %', 'index': sleep_stat})
 
     return fig
@@ -230,15 +226,11 @@ def update_rem_sleep(remsleep, show_trendline, sleep_stat):
     # change the times in the data frame to represent hours into a day as floats if they are getting plotted
     filt_remsleep = parse_times(filt_remsleep, sleep_stat)
 
-    # plot the data
-    x = filt_remsleep['REM sleep percentage']
-    y = filt_remsleep[sleep_stat]
-
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(EFFICIENCY, x='REM sleep percentage', y=sleep_stat, trendline=trendline,
+    fig = px.scatter(filt_remsleep, x='REM sleep percentage', y=sleep_stat, trendline=trendline,
                      labels={'x': 'REM Sleep %', 'index': sleep_stat})
 
     return fig
@@ -263,15 +255,11 @@ def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
     # change the times in the data frame to represent hours into a day as floats if they are getting plotted
     filt_sleepeff = parse_times(filt_sleepeff, sleep_stat)
 
-    # plot the data
-    x = filt_sleepeff['Sleep efficiency'] * 100
-    y = filt_sleepeff[sleep_stat]
-
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(EFFICIENCY, x='Sleep efficiency', y=sleep_stat, trendline=trendline,
+    fig = px.scatter(filt_sleepeff, x='Sleep efficiency' * 100, y=sleep_stat, trendline=trendline,
                      labels={'x': 'Sleep Efficiency %', 'index': sleep_stat})
     return fig
 

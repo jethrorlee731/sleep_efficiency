@@ -255,11 +255,13 @@ def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
     # change the times in the data frame to represent hours into a day as floats if they are getting plotted
     filt_sleepeff = parse_times(filt_sleepeff, sleep_stat)
 
+    filt_sleepeff['Sleep efficiency'] = filt_sleepeff['Sleep efficiency'] * 100
+
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    fig = px.scatter(filt_sleepeff, x='Sleep efficiency' * 100, y=sleep_stat, trendline=trendline,
+    fig = px.scatter(filt_sleepeff, x='Sleep efficiency', y=sleep_stat, trendline=trendline,
                      labels={'x': 'Sleep Efficiency %', 'index': sleep_stat})
     return fig
 

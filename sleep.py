@@ -4,8 +4,8 @@ import pandas as pd
 
 
 # read the csv files into dataframes
-efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
-times = pd.read_csv('data/sleepdata_2.csv')
+efficiency = pd.read_csv('Sleep_Efficiency.csv')
+times = pd.read_csv('sleepdata.csv')
 app = Dash(__name__)
 
 
@@ -47,11 +47,40 @@ def filt_vals(df, vals, col, lcols):
     return df_update
 
 
+def avg_ds(ds, df_new):
+    """
+    Find the average across some range of deep sleep
+    :param ds: (int) a user-selected range over which to find the rolling average
+    :param df_new: (dataframe) a dataframe with a deep sleep percentage column
+    :return: df_new: (dataframe) the dataframe updated with a Rolling Average column
+    """
+    # find the average deep sleep for each REM value in the selected range
+    rem_range = [val for val in range(ds[0], ds[1])]
+    # initialize a list
+    avgs_list = []
+    for i in rem_range:
+        # make a new df for which the REM value is the same as i
+        # avg that and append to list
+        new_df = df_new[df_new['Deep sleep percentage'] == i]
+        avg = new_df['REM sleep percentage'].mean()
+        avgs_list.append(avg)
+    # create a new column with the rolling average sunspots
+    # df_new['Rolling Avg'] = df_new['Deep sleep percentage'].rolling(ds).mean()
+    df_new.dropna(inplace=True)
+    return rem_range, avgs_list
+
 @app.callback(
     Output('ds-rem', 'figure'),
     Input('ds-slide', 'value')
 )
 def update_sleep_corr(deepsleep):
+    """
+    Update the Deep Sleep vs. REM Sleep Percentage scatterplot
+    based on user input
+    :param deepsleep: (tuple) starting and ending values of deep sleep
+        percentage to filter for
+    :return: updated plot showing points only for slider-selected values
+    """
 
     # filter out appropriate values
     cols = ['ID', 'Deep sleep percentage', 'REM sleep percentage']
@@ -63,6 +92,11 @@ def update_sleep_corr(deepsleep):
 
     fig = px.scatter(x, y, labels={'y': 'REM Sleep %',
                                    'x': 'Deep Sleep %'})
+
+    # add the average line
+
+
+    fig.add_scatter(x=)
 
     return fig
 

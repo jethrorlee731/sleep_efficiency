@@ -58,6 +58,15 @@ def filt_vals(df, vals, col, lcols):
     return df_update
 
 
+
+# USE PARSE TIME for sleep vs wakeup
+# figure out filt_vals for the efficiency
+
+
+    cols = ['ID', 'Sleep efficiency', sleep_stat]
+    filt_sleepeff = filt_vals(EFFICIENCY, sleepeff, 'Sleep efficiency', cols)
+
+
 # extract the time from a single value or series of datetime-formatted strings
 # def get_time(datetime_val):
 #     time_ser = []

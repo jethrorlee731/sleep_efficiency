@@ -3,6 +3,8 @@ import plotly.express as px
 import pandas as pd
 import sleep_reg as sr
 import sleep_forest as sf
+from sklearn.linear_model import LinearRegression
+
 
 # read the csv files into dataframes
 EFFICIENCY = pd.read_csv('data/Sleep_Efficiency.csv')
@@ -669,9 +671,52 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
     sleep_score_actual = (sleep_score_raw / sleep_score_max) * 100
     return 'Your sleep score out of 100 is: \n{}'.format(sleep_score_actual)
 
-def calc_eff_reg():
+@app.callback(
+    Output('sleep-eff', 'children'),
+    Input('sleep-eff-age', 'value'),
+    Input('sleep-eff-gender', 'value'),
+    Input('sleep-eff-bedtime', 'value'),
+    Input('sleep-eff-wakeuptime', 'value'),
+    Input('sleep-eff-awakenings', 'value'),
+    Input('sleep-eff-caffeine', 'value'),
+    Input('sleep-eff-alcohol', 'value'),
+    Input('sleep-eff-smoke', 'value'),
+    Input('sleep-eff-exercise', 'value')
+)
+def calc_eff_reg(age, gender, bedtime, wakeuptime, awakenings, caffeine, alcohol, smoke, exercise):
 
-    pass
+    # Establish the features not used by the random forest regressor
+    # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
+    # REM sleep percentage, light sleep percentage, and deep sleep percentage are not used because users don't know this
+    # about themselves
+    unwanted_feats = ['ID', 'Sleep efficiency', 'Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
+                      'Light sleep percentage']
+
+    # we can represent binary categorical variables in single indicator tags via one-hot encoding
+    df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
+    print(df_sleep.columns)
+
+    # the x features for the regressor should be quantitative
+    x_feat_list = list(df_sleep.columns)
+    for feat in unwanted_feats:
+        x_feat_list.remove(feat)
+
+    # initialize regression object
+    reg = LinearRegression()
+
+    # get target variable
+    # (note: since we index with list -> guaranteed 2d x array, no reshape needed)
+    x = df_sleep.loc[:, x_feat_list].values
+    y = df_sleep.loc[:, 'Sleep efficiency'].values
+
+    # fit regression
+    reg.fit(x, y)
+
+    # X HERE CAN BE WHAT THE USER CAN PASS IN BASED ON DASHBOARD INPUTS
+    # compute / store r2
+    # PASS IN A 1D DATAFRAME
+    # CANNOT BE A MIX OF INTEGERS AND STRINGS?
+    y_pred = reg.predict(x)
 
 def calculate_eff_forest():
     pass

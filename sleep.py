@@ -45,7 +45,6 @@ app.layout = html.Div([
         html.P('Adjust Deep Sleep Percentage', style={'textAlign': 'left'}),
         dcc.RangeSlider(18, 30, 1, value=[18, 30], id='ds-slide-deep')]),
 
-
     # div for REM Sleep Percentage vs. other variables
     html.Div([
         html.H2('REM Sleep Percentage vs. Sleep Statistics', style={'textAlign': 'center'}),
@@ -76,17 +75,42 @@ app.layout = html.Div([
         html.P('Adjust Sleep Efficiency Percentage', style={'textAlign': 'left'}),
         dcc.RangeSlider(50, 100, 1, value=[50, 100], id='ds-slide-sleep')]),
 
-
     # div for Box Plot Distributions by Gender
     html.Div([
         html.H2('Distribution by Gender', style={'textAlign': 'center'}),
-        dcc.Graph(id='ds-gender', style={'display': 'inline-block'}),
+        dcc.Graph(id='box-gender', style={'display': 'inline-block'}),
 
         # gender checkbox
         dcc.Checklist(
             ['Male', 'Female'],
-            ['Male', 'Female'], id='ds-gender-options', inline=True
+            ['Male', 'Female'], id='box-gender-options', inline=True
         )]),
+
+    # div for density contour plot (comparing a combination of variables with sleep efficiency)
+    html.Div([
+        html.H2('How Various Features Affect Sleep Efficiency', style={'textAlign': 'center'}),
+        dcc.Graph(id='efficiency-contour', style={'display': 'inline-block'}),
+
+        html.P('Choose one independent variable to be represented in the density contour plot',
+               style={'textAlign': 'center'}),
+
+        # drop down menu to choose the first independent variable for the density contour plot
+        dcc.Dropdown(['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
+                      'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency'],
+                     value='Sleep duration', id='density-stat1'),
+
+        html.P('Choose the another variable to be represented in the density contour plot',
+               style={'textAlign': 'center'}),
+
+        # drop down menu to choose the second independent variable for the density contour plot
+        dcc.Dropdown(['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
+                      'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency'],
+                     value='Light sleep percentage', id='density-stat2'),
+
+        # deep sleep slider
+        html.P('Adjust the Represented Sleep Efficiency Values', style={'textAlign': 'left'}),
+        dcc.RangeSlider(50, 100, 1, value=[50, 100], marks=None, tooltip={"placement": "bottom", "always_visible": True},
+                        id='efficiency-slide')]),
 
     # div for calculating sleep score
     html.Div([
@@ -100,8 +124,8 @@ app.layout = html.Div([
                    tooltip={"placement": "bottom", "always_visible": True}),
 
         # Ask a user for they gender they identify with
-        html.P("What's your gender identity?", style={'textAlign': 'center'}),
-        dcc.Dropdown(['Male', 'Female', 'Non-binary'], clearable=False, id='sleep-score-gender'),
+        html.P("What's your biological gender?", style={'textAlign': 'center'}),
+        dcc.Dropdown(['Biological Male', 'Biological Female'], clearable=False, id='sleep-score-gender'),
 
         # Ask a user how many drinks of alcohol they consume, on average, per week
         html.P('How many drinks of alcohol do you typically drink in a week?',
@@ -206,7 +230,7 @@ def parse_times(df_sleep, sleep_stat):
         df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
                                   df_sleep['Wakeup time'].str[3:5].astype(float) / 60
 
-    # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
+    # Parse no data if neither the bedtime nor wakeup time columns are specified via the sleep_stat parameter
     else:
         None
 
@@ -310,8 +334,8 @@ def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
 
 
 @app.callback(
-    Output('ds-gender', 'figure'),
-    Input('ds-gender-options', 'value'),
+    Output('box-gender', 'figure'),
+    Input('box-gender-options', 'value'),
     Input('sleep-stat', 'value')
 )
 def show_sleep_gender_stats(genders, sleep_stat):
@@ -335,8 +359,42 @@ def show_sleep_gender_stats(genders, sleep_stat):
     fig = px.box(sleep_gender, x='Gender', y=sleep_stat, color='Gender',
                  color_discrete_map={'Female': 'fuchsia', 'Male': 'orange'}, labels={sleep_stat: ylabel})
 
-    # add the average line
+    return fig
 
+@app.callback(
+    Output('efficiency-contour', 'figure'),
+    Input('density-stat1', 'value'),
+    Input('density-stat2', 'value'),
+    Input('efficiency-slide', 'value')
+)
+def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
+    """
+    Shows a density contour plots that shows the relationship between two variables and average sleep efficiency
+    Args:
+        sleep_stat1 (str): One statistic to be portrayed on the box plot
+        sleep_stat2 (str): Another statistic to be portrayed on the box plot
+        slider_values (list of floats): a range of sleep efficiencies to be represented on the plot
+    Returns:
+        fig: the density contour plot
+    """
+    SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
+
+    if sleep_stat2 == sleep_stat1:
+        if sleep_stat1 != 'Light sleep percentage':
+            sleep_stat2 = 'Light sleep percentage'
+        else:
+            sleep_stat2 = 'Deep sleep percentage'
+#  df: (dataframe) a dataframe with the values we are seeking and additional attributes
+    #         vals (list): two user-defined values, a min and max
+    #         col (str): the column to filter by
+    #         lcols (list): a list of column names to return
+
+    # filter out appropriate values
+    cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
+    filt_efficiency = filt_vals(EFFICIENCY, slider_values, SLEEP_EFFICIENCY_COL, cols)
+
+    fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z='Sleep efficiency', histfunc="avg")
+    fig.update_traces(contours_coloring="fill", contours_showlabels=True)
 
     return fig
 
@@ -351,9 +409,7 @@ def show_sleep_gender_stats(genders, sleep_stat):
     Input('sleep-score-caffeine', 'value'),
     Input('sleep-score-gender', 'value')
 )
-def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_duration, caffeine_intake, gender):
-    sleep_score_raw = 0
-
+def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_duration, caffeine_intake, bio_gender):
     ALCOHOL_WEIGHT = 0.014327937359475853
     EXERCISE_WEIGHT = 0.009108186817433802
     SMOKING_WEIGHT = 0.02321723448127149
@@ -364,29 +420,25 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
 
     alcohol_score = 0
     exercise_score = 0
-    smoking_score = 0
-    sleep_score = 0
-    caffeine_score = 0
+    duration_score = 0
 
     # changes the sleep score based on one's alcohol intake
-    if gender == 'Male':
-        if 0 < alcohol_intake < 2:
-            alcohol_score = 80
+    if bio_gender == 'Biological Male':
+        if alcohol_intake > 2:
+            alcohol_score = 0
         elif alcohol_intake == 2:
             alcohol_score = 50
-        elif alcohol_intake > 2:
-            alcohol_score = 0
+        elif 1 < alcohol_intake < 2:
+            alcohol_score = 80
         else:
             alcohol_score = MAX_SCORE
 
-    elif gender == 'Female':
-        if 0 < alcohol_intake < 1:
-            alcohol_score = 80
+    elif bio_gender == 'Biological Female':
+        if alcohol_intake > 1:
+            alcohol_score = 0
         elif alcohol_intake == 1:
             alcohol_score = 50
-        elif alcohol_intake > 1:
-            alcohol_score = 0
-        else:
+        elif alcohol_intake < 1:
             alcohol_score = MAX_SCORE
 
     # changes the sleep score based on one's exercise habits
@@ -401,53 +453,53 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
 
     # changes the sleep score based on one's smoking habits
     if is_smoker == 'Yes':
-        smoking_score = 0
+        smoking_score = 50
     else:
         smoking_score = MAX_SCORE
 
     # changes the sleep score based on one's sleep duration habits
     if age == 0:
         if sleep_duration >= 14:
-            sleep_score = MAX_SCORE
+            duration_score = MAX_SCORE
         elif 10 <= sleep_duration < 14:
-            sleep_score = 50
+            duration_score = 50
         else:
-            sleep_score = 0
+            duration_score = 0
     elif 1 <= age <= 2:
         if sleep_duration >= 11:
-            sleep_score = MAX_SCORE
+            duration_score = MAX_SCORE
         elif 7 <= sleep_duration < 11:
-            sleep_score = 50
+            duration_score = 50
         else:
-            sleep_score = 0
+            duration_score = 0
     elif 3 <= age <= 5:
         if sleep_duration >= 10:
-            sleep_score = MAX_SCORE
+            duration_score = MAX_SCORE
         elif 6 <= sleep_duration < 10:
-            sleep_score = 50
+            duration_score = 50
         else:
-            sleep_score = 0
+            duration_score = 0
     elif 6 <= age <= 12:
         if sleep_duration >= 9:
-            sleep_score = MAX_SCORE
+            duration_score = MAX_SCORE
         elif 5 <= sleep_duration < 9:
-            sleep_score = 50
+            duration_score = 50
         else:
-            sleep_score = 0
+            duration_score = 0
     elif 13 <= age <= 18:
         if sleep_duration >= 8:
-            sleep_score = MAX_SCORE
+            duration_score = MAX_SCORE
         elif 4 <= sleep_duration < 8:
-            sleep_score = 50
+            duration_score = 50
         else:
-            sleep_score = 0
+            duration_score = 0
     elif age > 18:
         if sleep_duration >= 7:
-            sleep_score = MAX_SCORE
+            duration_score = MAX_SCORE
         elif 3 <= sleep_duration < 7:
-            sleep_score = 50
+            duration_score = 50
         else:
-            sleep_score = 0
+            duration_score = 0
 
     # changes the sleep score based on one's caffeine consumption habits
     if caffeine_intake >= 4:
@@ -455,14 +507,15 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
     elif 2 <= caffeine_intake < 4:
         caffeine_score = 50
     elif caffeine_intake == 1:
-        caffeine_score = 0
+        caffeine_score = 80
     else:
         caffeine_score = MAX_SCORE
 
     sleep_score_raw = alcohol_score * ALCOHOL_WEIGHT + exercise_score * EXERCISE_WEIGHT + smoking_score * \
-                      SMOKING_WEIGHT + sleep_score * DURATION_WEIGHT + caffeine_score * CAFFEINE_WEIGHT
+                      SMOKING_WEIGHT + duration_score * DURATION_WEIGHT + caffeine_score * CAFFEINE_WEIGHT
     sleep_score_max = MAX_SCORE * (ALCOHOL_WEIGHT + EXERCISE_WEIGHT + SMOKING_WEIGHT + DURATION_WEIGHT +
                                    CAFFEINE_WEIGHT)
+    print(alcohol_score, exercise_score, smoking_score, duration_score, caffeine_score)
     sleep_score_actual = (sleep_score_raw / sleep_score_max) * 100
     return 'Your sleep score out of 100 is: \n{}'.format(sleep_score_actual)
 

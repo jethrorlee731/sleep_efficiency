@@ -63,7 +63,7 @@ app.layout = html.Div([
 
     # div for Sleep Efficiency vs. other variables
     html.Div([
-        html.H2('Sleep Efficiency vs. Sleep Statistics', style={'textAlign': 'center'}),
+        html.H2('Sleep Efficiency (expressed in %) vs. Sleep Statistics', style={'textAlign': 'center'}),
         dcc.Graph(id='ds-sleep', style={'display': 'inline-block'}),
 
         # checkbox to toggle trendline
@@ -304,28 +304,8 @@ def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
         Returns:
             fig (px.scatter): the sleep efficiency percentage vs. sleep statistic scatter plot itself
     """
-    # fig = _sleep_scatter(sleepeff, show_trendline, 'Sleep efficiency', sleep_stat)
+    fig = _sleep_scatter(sleepeff, show_trendline, 'Sleep efficiency', sleep_stat)
 
-    if sleep_stat in [None, 'Sleep efficiency']:
-        sleep_stat = 'Sleep duration'
-
-    trendline = None
-
-    # filter out appropriate values
-    cols = ['ID', 'Sleep efficiency', sleep_stat]
-    filt_sleepeff = filt_vals(EFFICIENCY, sleepeff, 'Sleep efficiency', cols)
-
-    # change the times in the data frame to represent hours into a day as floats if they are getting plotted
-    filt_sleepeff = parse_times(filt_sleepeff, sleep_stat)
-
-    filt_sleepeff['Sleep efficiency'] = filt_sleepeff['Sleep efficiency'] * 100
-
-    # show a trend line or not based on the user's input
-    if 'Show Trend Line' in show_trendline:
-        trendline = 'ols'
-
-    fig = px.scatter(filt_sleepeff, x='Sleep efficiency', y=sleep_stat, trendline=trendline,
-                     labels={'x': 'Sleep Efficiency %', 'index': sleep_stat})
     return fig
 
 

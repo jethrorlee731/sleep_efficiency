@@ -43,7 +43,8 @@ app.layout = html.Div([
 
         # deep sleep slider
         html.P('Adjust Deep Sleep Percentage', style={'textAlign': 'left'}),
-        dcc.RangeSlider(18, 30, 1, value=[18, 30], id='ds-slide-deep')]),
+        dcc.RangeSlider(18, 30, 1, value=[18, 30], id='ds-slide-deep', marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True})]),
 
     # div for REM Sleep Percentage vs. other variables
     html.Div([
@@ -58,7 +59,8 @@ app.layout = html.Div([
 
         # deep sleep slider
         html.P('Adjust REM Sleep Percentage', style={'textAlign': 'left'}),
-        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide-rem')]),
+        dcc.RangeSlider(15, 30, 1, value=[15, 30], id='ds-slide-rem', marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True})]),
 
     # div for Sleep Efficiency vs. other variables
     html.Div([
@@ -73,7 +75,8 @@ app.layout = html.Div([
 
         # deep sleep slider
         html.P('Adjust Sleep Efficiency Percentage', style={'textAlign': 'left'}),
-        dcc.RangeSlider(50, 100, 1, value=[50, 100], id='ds-slide-sleep')]),
+        dcc.RangeSlider(50, 100, 1, value=[50, 100], id='ds-slide-sleep', marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True})]),
 
     # div for Box Plot Distributions by Gender
     html.Div([
@@ -99,11 +102,13 @@ app.layout = html.Div([
 
         # slider for bedtime
         html.P('Adjust Bedtime', style={'textAlign': 'left'}),
-        dcc.RangeSlider(0, 23, 0.5, value=[0, 23], id='bd-slide'),
+        dcc.RangeSlider(0, 23, 0.5, value=[0, 23], id='bd-slide', marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True}),
 
         # slider for wakeup time
         html.P('Adjust Wakeup Time', style={'textAlign': 'left'}),
-        dcc.RangeSlider(3, 12.5, 0.5, value=[3, 12.5], id='wu-slide'),
+        dcc.RangeSlider(3, 12.5, 0.5, value=[3, 12.5], id='wu-slide', marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True}),
     ]),
 
     # div for density contour plot (comparing a combination of variables with sleep efficiency)
@@ -142,16 +147,13 @@ app.layout = html.Div([
         html.H2('How Smoking Affects Your Sleep Quality', style={'textAlign': 'center'}),
         dcc.Graph(id='smoke-vs-sleep', style={'display': 'inline-block'}),
 
-        # allows users to choose the dependent variable of the strip chart
-        html.P('Choose the dependent variable',
-               style={'textAlign': 'center'}),
-
-        # drop down menu to choose the value represented on the y-axis
-        dcc.Dropdown(['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
-                      'Light sleep percentage', 'Awakenings'], value='Sleep duration', id='smoking-sleep-stat'),
+        # sleep efficiency slider
+        html.P('Adjust Sleep Efficiency Percentage', style={'textAlign': 'left'}),
+        dcc.RangeSlider(50, 100, 1, value=[50, 100], id='smoker-slider',
+                        tooltip={"placement": "bottom", "always_visible": True}, marks=None),
 
         # checkbox that allows users to filter the data by smoking status
-        html.P('Filter by smoking status', style={'textAlign': 'center'}),
+        html.P('Filter by smoking status'),
         dcc.Checklist(
             ['Smokers', 'Non-smokers'],
             ['Smokers', 'Non-smokers'], id='strip-smoker-options', inline=True)
@@ -232,7 +234,7 @@ def filt_vals(df, vals, col, lcols):
     return df_update
 
 
-def parse_times(df_sleep, sleep_stat):
+def _parse_times(df_sleep, sleep_stat):
     """
     Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
     Args:
@@ -281,7 +283,7 @@ def _sleep_scatter(slider_values, show_trendline, sleep_stat_x, sleep_stat_y):
     filt_deepsleep = filt_vals(EFFICIENCY, slider_values, sleep_stat_x, cols)
 
     # change the times in the data frame to represent hours into a day as floats if they are getting plotted
-    filt_deepsleep = parse_times(filt_deepsleep, sleep_stat_y)
+    filt_deepsleep = _parse_times(filt_deepsleep, sleep_stat_y)
 
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
@@ -380,7 +382,7 @@ def show_sleep_gender_stats(genders, sleep_stat):
 
     # plot the box and whisker chart
     fig = px.box(sleep_gender, x='Gender', y=sleep_stat, color='Gender',
-                 color_discrete_map={'Female': 'fuchsia', 'Male': 'orange'}, labels={sleep_stat: ylabel})
+                 color_discrete_map={'Female': 'sienna', 'Male': 'blue'}, labels={sleep_stat: ylabel})
 
     return fig
 
@@ -422,19 +424,21 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
 @app.callback(
     Output('smoke-vs-sleep', 'figure'),
     Input('strip-smoker-options', 'value'),
-    Input('smoking-sleep-stat', 'value'),
+    Input('smoker-slider', 'value')
 )
-def show_sleep_strip(user_responses, sleep_stat):
+# ONLY SHOWING SLEEP EFFICIENCY BECAUSE THE DATA FOR THE OTHER COLUMNS DOES NOT MAKE SENSE
+def show_sleep_strip(user_responses, smoker_slider):
     """
     Shows a strip chart that shows the relationship between a sleep variable and smoking status
     Args:
         user_responses (list of str): List of smoking statuses that the user wants to be portrayed in the strip chart
-        sleep_stat (str): The independent variable of the strip chart
+        smoker_slider (list of ints): a range of sleep efficiencies to be represented on the plot
     Returns:
         fig: the strip chart itself
     """
     smoking_statuses = []
     SMOKING_STATUS_COL = 'Smoking status'
+    SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
 
     for user_response in user_responses:
         if user_response == 'Smokers':
@@ -442,17 +446,20 @@ def show_sleep_strip(user_responses, sleep_stat):
         elif user_response == 'Non-smokers':
             smoking_statuses.append('No')
 
-    # filter the data based on the chosen smoking statuses
+    # filter the data based on the chosen smoking statuses and sleep efficiency range
+    cols = ['ID', SMOKING_STATUS_COL, SLEEP_EFFICIENCY_COL]
     sleep_smoking = EFFICIENCY.loc[EFFICIENCY[SMOKING_STATUS_COL].isin(smoking_statuses), ]
+    sleep_smoking = filt_vals(sleep_smoking, smoker_slider, SLEEP_EFFICIENCY_COL, cols)
 
-    fig = px.strip(sleep_smoking, x=sleep_stat, y=SMOKING_STATUS_COL, color=SMOKING_STATUS_COL)
+    fig = px.strip(sleep_smoking, x=SLEEP_EFFICIENCY_COL, y=SMOKING_STATUS_COL, color=SMOKING_STATUS_COL,
+                   color_discrete_map={'Yes': 'forestgreen', 'No': 'red'})
 
     return fig
 
 
 # parse the Bedtime and Wakeup time for the EFFICIENCY dataframe
-parse_times(EFFICIENCY, "Bedtime")
-parse_times(EFFICIENCY, 'Wakeup time')
+_parse_times(EFFICIENCY, "Bedtime")
+_parse_times(EFFICIENCY, 'Wakeup time')
 
 
 @app.callback(

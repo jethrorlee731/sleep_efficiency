@@ -88,6 +88,26 @@ app.layout = html.Div([
             ['Male', 'Female'], id='ds-gender-options', inline=True
         )]),
 
+    # div for Bedtime v. Wake Up Time
+    html.Div([
+        html.H2('Bedtime vs. Wakeup Time', style={'textAlign': 'center'}),
+        dcc.Graph(id='bd-wu', style={'display': 'inline-block'}),
+
+        # checkbox to toggle trendline
+        dcc.Checklist(
+            ['Show Trend Line'],
+            ['Show Trend Line'], id='scatter_trendline-bdwu', inline=True
+        ),
+
+        # slider for bedtime
+        html.P('Adjust Bedtime', style={'textAlign': 'left'}),
+        dcc.RangeSlider(0, 23, 0.5, value=[0, 23], id='bd-slide'),
+
+        # slider for wakeup time
+        html.P('Adjust Wakeup Time', style={'textAlign': 'left'}),
+        dcc.RangeSlider(3, 12.5, 0.5, value=[3, 12.5], id='wu-slide'),
+    ]),
+
     # div for calculating sleep score
     html.Div([
         html.H2('Find your sleep score!', style={'textAlign': 'center'}),
@@ -163,28 +183,6 @@ def filt_vals(df, vals, col, lcols):
     return df_update
 
 
-# def avg_ds(ds, df_new):
-#     """
-#     Find the average across some range of deep sleep
-#     :param ds: (int) a user-selected range over which to find the rolling average
-#     :param df_new: (dataframe) a dataframe with a deep sleep percentage column
-#     :return: df_new: (dataframe) the dataframe updated with a Rolling Average column
-#     """
-#     # find the average deep sleep for each REM value in the selected range
-#     rem_range = [val for val in range(ds[0], ds[1])]
-#     # initialize a list
-#     avgs_list = []
-#     for i in rem_range:
-#         # make a new df for which the REM value is the same as i
-#         # avg that and append to list
-#         new_df = df_new[df_new['Deep sleep percentage'] == i]
-#         avg = new_df['REM sleep percentage'].mean()
-#         avgs_list.append(avg)
-#
-#     df_new.dropna(inplace=True)
-#     return rem_range, avgs_list
-
-
 def parse_times(df_sleep, sleep_stat):
     """
     Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
@@ -207,8 +205,8 @@ def parse_times(df_sleep, sleep_stat):
                                   df_sleep['Wakeup time'].str[3:5].astype(float) / 60
 
     # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
-    else:
-        None
+    # else:
+    #     None
 
     return df_sleep
 
@@ -357,6 +355,44 @@ def show_sleep_gender_stats(genders, sleep_stat):
 
     # add the average line
 
+    return fig
+
+
+# parse the Bedtime and Wakeup time for the EFFICIENCY dataframe
+parse_times(EFFICIENCY, "Bedtime")
+parse_times(EFFICIENCY, 'Wakeup time')
+
+
+@app.callback(
+    Output('bd-wu', 'figure'),
+    Input('bd-slide', 'value'),
+    Input('wu-slide', 'value'),
+    Input('scatter_trendline-bdwu', 'value')
+)
+def update_sleep_corr(bedtime, wakeup, show_trendline):
+    """ Display the correlation between bedtime and wake time
+        Args:
+            bedtime (list): a list containing floats of the Bedtimes to display
+            wakeup (list): a list containing floats of the Wakeup times to display
+            show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
+
+        Returns:
+            fig (px.scatter): the bedtime vs. the wakeup times
+    """
+    trendline = None
+
+    # filter out appropriate values
+    cols = ['ID', 'Bedtime', 'Wakeup time']
+
+    filt_bedtime = filt_vals(EFFICIENCY, bedtime, 'Bedtime', cols)
+    filt_both = filt_vals(filt_bedtime, wakeup, 'Wakeup time', cols)
+
+    # show a trend line or not based on the user's input
+    if 'Show Trend Line' in show_trendline:
+        trendline = 'ols'
+
+    # plot the data
+    fig = px.scatter(filt_both, x='Bedtime', y='Wakeup time', trendline=trendline)
 
     return fig
 

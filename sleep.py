@@ -1,6 +1,8 @@
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
+import sleep_reg as sr
+import sleep_forest as sf
 
 # read the csv files into dataframes
 EFFICIENCY = pd.read_csv('data/Sleep_Efficiency.csv')
@@ -615,6 +617,13 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
     print(alcohol_score, exercise_score, smoking_score, duration_score, caffeine_score)
     sleep_score_actual = (sleep_score_raw / sleep_score_max) * 100
     return 'Your sleep score out of 100 is: \n{}'.format(sleep_score_actual)
+
+def calc_eff_reg():
+
+    pass
+
+def calculate_eff_forest():
+    pass
 
 
 app.run_server(debug=True)

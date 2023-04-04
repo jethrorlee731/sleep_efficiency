@@ -152,10 +152,11 @@ def main():
     # computing R2 from sklearn
     r_squared = r2_score(y_true=y_true, y_pred=y_pred)
 
-    # show the cross validated r^2 value of the random forest regressor
-    print('Cross-validated r^2:', r_squared)
+    # # show the cross validated r^2 value of the random forest regressor
+    # print('Cross-validated r^2:', r_squared)
 
     # creates a dictionary that maps features to their importance value
+    # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
     sleep_important = make_feature_import_dict(x_feat_list, random_forest_reg.feature_importances_)
     print(sleep_important)
 

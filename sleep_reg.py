@@ -8,7 +8,8 @@ import sleep
 
 def main():
     # Establish the features not used by the random forest regressor
-    unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage']
+    # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
+    unwanted_feats = ['ID', 'Sleep efficiency', 'Sleep duration']
 
     # load sleep data
     df_sleep = pd.read_csv('data/Sleep_Efficiency.csv')
@@ -40,19 +41,20 @@ def main():
     # fit regression
     reg.fit(x, y)
 
+    # X HERE CAN BE WHAT THE USER CAN PASS IN BASED ON DASHBOARD INPUTS
     # compute / store r2
     y_pred = reg.predict(x)
 
-    # print model
-    model_str = 'Sleep efficiency' + f' = {reg.intercept_:.2f}'
-    for feat, coef in zip(x_feat_list, reg.coef_):
-        s_sign = ' - ' if coef < 0 else ' + '
-        model_str += s_sign + f'{np.abs(coef):.2f} {feat}'
-    print(model_str)
-
-    # compute / print r2
-    r_squared = r2_score(y_true=y, y_pred=y_pred)
-    print(f'r2 = {r_squared:.3} (not cross validated)')
+    # # print model
+    # model_str = 'Sleep efficiency' + f' = {reg.intercept_:.2f}'
+    # for feat, coef in zip(x_feat_list, reg.coef_):
+    #     s_sign = ' - ' if coef < 0 else ' + '
+    #     model_str += s_sign + f'{np.abs(coef):.2f} {feat}'
+    # print(model_str)
+    #
+    # # compute / print r2
+    # r_squared = r2_score(y_true=y, y_pred=y_pred)
+    # print(f'r2 = {r_squared:.3} (not cross validated)')
 
 
 if __name__ == '__main__':

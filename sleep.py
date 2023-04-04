@@ -210,7 +210,58 @@ app.layout = html.Div([
 
         html.Br(),
         html.H2(id='sleep-score', style={'textAlign': 'center'})
+    ]),
 
+    # div for calculating sleep efficiency based on the multiple learning regression model
+    html.Div([
+        html.H2('Find your sleep efficiency!', style={'textAlign': 'center'}),
+
+        # Ask user information that are going to be inputs into the multiple learning regression model
+
+        # Ask a user for their age
+        html.P('How old are you?', style={'textAlign': 'center'}),
+        dcc.Slider(0, 100, 1, value=0, marks=None, id='sleep-eff-age',
+                   tooltip={"placement": "bottom", "always_visible": True}),
+
+        # Ask a user for they gender they identify with
+        html.P("What's your biological gender?", style={'textAlign': 'center'}),
+        dcc.Dropdown(['Biological Male', 'Biological Female'], clearable=False, id='sleep-eff-gender'),
+
+        # Ask a user what is their bedtime (hours into the day)
+        html.P('What is your bedtime based on hours into the day (military time)?', style={'textAlign': 'center'}),
+        dcc.Slider(0, 24, 1, value=0, marks=None, id='sleep-eff-bedtime', tooltip={'placement': 'bottom',
+                                                                                   'always_visible': True}),
+
+        # Ask a user what is their wakeup time (hours into the day)
+        html.P('What is your wakeup time based on hours into the day (military time)?', style={'textAlign': 'center'}),
+        dcc.Slider(0, 24, 1, value=0, marks=None, id='sleep-eff-wakeuptime', tooltip={'placement': 'bottom',
+                                                                                      'always_visible': True}),
+
+        # Ask a user the number of awakenings they have for a given night
+        html.P('What is the number of awakenings you have for a given night?', style={'textAlign': 'center'}),
+        dcc.Dropdown([0, 1, 2, 3, 4], clearable=False, id='sleep-eff-awakenings'),
+
+        # Ask a user the amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
+        html.P('What is your amount of caffeine consumption in the 24 hours prior to bedtime (in mg)?',
+               style={'textAlign': 'center'}), dcc.Slider(0, 200, 1, value=0,
+                                                          marks=None, id='sleep-eff-caffeine',
+                                                          tooltip={'placement': 'bottom', 'always_visible': True}),
+
+        # Ask a user the amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+        html.P('What is your amount of alcohol consumption in the 24 hours prior to bedtime (in oz)?',
+               style={'textAlign': 'center'}), dcc.Dropdown([0, 1, 2, 3, 4, 5], clearable=False,
+                                                            id='sleep-eff-alcohol'),
+
+        # Ask a user about whether they smoke/vape
+        html.P('Do you smoke/vape?', style={'textAlign': 'center'}),
+        dcc.Dropdown(['Yes', 'No'], clearable=False, id='sleep-eff-smoke'),
+
+        # Ask a user the number of times the test subject exercises per week
+        html.P('How many times do you exercise per week?', style={'textAlign': 'center'}),
+        dcc.Dropdown([0, 1, 2, 3, 4, 5], clearable=False, id='sleep-eff-exercise'),
+
+        html.Br(),
+        html.H2(id='sleep-eff', style={'textAlign': 'center'})
     ])
 ])
 

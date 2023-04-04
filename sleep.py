@@ -8,12 +8,11 @@ from sklearn.linear_model import LinearRegression
 
 # read the csv files into dataframes
 EFFICIENCY = pd.read_csv('data/Sleep_Efficiency.csv')
+# I JUST DID THIS FOR NOW SO WE DON'T RUN INTO ISSUES WITH NA VALUES BELOW. WE CAN FIX THIS BY REPLACING WITH MEDIAN OF THE
+# COLUMN IF WE WANT.
+EFFICIENCY = EFFICIENCY.dropna()
 TIMES = pd.read_csv('data/sleepdata_2.csv')
 app = Dash(__name__)
-
-# WE CAN EITHER MULTIPLY THE VALUES UP HERE OR ALTER THE COLUMN AFTER TAKING DEEP COPIES OF EFFICIENCY IN THE SCATTER
-# FUNCTIONS. WE CANNOT JUST ENTER THIS LINE IN OUR SCATTER PLOT FUNCTIONS FOR THE SLEEP EFFICIENCY VALUES WOULD MULTIPLY
-# BY 100 INDEFINITELY AS THE PROGRAM KEEPS RUNNING. - Jethro
 
 # multiply sleep efficiencies by 100 to represent them as percentages
 EFFICIENCY['Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
@@ -674,17 +673,16 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
 @app.callback(
     Output('sleep-eff', 'children'),
     Input('sleep-eff-age', 'value'),
-    Input('sleep-eff-gender', 'value'),
     Input('sleep-eff-bedtime', 'value'),
     Input('sleep-eff-wakeuptime', 'value'),
     Input('sleep-eff-awakenings', 'value'),
     Input('sleep-eff-caffeine', 'value'),
     Input('sleep-eff-alcohol', 'value'),
+    Input('sleep-eff-exercise', 'value'),
+    Input('sleep-eff-gender', 'value'),
     Input('sleep-eff-smoke', 'value'),
-    Input('sleep-eff-exercise', 'value')
 )
-def calc_eff_reg(age, gender, bedtime, wakeuptime, awakenings, caffeine, alcohol, smoke, exercise):
-
+def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
     # Establish the features not used by the random forest regressor
     # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
     # REM sleep percentage, light sleep percentage, and deep sleep percentage are not used because users don't know this
@@ -712,11 +710,26 @@ def calc_eff_reg(age, gender, bedtime, wakeuptime, awakenings, caffeine, alcohol
     # fit regression
     reg.fit(x, y)
 
-    # X HERE CAN BE WHAT THE USER CAN PASS IN BASED ON DASHBOARD INPUTS
-    # compute / store r2
-    # PASS IN A 1D DATAFRAME
-    # CANNOT BE A MIX OF INTEGERS AND STRINGS?
-    y_pred = reg.predict(x)
+    if gender == 'Biological Male':
+        gender_value = 1
+    else:
+        gender_value = 0
+
+    if smoke == 'Yes':
+        smoke_value = 1
+    else:
+        smoke_value = 0
+
+    # user inputs as a list of list and then converted into a dataframe
+    data = [[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]]
+    x_df = pd.DataFrame(data, columns=['Age', 'Bedtime', 'Wakeup time', 'Awakenings', 'Caffeine consumption',
+                                       'Alcohol consumption', 'Exercise frequency',
+                                       'Gender_Male', 'Smoking status_Yes'])
+
+    # predict based on user inputs from the dropdown and sliders
+    y_pred = reg.predict(x_df)
+
+    return 'Your predicted sleep efficiency (expressed in %) is \n{}'.format(round(float(y_pred), 2))
 
 def calculate_eff_forest():
     pass

@@ -80,7 +80,7 @@ app.layout = html.Div([
         html.H2('Distribution by Gender', style={'textAlign': 'center'}),
         dcc.Graph(id='box-gender', style={'display': 'inline-block'}),
 
-        # gender checkbox
+        # checkboxes that allow users to filter the data by gender
         dcc.Checklist(
             ['Male', 'Female'],
             ['Male', 'Female'], id='box-gender-options', inline=True
@@ -111,7 +111,8 @@ app.layout = html.Div([
         html.H2('How Various Features Affect Sleep Efficiency', style={'textAlign': 'center'}),
         dcc.Graph(id='efficiency-contour', style={'display': 'inline-block'}),
 
-        html.P('Choose one independent variable to be represented in the density contour plot',
+        html.P('Choose one independent variable to be represented in the density contour plot (sleep duration by '
+               'default, including when invalid values are chosen)',
                style={'textAlign': 'center'}),
 
         # drop down menu to choose the first independent variable for the density contour plot
@@ -119,7 +120,8 @@ app.layout = html.Div([
                       'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency'],
                      value='Sleep duration', id='density-stat1'),
 
-        html.P('Choose the another variable to be represented in the density contour plot',
+        html.P('Choose the another variable to be represented in the density contour plot (light sleep percentage by '
+               'default, including when invalid values are chosen)',
                style={'textAlign': 'center'}),
 
         # drop down menu to choose the second independent variable for the density contour plot
@@ -129,9 +131,31 @@ app.layout = html.Div([
 
         # deep sleep slider
         html.P('Adjust the Represented Sleep Efficiency Values', style={'textAlign': 'left'}),
-        dcc.RangeSlider(50, 100, 1, value=[50, 100], marks=None, tooltip={"placement": "bottom", "always_visible": True},
+        dcc.RangeSlider(50, 100, 1, value=[50, 100], marks=None,
+                        tooltip={"placement": "bottom", "always_visible": True},
                         id='efficiency-slide')]),
 
+    # div for smoking status strip chart
+
+    html.Div([
+        # creating a strip chart showing the relationship between one's smoking status and a sleep variable
+        html.H2('How Smoking Affects Your Sleep Quality', style={'textAlign': 'center'}),
+        dcc.Graph(id='smoke-vs-sleep', style={'display': 'inline-block'}),
+
+        # allows users to choose the dependent variable of the strip chart
+        html.P('Choose the dependent variable',
+               style={'textAlign': 'center'}),
+
+        # drop down menu to choose the value represented on the y-axis
+        dcc.Dropdown(['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
+                      'Light sleep percentage', 'Awakenings'], value='Sleep duration', id='smoking-sleep-stat'),
+
+        # checkbox that allows users to filter the data by smoking status
+        html.P('Filter by smoking status', style={'textAlign': 'center'}),
+        dcc.Checklist(
+            ['Smokers', 'Non-smokers'],
+            ['Smokers', 'Non-smokers'], id='strip-smoker-options', inline=True)
+    ]),
 
     # div for calculating sleep score
     html.Div([
@@ -228,7 +252,6 @@ def parse_times(df_sleep, sleep_stat):
         df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
         df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
                                   df_sleep['Wakeup time'].str[3:5].astype(float) / 60
-
 
     # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
     # else:
@@ -353,7 +376,7 @@ def show_sleep_gender_stats(genders, sleep_stat):
     ylabel = sleep_stat
 
     # filter the data based on the chosen genders
-    sleep_gender = EFFICIENCY.loc[EFFICIENCY.Gender.isin(genders),]
+    sleep_gender = EFFICIENCY.loc[EFFICIENCY.Gender.isin(genders), ]
 
     # plot the box and whisker chart
     fig = px.box(sleep_gender, x='Gender', y=sleep_stat, color='Gender',
@@ -385,16 +408,44 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
             sleep_stat2 = 'Light sleep percentage'
         else:
             sleep_stat2 = 'Deep sleep percentage'
-#  df: (dataframe) a dataframe with the values we are seeking and additional attributes
-    #         vals (list): two user-defined values, a min and max
-    #         col (str): the column to filter by
-    #         lcols (list): a list of column names to return
+
     # filter out appropriate values
     cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
     filt_efficiency = filt_vals(EFFICIENCY, slider_values, SLEEP_EFFICIENCY_COL, cols)
 
     fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z='Sleep efficiency', histfunc="avg")
     fig.update_traces(contours_coloring="fill", contours_showlabels=True)
+
+    return fig
+
+
+@app.callback(
+    Output('smoke-vs-sleep', 'figure'),
+    Input('strip-smoker-options', 'value'),
+    Input('smoking-sleep-stat', 'value'),
+)
+def show_sleep_strip(user_responses, sleep_stat):
+    """
+    Shows a strip chart that shows the relationship between a sleep variable and smoking status
+    Args:
+        user_responses (list of str): List of smoking statuses that the user wants to be portrayed in the strip chart
+        sleep_stat (str): The independent variable of the strip chart
+    Returns:
+        fig: the strip chart itself
+    """
+    smoking_statuses = []
+    SMOKING_STATUS_COL = 'Smoking status'
+
+    for user_response in user_responses:
+        if user_response == 'Smokers':
+            smoking_statuses.append('Yes')
+        elif user_response == 'Non-smokers':
+            smoking_statuses.append('No')
+
+    # filter the data based on the chosen smoking statuses
+    sleep_smoking = EFFICIENCY.loc[EFFICIENCY[SMOKING_STATUS_COL].isin(smoking_statuses), ]
+
+    fig = px.strip(sleep_smoking, x=sleep_stat, y=SMOKING_STATUS_COL, color=SMOKING_STATUS_COL)
 
     return fig
 

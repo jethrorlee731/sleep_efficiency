@@ -270,17 +270,27 @@ html.Div([
     ]),
 
     html.Div([
-        html.H2('Determine which variables are most important in determining your sleep efficiency!',
+        html.H2('Which variables are most important in determining Sleep efficiency, '
+                'REM sleep percentage, or Deep sleep percentage?',
                 style={'textAlign': 'center'}),
+        html.P('Select which dependent variable you are interested in looking at.'),
+        dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'], value='Sleep efficiency',
+                     clearable=False, id='feature'),
+        dcc.Graph(id="feature-importance", style={'display': 'inline-block'})
+    ]),
 
-        # Ask user to choose as many variables as they are interested to look at which is most impactful to sleep
-        # efficiency
-        html.P('Choose as many variables as you would like to be shown on a bar chart that will tell you which'
-               'variables are most important in determining your sleep efficiency'),
-        dcc.Dropdown(['Age', 'Gender', 'Bedtime', 'Wakeup time', 'Sleep duration', 'REM sleep percentage',
-                      'Deep sleep percentage', 'Light sleep percentage', 'Awakenings', 'Caffeine consumption',
-                      'Alcohol consumption', 'Smoking status', 'Exercise frequency'], multi=True, id='feat-chosen'),
-        dcc.Graph(id="feature-importance")
+    html.Div([
+        html.H2('3d view of two independent variables against a chosen dependent variable',
+                style={'textAlign': 'center'}),
+        html.P('Select two indepedent variables you are interested in looking at.'),
+        dcc.Dropdown(['Age', 'Gender', 'Bedtime', 'Wakeup time', 'Sleep duration', 'Awakenings',
+                      'Caffeine consumption', 'Alcohol consumption', 'Smoking status', 'Exercise frequency'], multi=True,
+                     value=['Age', 'Awakenings'],
+                     clearable=False, id='independent-features'),
+        html.P('Select dependent variable you are interested in looking at.'),
+        dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'], value='Sleep efficiency',
+                     clearable=False, id='dependent-feature'),
+        dcc.Graph(id="3d-plot", style={'display': 'inline-block'})
     ])
 
 ])
@@ -851,145 +861,104 @@ def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alco
 
     return 'Your predicted Deep sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
-# I WILL WORK ON THE FEATURE IMPORTANCE PLOT BELOW. I COMMENTED OUT FOR NOW SO IT DOESN'T GIVE AN ERROR.
-# def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
-#     """ plots feature importances in a horizontal bar chart
-#
-#     The x axis is labeled accordingly for a random forest regressor
-#
-#     Args:
-#         feat_list (list): str names of features
-#         feat_import (np.array): feature importances (mean MSE reduce)
-#         sort (bool): if True, sorts features in decreasing importance
-#             from top to bottom of plot
-#         limit (int): if passed, limits the number of features shown
-#             to this value
-#     Returns:
-#         None, just plots the feature importance bar chart
-#     """
-#     if sort:
-#         # sort features in decreasing importance
-#         idx = np.argsort(feat_import).astype(int)
-#         feat_list = [feat_list[_idx] for _idx in idx]
-#         feat_import = feat_import[idx]
-#
-#     if limit is not None:
-#         # limit to the first limit feature
-#         feat_list = feat_list[:limit]
-#         feat_import = feat_import[:limit]
-#
-#     # plot and label feature importance
-#     plt.barh(feat_list, feat_import)
-#     plt.gcf().set_size_inches(5, len(feat_list) / 2)
-#     plt.xlabel('Feature importance\n(Mean decrease in MSE across all Decision Trees)')
-#
-#     # show the feature importance graph
-#     plt.show()
-#
-#
-# def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
-#     """ Map features to their importance metrics
-#
-#     Args:
-#         feat_list (list): str names of features
-#         feat_import (np.array): feature importances (mean MSE reduce)
-#         sort (bool): if True, sorts features in decreasing importance
-#             from top to bottom of plot
-#         limit (int): if passed, limits the number of features shown
-#             to this value
-#     Returns:
-#         feature_dict (list): has tuples that map certain features (key) to their feature importance (mean MSE reduce)
-#                              values
-#     """
-#     # initialize a dictionary that maps features to their importance metrics
-#     feature_dict = defaultdict(lambda: 0)
-#
-#     if sort:
-#         # sort features in decreasing importance
-#         idx = np.argsort(feat_import).astype(int)
-#         feat_list = [feat_list[_idx] for _idx in idx]
-#         feat_import = feat_import[idx]
-#
-#     if limit is not None:
-#         # limit to the first limit feature
-#         feat_list = feat_list[:limit]
-#         feat_import = feat_import[:limit]
-#
-#     # create a dictionary mapping features to their feature importances
-#     for i in range(len(feat_list)):
-#         feature_dict[feat_list[i]] = feat_import[i]
-#     feature_dict = dict(feature_dict)
-#     feature_dict = sorted(feature_dict.items(), key=lambda item: item[1], reverse=True)
-#
-#     # return the feature importance dictionary
-#     return feature_dict
+def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
+    """ plots feature importances in a horizontal bar chart
 
-#
-# @app.callback(
-#     Output('feature-importance', 'figure'),
-#     Input('feat-chosen', 'value')
-# )
-# def plot_eff_forest(featchosen):
-#     """
-#     Allow users to see given the x-variables they choose, which are most important in improving sleep efficiency
-#     """
-#     # Establish the theme of any visualizations
-#     sns.set()
-#
-#     # we can represent binary categorical variables in single indicator tags via one-hot encoding
-#     df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
-#     print(df_sleep.columns)
-#
-#     featchosen = list(map(lambda x: x.replace('Gender', 'Gender_Male'), featchosen))
-#     featchosen = list(map(lambda x: x.replace('Smoking status', 'Smoking status_Yes'), featchosen))
-#
-#     y_feat = 'Sleep efficiency'
-#
-#     # extract data from dataframe
-#     x = df_sleep.loc[:, featchosen].values
-#     y = df_sleep.loc[:, y_feat].values
-#
-#     # initialize a random forest regressor
-#     random_forest_reg = RandomForestRegressor()
-#     y_true = y
-#
-#     # Cross-validation:
-#     # construction of (non-stratified) kfold object
-#     kfold = KFold(n_splits=10, shuffle=True)
-#
-#     # allocate an empty array to store predictions in
-#     y_pred = copy(y_true)
-#
-#     for train_idx, test_idx in kfold.split(x, y_true):
-#         # build arrays which correspond to x, y train /test
-#         x_test = x[test_idx, :]
-#         x_train = x[train_idx, :]
-#         y_true_train = y_true[train_idx]
-#
-#         # fit happens "inplace", we modify the internal state of
-#         # random_forest_reg to remember all the training samples;
-#         # gives the regressor the training data
-#         random_forest_reg.fit(x_train, y_true_train)
-#
-#         # estimate the class of each test value
-#         y_pred[test_idx] = random_forest_reg.predict(x_test)
-#
-#     # computing R2 from sklearn
-#     r_squared = r2_score(y_true=y_true, y_pred=y_pred)
-#
-#     # # show the cross validated r^2 value of the random forest regressor
-#     # print('Cross-validated r^2:', r_squared)
-#
-#     # creates a dictionary that maps features to their importance value
-#     # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
-#     sleep_important = make_feature_import_dict(featchosen, random_forest_reg.feature_importances_)
-#     print(sleep_important)
-#
-#     # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
-#     fig = plot_feat_import_rf_reg(featchosen, random_forest_reg.feature_importances_)
-#     # fig = plt.gcf().set_size_inches(15, 7)
-#
-#     return fig
+    The x-axis is labeled accordingly for a random forest regressor
+
+    Args:
+        feat_list (list): str names of features
+        feat_import (np.array): feature importances (mean MSE reduce)
+        sort (bool): if True, sorts features in decreasing importance
+            from top to bottom of plot
+        limit (int): if passed, limits the number of features shown
+            to this value
+    Returns:
+        None, just plots the feature importance bar chart
+    """
+    if sort:
+        # sort features in decreasing importance
+        idx = np.argsort(feat_import).astype(int)
+        feat_list = [feat_list[_idx] for _idx in idx]
+        feat_import = feat_import[idx]
+
+    if limit is not None:
+        # limit to the first limit feature
+        feat_list = feat_list[:limit]
+        feat_import = feat_import[:limit]
+
+    fig = px.bar(x=feat_list, y=feat_import, title="How important is each variable in contributing to "
+                                                   "variable of prediction?", labels={'x': 'Features', 'y':
+        'feature importance'})
+
+    return fig
+
+
+@app.callback(
+    Output('feature-importance', 'figure'),
+    Input('feature', 'value')
+)
+def plot_eff_forest(focus_col):
+    """ Plot the feature importance graph for the y-variable that the user chooses
+    Args:
+        focus_col (str): interested y-variable (either sleep efficiency, rem sleep percentage, or deep sleep percentage
+    Return:
+        None (just a bar chart)
+    """
+    # Establish the theme of any visualizations
+    sns.set()
+
+    # Establish the features not used by the random forest regressor
+    unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
+                      'Light sleep percentage']
+
+    # we can represent binary categorical variables in single indicator tags via one-hot encoding
+    df_sleep = pd.get_dummies(data=filt_parsed, columns=['Gender', 'Smoking status'], drop_first=True)
+
+    # the x features for the regressor should be quantitative
+    x_feat_list = list(df_sleep.columns)
+    for feat in unwanted_feats:
+        x_feat_list.remove(feat)
+
+    # extract data from dataframe
+    x = df_sleep.loc[:, x_feat_list].values
+    y = df_sleep.loc[:, focus_col].values
+
+    # creates a dictionary that maps features to their importance value
+    # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
+    # sleep_important = make_feature_import_dict(featchosen, random_forest_reg.feature_importances_)
+    # print(sleep_important)
+
+    # initialize a random forest regressor
+    random_forest_reg = RandomForestRegressor()
+
+    random_forest_reg.fit(x, y)
+
+    # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
+    fig = plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
+
+    return fig
+
+@app.callback(
+    Output('3d-plot', 'figure'),
+    Input('independent-features', 'value'),
+    Input('dependent-feature', 'value')
+)
+def plot_m_reg(x_col, focus_col):
+    """
+    x_col (list): two interested x-variables
+    focus_col (str): y-variable of interest
+    """
+    # Create the linear regression model
+    model = LinearRegression()
+
+    # Fit the model
+    model.fit(filt_parsed[[x_col[0], x_col[1]]], filt_parsed[focus_col])
+
+    # mutliple linear regression plot
+    fig = px.scatter_3d(filt_parsed, x=x_col[0], y=x_col[1], z=focus_col)
+
+    return fig
 
 
 app.run_server(debug=True)

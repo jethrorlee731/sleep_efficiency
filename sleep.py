@@ -828,11 +828,10 @@ def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
     Output('feature-importance', 'figure'),
     Input('feat-chosen', 'value')
 )
-def calculate_eff_forest(featchosen):
+def plot_eff_forest(featchosen):
     """
     Allow users to see given the x-variables they choose, which are most important in improving sleep efficiency
     """
-
     # Establish the theme of any visualizations
     sns.set()
 
@@ -887,9 +886,8 @@ def calculate_eff_forest(featchosen):
 
     # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
     fig = plot_feat_import_rf_reg(featchosen, random_forest_reg.feature_importances_)
-    fig = plt.gcf().set_size_inches(15, 7)
+    # fig = plt.gcf().set_size_inches(15, 7)
 
     return fig
-# calculate_eff_forest()
 
 app.run_server(debug=True)

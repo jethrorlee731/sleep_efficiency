@@ -269,7 +269,20 @@ app.layout = html.Div([
 
         html.Br(),
         html.H2(id='sleep-eff', style={'textAlign': 'center'})
-    ])
+    ]),
+    html.Div([
+        html.H2('Determine which variables are most important in determining your sleep efficiency!', style={'textAlign': 'center'}),
+
+        # Ask user to choose as many variables as they are interested to look at which is most impactful to sleep
+        # efficiency
+        html.P('Choose as many variables as you would like to be shown on a bar chart that will tell you which'
+               'variables are most important in determining your sleep efficiency'),
+        dcc.Dropdown(['Age', 'Gender', 'Bedtime', 'Wakeup time', 'Sleep duration', 'REM sleep percentage',
+                      'Deep sleep percentage', 'Light sleep percentage', 'Awakenings', 'Caffeine consumption',
+                      'Alcohol consumption', 'Smoking status', 'Exercise frequency'], multi=True, id='feat-chosen'),
+        dcc.Graph(id="feature-importance")
+        ])
+
 ])
 
 
@@ -672,7 +685,7 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
                       SMOKING_WEIGHT + duration_score * DURATION_WEIGHT + caffeine_score * CAFFEINE_WEIGHT
     sleep_score_max = MAX_SCORE * (ALCOHOL_WEIGHT + EXERCISE_WEIGHT + SMOKING_WEIGHT + DURATION_WEIGHT +
                                    CAFFEINE_WEIGHT)
-    print(alcohol_score, exercise_score, smoking_score, duration_score, caffeine_score)
+    # print(alcohol_score, exercise_score, smoking_score, duration_score, caffeine_score)
     sleep_score_actual = (sleep_score_raw / sleep_score_max) * 100
     return 'Your sleep score out of 100 is: \n{}'.format(sleep_score_actual)
 
@@ -689,6 +702,9 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
     Input('sleep-eff-smoke', 'value')
 )
 def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
+    """
+    Allow users to get their sleep efficiency score given input of all these variables
+    """
     # Establish the features not used by the random forest regressor
     # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
     # REM sleep percentage, light sleep percentage, and deep sleep percentage are not used because users don't know this
@@ -698,7 +714,7 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
 
     # we can represent binary categorical variables in single indicator tags via one-hot encoding
     df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
-    print(df_sleep.columns)
+    # print(df_sleep.columns)
 
     # the x features for the regressor should be quantitative
     x_feat_list = list(df_sleep.columns)
@@ -808,9 +824,14 @@ def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
     # return the feature importance dictionary
     return feature_dict
 
-def calculate_eff_forest():
-    # Establish the features not used by the random forest regressor
-    unwanted_feats = ['ID', 'Sleep efficiency']
+@app.callback(
+    Output('feature-importance', 'figure'),
+    Input('feat-chosen', 'value')
+)
+def calculate_eff_forest(featchosen):
+    """
+    Allow users to see given the x-variables they choose, which are most important in improving sleep efficiency
+    """
 
     # Establish the theme of any visualizations
     sns.set()
@@ -819,17 +840,13 @@ def calculate_eff_forest():
     df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
     print(df_sleep.columns)
 
-    # define the true and testing values
-
-    # the x features for the regressor should be quantitative
-    x_feat_list = list(df_sleep.columns)
-    for feat in unwanted_feats:
-        x_feat_list.remove(feat)
+    featchosen = list(map(lambda x: x.replace('Gender', 'Gender_Male'), featchosen))
+    featchosen = list(map(lambda x: x.replace('Smoking status', 'Smoking status_Yes'), featchosen))
 
     y_feat = 'Sleep efficiency'
 
     # extract data from dataframe
-    x = df_sleep.loc[:, x_feat_list].values
+    x = df_sleep.loc[:, featchosen].values
     y = df_sleep.loc[:, y_feat].values
 
     # initialize a random forest regressor
@@ -865,12 +882,14 @@ def calculate_eff_forest():
 
     # creates a dictionary that maps features to their importance value
     # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
-    sleep_important = make_feature_import_dict(x_feat_list, random_forest_reg.feature_importances_)
+    sleep_important = make_feature_import_dict(featchosen, random_forest_reg.feature_importances_)
     print(sleep_important)
 
     # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
-    plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
-    plt.gcf().set_size_inches(15, 7)
+    fig = plot_feat_import_rf_reg(featchosen, random_forest_reg.feature_importances_)
+    fig = plt.gcf().set_size_inches(15, 7)
 
+    return fig
+# calculate_eff_forest()
 
 app.run_server(debug=True)

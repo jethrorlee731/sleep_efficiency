@@ -1,4 +1,7 @@
 # MOVED EVERYTHING TO SLEEP.PY. MIGHT MOVE IT BACK HERE AFTER EVERYTHING WORKS.
+# THIS DOCUMENT IS ALSO NECESSARY TO SHOW THAT THE RANDOM FOREST REGRESSOR MODEL IS ALRIGHT IN PREDICTING SLEEP
+# EFFICIENCY, REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE BASED ON THE CROSS VALIDATED R2 SCORE.
+
 """
 sleep_forest.py: Build a random forest regressor to determine the attributes that best determine one's sleep
                      efficiency
@@ -14,7 +17,37 @@ from copy import copy
 from sklearn.metrics import r2_score
 from sklearn.ensemble import RandomForestRegressor
 from collections import defaultdict
-import sleep
+
+efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
+# I JUST DID THIS FOR NOW SO WE DON'T RUN INTO ISSUES WITH NA VALUES BELOW. WE CAN FIX THIS BY REPLACING WITH MEDIAN
+# OF THE COLUMN IF WE WANT.
+EFFICIENCY = efficiency.dropna()
+
+def _parse_times(df_sleep, sleep_stat):
+    """ Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
+    Args:
+        df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
+        sleep_stat (str): The statistic to be portrayed on the box plot
+    Returns:
+        sleep_df (Pandas data frame): a newer version of the data frame with the parsed times
+    """
+    # parse the bedtime columns to only include hours into the day
+    if sleep_stat == 'Bedtime':
+        df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
+        df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / \
+                              60
+
+    # parse the wakeup time columns to only include hours into the day
+    elif sleep_stat == 'Wakeup time':
+        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
+        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
+                                  df_sleep['Wakeup time'].str[3:5].astype(float) / 60
+
+    # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
+    # else:
+    #     None
+
+    return df_sleep
 
 
 def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
@@ -93,8 +126,8 @@ def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
 def main():
 
     # Establish the features not used by the random forest regressor
-    unwanted_feats = ['ID', 'Sleep efficiency']
-
+    unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
+                      'Light sleep percentage']
     # Establish the theme of any visualizations
     sns.set()
 
@@ -103,10 +136,10 @@ def main():
     df_sleep.dropna(axis=0, inplace=True)
 
     # parse the bedtime columns to only include hours into the day
-    df_sleep = sleep.parse_times(df_sleep, 'Bedtime')
+    df_sleep = _parse_times(df_sleep, 'Bedtime')
 
     # parse the wakeup time columns to only include hours into the day
-    df_sleep = sleep.parse_times(df_sleep, 'Wakeup time')
+    df_sleep = _parse_times(df_sleep, 'Wakeup time')
 
     # we can represent binary categorical variables in single indicator tags via one-hot encoding
     df_sleep = pd.get_dummies(data=df_sleep, columns=['Gender', 'Smoking status'], drop_first=True)
@@ -119,7 +152,7 @@ def main():
     for feat in unwanted_feats:
         x_feat_list.remove(feat)
 
-    y_feat = 'Sleep efficiency'
+    y_feat = 'Deep sleep percentage'
 
     # extract data from dataframe
     x = df_sleep.loc[:, x_feat_list].values
@@ -152,7 +185,7 @@ def main():
 
     # computing R2 from sklearn
     r_squared = r2_score(y_true=y_true, y_pred=y_pred)
-
+    print(r_squared)
     # # show the cross validated r^2 value of the random forest regressor
     # print('Cross-validated r^2:', r_squared)
 
@@ -163,7 +196,7 @@ def main():
 
     # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
     plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
-    plt.gcf().set_size_inches(15, 7)
+    plt.gcf().set_size_inches(30, 30)
 
 
 if __name__ == '__main__':

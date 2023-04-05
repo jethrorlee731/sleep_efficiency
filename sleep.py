@@ -101,7 +101,7 @@ app.layout = html.Div([
     # div for box plot distributions of a sleep statistic by gender
     html.Div([
         html.H2('Box Plot: Sleep Stat Distribution by Gender', style={'textAlign': 'center'}),
-        dcc.Graph(id='box-gender', style={'display': 'inline-block'}),
+        dcc.Graph(id='box-gender2', style={'display': 'inline-block'}),
 
         # checkboxes that allow users to filter the data by gender
         dcc.Checklist(
@@ -140,9 +140,6 @@ app.layout = html.Div([
         dcc.Checklist(
             ['Show Trend Line'],
             ['Show Trend Line'], id='scatter_trendline-wu', inline=True),
-
-        dcc.RangeSlider(0, 23, 0.5, value=[0, 23], id='bd-slide', marks=None,
-                        tooltip={"placement": "bottom", "always_visible": True}),
 
         # slider for wakeup time
         html.P('Adjust Wakeup Time', style={'textAlign': 'left'}),
@@ -597,10 +594,6 @@ def show_sleep_strip(user_responses, smoker_slider):
     return fig
 
 
-# parse the Bedtime and Wakeup time for the EFFICIENCY dataframe
-# _parse_times(EFFICIENCY, "Bedtime")
-# _parse_times(EFFICIENCY, 'Wakeup time')
-
 @app.callback(
     Output('bd-scatter', 'figure'),
     Input('bd-slide', 'value'),
@@ -679,6 +672,7 @@ def update_wu_corr(wakeuptime, show_trendline, sleep_stat):
 
     return fig
 
+
 def _forest_reg(focus_col):
     """ Builds the random forest regressor model that predicts a y-variable
     Args:
@@ -691,7 +685,7 @@ def _forest_reg(focus_col):
                       'Light sleep percentage']
 
     # we can represent binary categorical variables in single indicator tags via one-hot encoding
-    df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
+    df_sleep = pd.get_dummies(data=filt_parsed, columns=['Gender', 'Smoking status'], drop_first=True)
 
     # the x features for the regressor should be quantitative
     x_feat_list = list(df_sleep.columns)

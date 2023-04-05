@@ -50,40 +50,40 @@ def _parse_times(df_sleep, sleep_stat):
     return df_sleep
 
 
-def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
-    """ plots feature importances in a horizontal bar chart
-
-    The x axis is labeled accordingly for a random forest regressor
-
-    Args:
-        feat_list (list): str names of features
-        feat_import (np.array): feature importances (mean MSE reduce)
-        sort (bool): if True, sorts features in decreasing importance
-            from top to bottom of plot
-        limit (int): if passed, limits the number of features shown
-            to this value
-    Returns:
-        None, just plots the feature importance bar chart
-    """
-    if sort:
-        # sort features in decreasing importance
-        idx = np.argsort(feat_import).astype(int)
-        feat_list = [feat_list[_idx] for _idx in idx]
-        feat_import = feat_import[idx]
-
-    if limit is not None:
-        # limit to the first limit feature
-        feat_list = feat_list[:limit]
-        feat_import = feat_import[:limit]
-
-    # plot and label feature importance
-    plt.barh(feat_list, feat_import)
-    plt.gcf().set_size_inches(5, len(feat_list) / 2)
-    plt.xlabel('Feature importance\n(Mean decrease in MSE across all Decision Trees)')
-
-    # show the feature importance graph
-    plt.show()
-
+# def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
+#     """ plots feature importances in a horizontal bar chart
+#
+#     The x axis is labeled accordingly for a random forest regressor
+#
+#     Args:
+#         feat_list (list): str names of features
+#         feat_import (np.array): feature importances (mean MSE reduce)
+#         sort (bool): if True, sorts features in decreasing importance
+#             from top to bottom of plot
+#         limit (int): if passed, limits the number of features shown
+#             to this value
+#     Returns:
+#         None, just plots the feature importance bar chart
+#     """
+#     if sort:
+#         # sort features in decreasing importance
+#         idx = np.argsort(feat_import).astype(int)
+#         feat_list = [feat_list[_idx] for _idx in idx]
+#         feat_import = feat_import[idx]
+#
+#     if limit is not None:
+#         # limit to the first limit feature
+#         feat_list = feat_list[:limit]
+#         feat_import = feat_import[:limit]
+#
+#     # plot and label feature importance
+#     plt.barh(feat_list, feat_import)
+#     plt.gcf().set_size_inches(5, len(feat_list) / 2)
+#     plt.xlabel('Feature importance\n(Mean decrease in MSE across all Decision Trees)')
+#
+#     # show the feature importance graph
+#     plt.show()
+#
 
 def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
     """ Map features to their importance metrics
@@ -152,7 +152,7 @@ def main():
     for feat in unwanted_feats:
         x_feat_list.remove(feat)
 
-    y_feat = 'Deep sleep percentage'
+    y_feat = 'Sleep efficiency'
 
     # extract data from dataframe
     x = df_sleep.loc[:, x_feat_list].values
@@ -189,14 +189,14 @@ def main():
     # # show the cross validated r^2 value of the random forest regressor
     # print('Cross-validated r^2:', r_squared)
 
-    # creates a dictionary that maps features to their importance value
-    # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
+    # # creates a dictionary that maps features to their importance value
+    # # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
     sleep_important = make_feature_import_dict(x_feat_list, random_forest_reg.feature_importances_)
     print(sleep_important)
-
-    # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
-    plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
-    plt.gcf().set_size_inches(30, 30)
+    #
+    # # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
+    # plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
+    # plt.gcf().set_size_inches(30, 30)
 
 
 if __name__ == '__main__':

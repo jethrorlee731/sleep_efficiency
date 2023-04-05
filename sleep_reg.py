@@ -4,10 +4,7 @@ from sklearn.linear_model import LinearRegression
 import numpy as np
 from sklearn.metrics import r2_score
 import pandas as pd
-efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
-# I JUST DID THIS FOR NOW SO WE DON'T RUN INTO ISSUES WITH NA VALUES BELOW. WE CAN FIX THIS BY REPLACING WITH MEDIAN
-# OF THE COLUMN IF WE WANT.
-EFFICIENCY = efficiency.dropna()
+
 def _parse_times(df_sleep, sleep_stat):
     """ Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
     Args:
@@ -42,7 +39,12 @@ def _parse_times(df_sleep, sleep_stat):
 # _parse_times(EFFICIENCY, 'Wakeup time')
 
 def main():
-    # Establish the features not used by the multiple linear regression
+    efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
+    # I JUST DID THIS FOR NOW SO WE DON'T RUN INTO ISSUES WITH NA VALUES BELOW. WE CAN FIX THIS BY REPLACING WITH MEDIAN
+    # OF THE COLUMN IF WE WANT.
+    EFFICIENCY = efficiency.dropna()
+
+    # Establish the features not used by the muliple linear regression
     # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
     unwanted_feats = ['ID', 'Sleep efficiency', 'Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                       'Light sleep percentage']

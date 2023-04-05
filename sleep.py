@@ -15,14 +15,15 @@ from collections import defaultdict
 efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
 # I JUST DID THIS FOR NOW SO WE DON'T RUN INTO ISSUES WITH NA VALUES BELOW. WE CAN FIX THIS BY REPLACING WITH MEDIAN
 # OF THE COLUMN IF WE WANT.
-EFFICIENCY = efficiency.dropna()
+EFFICIENCY = efficiency.copy()
+EFFICIENCY = EFFICIENCY.dropna()
 TIMES = pd.read_csv('data/sleepdata_2.csv')
 
 app = Dash(__name__)
 
 # multiply sleep efficiencies by 100 to represent them as percentages
-EFFICIENCY['Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
-
+EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
+# EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'].apply(lambda x: x*100)
 
 # WE SHOULD GIVE AN INTRODUCTION AT THE TOP OF THE DASHBOARD REGARDING HOW WE THINK LOOKING AT SLEEP EFFICIENCY
 # , REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE ARE ALL VERY IMPORTANT. REM SLEEP IS RESPONSIBLE FOR HELPING
@@ -121,7 +122,7 @@ app.layout = html.Div([
         html.H2('Bedtime vs. Sleep Statistics', style={'textAlign': 'center'}),
         dcc.Graph(id='bd-scatter', style={'display': 'inline-block'}),
 
-        # checkbox to toggle trendline
+        # checkbox to toggle trend line
         dcc.Checklist(
             ['Show Trend Line'],
             ['Show Trend Line'], id='scatter_trendline-bd', inline=True
@@ -361,6 +362,8 @@ def _sleep_scatter(slider_values, show_trendline, sleep_stat_x, sleep_stat_y):
     Returns:
         fig (px.scatter): the scatter plot itself
     """
+    ### >>> fixing 'Bedtime' variable
+
     # set the default y statistic to "Sleep Duration"
     if sleep_stat_y in [None, sleep_stat_x]:
         sleep_stat_y = 'Sleep duration'

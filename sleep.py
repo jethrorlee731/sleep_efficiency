@@ -12,6 +12,7 @@ EFFICIENCY = pd.read_csv('data/Sleep_Efficiency.csv')
 # COLUMN IF WE WANT.
 EFFICIENCY = EFFICIENCY.dropna()
 TIMES = pd.read_csv('data/sleepdata_2.csv')
+
 app = Dash(__name__)
 
 # multiply sleep efficiencies by 100 to represent them as percentages

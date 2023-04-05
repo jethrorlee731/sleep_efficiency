@@ -8,7 +8,7 @@ import sleep
 
 
 def main():
-    # Establish the features not used by the muliple linear regression
+    # Establish the features not used by the multiple linear regression
     # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
     unwanted_feats = ['ID', 'Sleep efficiency', 'Sleep duration']
 

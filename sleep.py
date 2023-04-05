@@ -209,6 +209,11 @@ app.layout = html.Div([
         dcc.Slider(0, 24, 0.25, value=9, marks=None, id='sleep-wakeuptime', tooltip={'placement': 'bottom',
                                                                                       'always_visible': True}),
 
+        # Ask a user how long they sleep for (wakeup time minus bedtime)
+        html.P('What is the total amount of time you slept (in hours)?', style={'textAlign': 'center'}),
+        dcc.Slider(0, 15, 0.25, value=7, marks=None, id='sleep-duration', tooltip={'placement': 'bottom',
+                                                                                     'always_visible': True}),
+
         # Ask a user the number of awakenings they have for a given night
         html.P('What is the number of awakenings you have for a given night?', style={'textAlign': 'center'}),
         dcc.Dropdown([0, 1, 2, 3, 4], value=0, clearable=False, id='sleep-awakenings'),
@@ -535,7 +540,6 @@ def show_sleep_strip(user_responses, smoker_slider):
 _parse_times(EFFICIENCY, "Bedtime")
 _parse_times(EFFICIENCY, 'Wakeup time')
 
-
 @app.callback(
     Output('bd-wu', 'figure'),
     Input('bd-slide', 'value'),
@@ -569,44 +573,38 @@ def update_sleep_corr(bedtime, wakeup, show_trendline):
 
     return fig
 
-def _m_reg(focus_col):
-    """ Builds the multiple linear regression model that predicts a y-variable
+def _forest_reg(focus_col):
+    """ Builds the random forest regressor model that predicts a y-variable
     Args:
-        focus_col (str):  name of the y-variable of interest
+        focus_col (str): name of the y-variable of interest
     Returns:
-        reg: fitted multiple linear regression based on the dataset
+        random_forest_reg: fitted random forest regressor based on the dataset
     """
     # Establish the features not used by the random forest regressor
-    # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
-    # REM sleep percentage, light sleep percentage, and deep sleep percentage are not used because users don't know this
-    # about themselves
-    unwanted_feats = ['ID', 'Sleep efficiency', 'Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
+    unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                       'Light sleep percentage']
 
     # we can represent binary categorical variables in single indicator tags via one-hot encoding
     df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
-    # print(df_sleep.columns)
 
     # the x features for the regressor should be quantitative
     x_feat_list = list(df_sleep.columns)
     for feat in unwanted_feats:
         x_feat_list.remove(feat)
 
-    # initialize regression object
-    reg = LinearRegression()
-
-    # get target variable
-    # (note: since we index with list -> guaranteed 2d x array, no reshape needed)
+    # extract data from dataframe
     x = df_sleep.loc[:, x_feat_list].values
     y = df_sleep.loc[:, focus_col].values
 
-    # fit regression
-    reg.fit(x, y)
+    # initialize a random forest regressor
+    random_forest_reg = RandomForestRegressor()
 
-    return reg
+    random_forest_reg.fit(x, y)
+
+    return random_forest_reg
 
 def _convert(gender, smoke):
-    """ Encode the passed in variables to match encoding in the multiple linear regression
+    """ Encode the passed in variables to match encoding in the random forest regressor
     Args:
         gender (str): whether the user is Biological Male or Biological Female
         smoke (str): whether the user smokes or not
@@ -631,6 +629,7 @@ def _convert(gender, smoke):
     Input('sleep-age', 'value'),
     Input('sleep-bedtime', 'value'),
     Input('sleep-wakeuptime', 'value'),
+    Input('sleep-duration', 'value'),
     Input('sleep-awakenings', 'value'),
     Input('sleep-caffeine', 'value'),
     Input('sleep-alcohol', 'value'),
@@ -638,12 +637,13 @@ def _convert(gender, smoke):
     Input('sleep-gender', 'value'),
     Input('sleep-smoke', 'value')
 )
-def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
+def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
     """ Allow users to get their sleep efficiency given input of all these variables
     Args:
         age (int): the age of the user
         bedtime (float): user bedtime based on hours into the day (military time)
         wakeuptime (float): user wakeup time based on hours into the day (military time)
+        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
         caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
         alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
@@ -653,15 +653,16 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     Returns:
         y_pred (float): predicted sleep efficiency
     """
-    reg = _m_reg('Sleep efficiency')
+    random_forest_reg = _forest_reg('Sleep efficiency')
 
     gender_value, smoke_value = _convert(gender, smoke)
 
     # user inputs turned into a numpy array
-    data = np.array([[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]])
+    data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
+                      gender_value, smoke_value]])
 
     # predict based on user inputs from the dropdown and sliders
-    y_pred = reg.predict(data)
+    y_pred = random_forest_reg.predict(data)
 
     return 'Your predicted sleep efficiency (expressed in %) is \n{}'.format(round(float(y_pred), 2))
 
@@ -670,6 +671,7 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     Input('sleep-age', 'value'),
     Input('sleep-bedtime', 'value'),
     Input('sleep-wakeuptime', 'value'),
+    Input('sleep-duration', 'value'),
     Input('sleep-awakenings', 'value'),
     Input('sleep-caffeine', 'value'),
     Input('sleep-alcohol', 'value'),
@@ -677,12 +679,13 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     Input('sleep-gender', 'value'),
     Input('sleep-smoke', 'value')
 )
-def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
+def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
     """ Allow users to get their REM sleep percentage given input of all these variables
     Args:
         age (int): the age of the user
         bedtime (float): user bedtime based on hours into the day (military time)
         wakeuptime (float): user wakeup time based on hours into the day (military time)
+        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
         caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
         alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
@@ -692,15 +695,16 @@ def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     Returns:
         y_pred (float): predicted REM sleep percentage
     """
-    reg = _m_reg('REM sleep percentage')
+    random_forest_reg = _forest_reg('REM sleep percentage')
 
     gender_value, smoke_value = _convert(gender, smoke)
 
     # user inputs turned into a numpy array
-    data = np.array([[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]])
+    data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
+                      gender_value, smoke_value]])
 
     # predict based on user inputs from the dropdown and sliders
-    y_pred = reg.predict(data)
+    y_pred = random_forest_reg.predict(data)
 
     return 'Your predicted REM sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
@@ -709,6 +713,7 @@ def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     Input('sleep-age', 'value'),
     Input('sleep-bedtime', 'value'),
     Input('sleep-wakeuptime', 'value'),
+    Input('sleep-duration', 'value'),
     Input('sleep-awakenings', 'value'),
     Input('sleep-caffeine', 'value'),
     Input('sleep-alcohol', 'value'),
@@ -716,12 +721,13 @@ def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     Input('sleep-gender', 'value'),
     Input('sleep-smoke', 'value')
 )
-def calc_deep_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
+def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
     """ Allow users to get their deep sleep percentage given input of all these variables
     Args:
         age (int): the age of the user
         bedtime (float): user bedtime based on hours into the day (military time)
         wakeuptime (float): user wakeup time based on hours into the day (military time)
+        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
         caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
         alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
@@ -731,19 +737,20 @@ def calc_deep_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerc
     Returns:
         y_pred (float): predicted deep sleep percentage
     """
-    reg = _m_reg('Deep sleep percentage')
+    random_forest_reg = _forest_reg('Deep sleep percentage')
 
     gender_value, smoke_value = _convert(gender, smoke)
 
     # user inputs turned into a numpy array
-    data = np.array([[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]])
+    data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
+                      gender_value, smoke_value]])
 
     # predict based on user inputs from the dropdown and sliders
-    y_pred = reg.predict(data)
+    y_pred = random_forest_reg.predict(data)
 
     return 'Your predicted Deep sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
-# I WILL WORK ON THE FEATURE IMPORTANCE PLOT BELOW. I COMMENTED OUT FOR NOW SO IT DOESN'T GIVE AN ERROR. 
+# I WILL WORK ON THE FEATURE IMPORTANCE PLOT BELOW. I COMMENTED OUT FOR NOW SO IT DOESN'T GIVE AN ERROR.
 # def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
 #     """ plots feature importances in a horizontal bar chart
 #

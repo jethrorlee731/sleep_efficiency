@@ -150,7 +150,7 @@ app.layout = html.Div([
     ]),
 
     # div for Box Plot Distributions by Gender
-html.Div([
+    html.Div([
         html.H2('Distribution by Gender', style={'textAlign': 'center'}),
         dcc.Graph(id='box-gender', style={'display': 'inline-block'}),
 
@@ -362,8 +362,6 @@ def _sleep_scatter(slider_values, show_trendline, sleep_stat_x, sleep_stat_y):
     Returns:
         fig (px.scatter): the scatter plot itself
     """
-    ### >>> fixing 'Bedtime' variable
-
     # set the default y statistic to "Sleep Duration"
     if sleep_stat_y in [None, sleep_stat_x]:
         sleep_stat_y = 'Sleep duration'

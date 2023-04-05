@@ -75,6 +75,38 @@ app.layout = html.Div([
         html.P('Adjust Sleep Efficiency Percentage', style={'textAlign': 'left'}),
         dcc.RangeSlider(50, 100, 1, value=[50, 100], id='ds-slide-sleep')]),
 
+    # div for Bedtime v. Other Stats
+    html.Div([
+        html.H2('Bedtime vs. Sleep Statistics', style={'textAlign': 'center'}),
+        dcc.Graph(id='bd-scatter', style={'display': 'inline-block'}),
+
+        # checkbox to toggle trendline
+        dcc.Checklist(
+            ['Show Trend Line'],
+            ['Show Trend Line'], id='scatter_trendline-bd', inline=True
+        ),
+
+        # slider for bedtime
+        html.P('Adjust Bedtime', style={'textAlign': 'left'}),
+        dcc.RangeSlider(0, 23, 0.5, value=[0, 23], id='bd-slide'),
+    ]),
+
+    # div for Wakeup time v. Other Stats
+    html.Div([
+        html.H2('Wakeup Time vs. Sleep Statistics', style={'textAlign': 'center'}),
+        dcc.Graph(id='wu-scatter', style={'display': 'inline-block'}),
+
+        # checkbox to toggle trendline
+        dcc.Checklist(
+            ['Show Trend Line'],
+            ['Show Trend Line'], id='scatter_trendline-wu', inline=True
+        ),
+
+        # slider for wakeup time
+        html.P('Adjust Wakeup Time', style={'textAlign': 'left'}),
+        dcc.RangeSlider(3, 12.5, 0.5, value=[3, 12.5], id='wu-slide'),
+    ]),
+
     # div for Box Plot Distributions by Gender
     html.Div([
         html.H2('Distribution by Gender', style={'textAlign': 'center'}),
@@ -85,26 +117,6 @@ app.layout = html.Div([
             ['Male', 'Female'],
             ['Male', 'Female'], id='box-gender-options', inline=True
         )]),
-
-    # div for Bedtime v. Wake Up Time
-    html.Div([
-        html.H2('Bedtime vs. Wakeup Time', style={'textAlign': 'center'}),
-        dcc.Graph(id='bd-wu', style={'display': 'inline-block'}),
-
-        # checkbox to toggle trendline
-        dcc.Checklist(
-            ['Show Trend Line'],
-            ['Show Trend Line'], id='scatter_trendline-bdwu', inline=True
-        ),
-
-        # slider for bedtime
-        html.P('Adjust Bedtime', style={'textAlign': 'left'}),
-        dcc.RangeSlider(0, 23, 0.5, value=[0, 23], id='bd-slide'),
-
-        # slider for wakeup time
-        html.P('Adjust Wakeup Time', style={'textAlign': 'left'}),
-        dcc.RangeSlider(3, 12.5, 0.5, value=[3, 12.5], id='wu-slide'),
-    ]),
 
     # div for density contour plot (comparing a combination of variables with sleep efficiency)
     html.Div([
@@ -187,7 +199,6 @@ app.layout = html.Div([
 ])
 
 
-# filter out appropriate values
 def filt_vals(df, vals, col, lcols):
     """
     Filter the user-selected values from the dataframe
@@ -199,9 +210,11 @@ def filt_vals(df, vals, col, lcols):
     Returns:
         df_updated (dataframe): the dataframe filtered to just include the values within the user specified range
     """
+    # identify the beginning and end of the range
     least = vals[0]
     most = vals[1]
 
+    # filter out the rows for which the column values are within the range
     df_update = df[df[col].between(least, most)][lcols]
 
     # return the updated dataframe to user
@@ -217,24 +230,26 @@ def parse_times(df_sleep, sleep_stat):
     Returns:
         sleep_df (Pandas data frame): a newer version of the data frame with the parsed times
     """
+    # make a copy of the dataframe to act upon
+    df_new = df_sleep
+
     # parse the bedtime columns to only include hours into the day
     if sleep_stat == 'Bedtime':
-        df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
-        df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / \
-                              60
+        df_new['Bedtime'] = df_new['Bedtime'].str.split().str[1]
+        df_new['Bedtime'] = df_new['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
+
 
     # parse the wakeup time columns to only include hours into the day
     elif sleep_stat == 'Wakeup time':
-        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
-        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
-                                  df_sleep['Wakeup time'].str[3:5].astype(float) / 60
-
+        df_new['Wakeup time'] = df_new['Wakeup time'].str.split().str[1]
+        df_new['Wakeup time'] = df_new['Wakeup time'].str[:2].astype(float) + \
+                                  df_new['Wakeup time'].str[3:5].astype(float) / 60
 
     # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
     # else:
     #     None
 
-    return df_sleep
+    return df_new
 
 
 def _sleep_scatter(slider_values, show_trendline, sleep_stat_x, sleep_stat_y):
@@ -248,9 +263,11 @@ def _sleep_scatter(slider_values, show_trendline, sleep_stat_x, sleep_stat_y):
     Returns:
         fig (px.scatter): the scatter plot itself
     """
+    # set the default y statistic to "Sleep Duration"
     if sleep_stat_y in [None, sleep_stat_x]:
         sleep_stat_y = 'Sleep duration'
 
+    # initialize the trendline as None
     trendline = None
 
     # filter out appropriate values
@@ -264,6 +281,7 @@ def _sleep_scatter(slider_values, show_trendline, sleep_stat_x, sleep_stat_y):
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
+    # plot the sleep statistic (x) and the other sleep statistic (y)
     fig = px.scatter(filt_deepsleep, x=sleep_stat_x, y=sleep_stat_y, trendline=trendline,
                      labels={'x': sleep_stat_x, 'index': sleep_stat_y})
 
@@ -286,6 +304,8 @@ def update_deep_sleep(deepsleep, show_trendline, sleep_stat):
         Returns:
             fig (px.scatter): the deep sleep percentage vs. sleep statistic scatter plot itself
     """
+
+    # call the _sleep_scatter function for the deep sleep percentage and another sleep statistic
     fig = _sleep_scatter(deepsleep, show_trendline, 'Deep sleep percentage', sleep_stat)
 
     return fig
@@ -307,6 +327,8 @@ def update_rem_sleep(remsleep, show_trendline, sleep_stat):
         Returns:
             fig (px.scatter): the REM sleep percentage vs. sleep statistic scatter plot itself
     """
+
+    # call the _sleep_scatter function for the REM sleep percentage and another sleep statistic
     fig = _sleep_scatter(remsleep, show_trendline, 'REM sleep percentage', sleep_stat)
 
     return fig
@@ -328,6 +350,8 @@ def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
         Returns:
             fig (px.scatter): the sleep efficiency percentage vs. sleep statistic scatter plot itself
     """
+
+    # call the _sleep_scatter function for the sleep efficiency and another sleep statistic
     fig = _sleep_scatter(sleepeff, show_trendline, 'Sleep efficiency', sleep_stat)
 
     return fig
@@ -347,9 +371,12 @@ def show_sleep_gender_stats(genders, sleep_stat):
     Returns:
         fig: the box and whisker chart
     """
+
+    # initialize the sleep statistic as Sleep Duration
     if sleep_stat in [None, 'Deep sleep percentage']:
         sleep_stat = 'Sleep duration'
 
+    # set the y-label
     ylabel = sleep_stat
 
     # filter the data based on the chosen genders
@@ -378,62 +405,111 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     Returns:
         fig: the density contour plot
     """
+    # assign a variable name to the string "Sleep efficiency"
     SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
 
+    # check whether the sleep statistics are equal to each other
     if sleep_stat2 == sleep_stat1:
+
+        # if they are equal and the first is not Light sleep percentage, set the second as Light sleep percentage
         if sleep_stat1 != 'Light sleep percentage':
             sleep_stat2 = 'Light sleep percentage'
+
+        # otherside, set the second as Deep sleep percentage
         else:
             sleep_stat2 = 'Deep sleep percentage'
-#  df: (dataframe) a dataframe with the values we are seeking and additional attributes
-    #         vals (list): two user-defined values, a min and max
-    #         col (str): the column to filter by
-    #         lcols (list): a list of column names to return
+
     # filter out appropriate values
     cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
     filt_efficiency = filt_vals(EFFICIENCY, slider_values, SLEEP_EFFICIENCY_COL, cols)
 
+    # plot the sleep statistics in a density contour plot
     fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z='Sleep efficiency', histfunc="avg")
     fig.update_traces(contours_coloring="fill", contours_showlabels=True)
 
     return fig
 
 
-# parse the Bedtime and Wakeup time for the EFFICIENCY dataframe
-parse_times(EFFICIENCY, "Bedtime")
-parse_times(EFFICIENCY, 'Wakeup time')
+# parse the times for bedtime and wakeup time from the EFFICIENCY dataframe
+filt_parsed = parse_times(EFFICIENCY, "Bedtime")
+filt_parsed = parse_times(filt_parsed, "Wakeup time")
 
 
 @app.callback(
-    Output('bd-wu', 'figure'),
+    Output('bd-scatter', 'figure'),
     Input('bd-slide', 'value'),
-    Input('wu-slide', 'value'),
-    Input('scatter_trendline-bdwu', 'value')
+    Input('scatter_trendline-bd', 'value'),
+    Input('sleep-stat', 'value')
 )
-def update_sleep_corr(bedtime, wakeup, show_trendline):
-    """ Display the correlation between bedtime and wake time
-        Args:
-            bedtime (list): a list containing floats of the Bedtimes to display
-            wakeup (list): a list containing floats of the Wakeup times to display
-            show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
-
-        Returns:
-            fig (px.scatter): the bedtime vs. the wakeup times
+def update_bd_corr(bedtime, show_trendline, sleep_stat):
     """
+    Updated the bedtime correlation to the chosen dependent sleep statistic
+    based off of the user-selected times from the slider
+        Args:
+            bedtime (list of floats): a range of bedtimes to be represented on the plot
+            show_trendline (str): a string indicating whether the trendline should appear on the plot
+            sleep_stat (str): the dependent statistic to be displayed on the plot
+        Return:
+            fig: the bedtime vs. sleep statistic scatter plot
+    """
+
+    # set the default sleep statistic to Sleep Duration
+    if sleep_stat in [None, 'Bedtime']:
+        sleep_stat = 'Sleep duration'
+
+    # initialize the trendline as none
     trendline = None
 
     # filter out appropriate values
-    cols = ['ID', 'Bedtime', 'Wakeup time']
-
-    filt_bedtime = filt_vals(EFFICIENCY, bedtime, 'Bedtime', cols)
-    filt_both = filt_vals(filt_bedtime, wakeup, 'Wakeup time', cols)
+    cols = ['ID', 'Bedtime', sleep_stat]
+    filt_deepsleep = filt_vals(filt_parsed, bedtime, 'Bedtime', cols)
 
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
         trendline = 'ols'
 
-    # plot the data
-    fig = px.scatter(filt_both, x='Bedtime', y='Wakeup time', trendline=trendline)
+    # plot the bedtime (x) and the sleep statistic (y)
+    fig = px.scatter(filt_deepsleep, x="Bedtime", y=sleep_stat, trendline=trendline,
+                     labels={'x': 'Bedtime', 'index': sleep_stat})
+
+    return fig
+
+
+@app.callback(
+    Output('wu-scatter', 'figure'),
+    Input('wu-slide', 'value'),
+    Input('scatter_trendline-wu', 'value'),
+    Input('sleep-stat', 'value')
+)
+def update_wu_corr(wakeuptime, show_trendline, sleep_stat):
+    """
+    Updated the wakeup time correlation to the chosen dependent sleep statistic
+    based off of the user-selected times from the slider
+        Args:
+            wakeuptime (list of floats): a range of wakeup times to be represented on the plot
+            show_trendline (str): a string indicating whether the trendline should appear on the plot
+            sleep_stat (str): the dependent statistic to be displayed on the plot
+        Return:
+            fig: the wakeup time vs. sleep statistic scatter plot
+    """
+    # set the default sleep statistic to "sleep duration"
+    if sleep_stat in [None, 'Wakeup time']:
+        sleep_stat = 'Sleep duration'
+
+    # set the default trendline to none
+    trendline = None
+
+    # filter out appropriate values
+    cols = ['ID', 'Wakeup time', sleep_stat]
+    filt_deepsleep = filt_vals(filt_parsed, wakeuptime, 'Wakeup time', cols)
+
+    # show a trend line or not based on the user's input
+    if 'Show Trend Line' in show_trendline:
+        trendline = 'ols'
+
+    # plot the wakeup time (x) and the sleep statistic (y)
+    fig = px.scatter(filt_deepsleep, x="Wakeup time", y=sleep_stat, trendline=trendline,
+                     labels={'x': 'Wakeup Time', 'index': sleep_stat})
 
     return fig
 

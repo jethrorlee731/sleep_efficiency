@@ -686,7 +686,7 @@ def calculate_sleep_score(age, alcohol_intake, exercise_freq, is_smoker, sleep_d
     Input('sleep-eff-alcohol', 'value'),
     Input('sleep-eff-exercise', 'value'),
     Input('sleep-eff-gender', 'value'),
-    Input('sleep-eff-smoke', 'value'),
+    Input('sleep-eff-smoke', 'value')
 )
 def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
     # Establish the features not used by the random forest regressor
@@ -726,17 +726,14 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     else:
         smoke_value = 0
 
-    # user inputs as a list of list and then converted into a dataframe
+    # user inputs as a list of list and then convert into numpy array
     data = [[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]]
-    x_df = pd.DataFrame(data, columns=['Age', 'Bedtime', 'Wakeup time', 'Awakenings', 'Caffeine consumption',
-                                       'Alcohol consumption', 'Exercise frequency',
-                                       'Gender_Male', 'Smoking status_Yes'])
+    data = np.array(data)
 
     # predict based on user inputs from the dropdown and sliders
-    y_pred = reg.predict(x_df)
+    y_pred = reg.predict(data)
 
     return 'Your predicted sleep efficiency (expressed in %) is \n{}'.format(round(float(y_pred), 2))
-
 
 
 def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):

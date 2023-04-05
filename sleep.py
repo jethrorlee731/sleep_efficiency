@@ -22,6 +22,12 @@ app = Dash(__name__)
 # multiply sleep efficiencies by 100 to represent them as percentages
 EFFICIENCY['Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
 
+
+# WE SHOULD GIVE AN INTRODUCTION AT THE TOP OF THE DASHBOARD REGARDING HOW WE THINK LOOKING AT SLEEP EFFICIENCY
+# , REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE ARE ALL VERY IMPORTANT. REM SLEEP IS RESPONSIBLE FOR HELPING
+# THE BRAIN PROCESS NEW LEARNINGS AND MOTOR SKILLS FOR THE DAY. DEEP SLEEP IS RESPONSIBLE FOR ALLOWING THE
+# BODY TO RELEASE GROWTH HORMONES AND WORKS TO BUILD AND REPAIR MUSCLES, BONES, AND TISSUES
+
 # layout for the dashboard
 # WE CAN DECIDE ON THE FORMAT OF THE LAYOUT LATER AND USE CHILDRENS TO REFORMAT
 app.layout = html.Div([
@@ -175,57 +181,63 @@ app.layout = html.Div([
             ['Smokers', 'Non-smokers'], id='strip-smoker-options', inline=True)
     ]),
 
-    # div for calculating sleep efficiency based on the multiple learning regression model
+    # div for calculating sleep efficiency, REM sleep percentage, and Deep sleep percentage
+    # based on the multiple learning regression model
     html.Div([
-        html.H2('Find your sleep efficiency!', style={'textAlign': 'center'}),
+        html.H2('Find your sleep efficiency, REM sleep percentage, and Deep sleep percentage!',
+                style={'textAlign': 'center'}),
 
         # Ask user information that are going to be inputs into the multiple learning regression model
 
         # Ask a user for their age
         html.P('How old are you?', style={'textAlign': 'center'}),
-        dcc.Slider(0, 100, 1, value=0, marks=None, id='sleep-eff-age',
+        dcc.Slider(0, 100, 1, value=15, marks=None, id='sleep-age',
                    tooltip={"placement": "bottom", "always_visible": True}),
 
         # Ask a user for they gender they identify with
         html.P("What's your biological gender?", style={'textAlign': 'center'}),
-        dcc.Dropdown(['Biological Male', 'Biological Female'], clearable=False, id='sleep-eff-gender'),
+        dcc.Dropdown(['Biological Male', 'Biological Female'], value='Biological Male',
+                     clearable=False, id='sleep-gender'),
 
         # Ask a user what is their bedtime (hours into the day)
         html.P('What is your bedtime based on hours into the day (military time)?', style={'textAlign': 'center'}),
-        dcc.Slider(0, 24, 1, value=0, marks=None, id='sleep-eff-bedtime', tooltip={'placement': 'bottom',
+        dcc.Slider(0, 24, 0.25, value=23, marks=None, id='sleep-bedtime', tooltip={'placement': 'bottom',
                                                                                    'always_visible': True}),
 
         # Ask a user what is their wakeup time (hours into the day)
         html.P('What is your wakeup time based on hours into the day (military time)?', style={'textAlign': 'center'}),
-        dcc.Slider(0, 24, 1, value=0, marks=None, id='sleep-eff-wakeuptime', tooltip={'placement': 'bottom',
+        dcc.Slider(0, 24, 0.25, value=9, marks=None, id='sleep-wakeuptime', tooltip={'placement': 'bottom',
                                                                                       'always_visible': True}),
 
         # Ask a user the number of awakenings they have for a given night
         html.P('What is the number of awakenings you have for a given night?', style={'textAlign': 'center'}),
-        dcc.Dropdown([0, 1, 2, 3, 4], clearable=False, id='sleep-eff-awakenings'),
+        dcc.Dropdown([0, 1, 2, 3, 4], value=0, clearable=False, id='sleep-awakenings'),
 
         # Ask a user the amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
         html.P('What is your amount of caffeine consumption in the 24 hours prior to bedtime (in mg)?',
-               style={'textAlign': 'center'}), dcc.Slider(0, 200, 1, value=0,
-                                                          marks=None, id='sleep-eff-caffeine',
+               style={'textAlign': 'center'}), dcc.Slider(0, 200, 1, value=50,
+                                                          marks=None, id='sleep-caffeine',
                                                           tooltip={'placement': 'bottom', 'always_visible': True}),
 
         # Ask a user the amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
         html.P('What is your amount of alcohol consumption in the 24 hours prior to bedtime (in oz)?',
-               style={'textAlign': 'center'}), dcc.Dropdown([0, 1, 2, 3, 4, 5], clearable=False,
-                                                            id='sleep-eff-alcohol'),
+               style={'textAlign': 'center'}), dcc.Dropdown([0, 1, 2, 3, 4, 5], value=0, clearable=False,
+                                                            id='sleep-alcohol'),
 
         # Ask a user about whether they smoke/vape
         html.P('Do you smoke/vape?', style={'textAlign': 'center'}),
-        dcc.Dropdown(['Yes', 'No'], clearable=False, id='sleep-eff-smoke'),
+        dcc.Dropdown(['Yes', 'No'], value='No', clearable=False, id='sleep-smoke'),
 
         # Ask a user the number of times the test subject exercises per week
         html.P('How many times do you exercise per week?', style={'textAlign': 'center'}),
-        dcc.Dropdown([0, 1, 2, 3, 4, 5], clearable=False, id='sleep-eff-exercise'),
+        dcc.Dropdown([0, 1, 2, 3, 4, 5], value=2, clearable=False, id='sleep-exercise'),
 
         html.Br(),
-        html.H2(id='sleep-eff', style={'textAlign': 'center'})
+        html.H2(id='sleep-eff', style={'textAlign': 'center'}),
+        html.H2(id='sleep-rem', style={'textAlign': 'center'}),
+        html.H2(id='sleep-deep', style={'textAlign': 'center'})
     ]),
+
     html.Div([
         html.H2('Determine which variables are most important in determining your sleep efficiency!',
                 style={'textAlign': 'center'}),
@@ -245,8 +257,7 @@ app.layout = html.Div([
 
 # filter out appropriate values
 def filt_vals(df, vals, col, lcols):
-    """
-    Filter the user-selected values from the dataframe
+    """ Filter the user-selected values from the dataframe
     Args:
         df: (dataframe) a dataframe with the values we are seeking and additional attributes
         vals (list): two user-defined values, a min and max
@@ -265,8 +276,7 @@ def filt_vals(df, vals, col, lcols):
 
 
 def _parse_times(df_sleep, sleep_stat):
-    """
-    Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
+    """ Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
     Args:
         df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
         sleep_stat (str): The statistic to be portrayed on the box plot
@@ -333,13 +343,13 @@ def _sleep_scatter(slider_values, show_trendline, sleep_stat_x, sleep_stat_y):
 )
 def update_deep_sleep(deepsleep, show_trendline, sleep_stat):
     """ Creates a scatter plot showing the relationship between deep sleep percentage and another sleep statistic
-        Args:
-            deepsleep (list of floats): a range of deep sleep percentages to be represented on the plot
-            show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
-            sleep_stat (string): the dependent variable of the scatter plot
+    Args:
+        deepsleep (list of floats): a range of deep sleep percentages to be represented on the plot
+        show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
+        sleep_stat (string): the dependent variable of the scatter plot
 
-        Returns:
-            fig (px.scatter): the sleep statistic vs. deep sleep percentage scatter plot itself
+    Returns:
+        fig (px.scatter): the sleep statistic vs. deep sleep percentage scatter plot itself
     """
     fig = _sleep_scatter(deepsleep, show_trendline, sleep_stat, 'Deep sleep percentage')
 
@@ -354,13 +364,13 @@ def update_deep_sleep(deepsleep, show_trendline, sleep_stat):
 )
 def update_rem_sleep(remsleep, show_trendline, sleep_stat):
     """ Creates a scatter plot showing the relationship between REM sleep percentage and another sleep statistic
-        Args:
-            remsleep (list of floats): a range of REM sleep percentages to be represented on the plot
-            show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
-            sleep_stat (string): the dependent variable of the scatter plot
+    Args:
+        remsleep (list of floats): a range of REM sleep percentages to be represented on the plot
+        show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
+        sleep_stat (string): the dependent variable of the scatter plot
 
-        Returns:
-            fig (px.scatter): the sleep statistic vs. REM sleep percentage scatter plot itself
+    Returns:
+        fig (px.scatter): the sleep statistic vs. REM sleep percentage scatter plot itself
     """
     fig = _sleep_scatter(remsleep, show_trendline, sleep_stat, 'REM sleep percentage')
 
@@ -375,13 +385,13 @@ def update_rem_sleep(remsleep, show_trendline, sleep_stat):
 )
 def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
     """ Creates a scatter plot showing the relationship between sleep efficiency and another sleep statistic
-        Args:
-            sleepeff (list of floats): a range of sleep efficiencies to be represented on the plot
-            show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
-            sleep_stat (string): the dependent variable of the scatter plot
+    Args:
+        sleepeff (list of floats): a range of sleep efficiencies to be represented on the plot
+        show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
+        sleep_stat (string): the dependent variable of the scatter plot
 
-        Returns:
-            fig (px.scatter): the sleep statistic vs. sleep efficiency scatter plot itself
+    Returns:
+        fig (px.scatter): the sleep statistic vs. sleep efficiency scatter plot itself
     """
     fig = _sleep_scatter(sleepeff, show_trendline, sleep_stat, 'Sleep efficiency')
 
@@ -394,8 +404,7 @@ def update_sleep_eff(sleepeff, show_trendline, sleep_stat):
     Input('sleep-stat', 'value')
 )
 def show_sleep_gender_boxplot(genders, sleep_stat):
-    """
-    Shows box plots that represents distributions of a sleep statistic per gender
+    """ Shows box plots that represents distributions of a sleep statistic per gender
     Args:
         genders (list of str): list of genders to be shown on the box and whisker chart
         sleep_stat (str): The statistic to be portrayed on the box plot
@@ -427,8 +436,7 @@ def show_sleep_gender_boxplot(genders, sleep_stat):
     Input('sleep-stat', 'value')
 )
 def show_sleep_gender_histogram(genders, sleep_stat):
-    """
-    Shows a histogram that represents distributions of a sleep statistic per gender
+    """ Shows a histogram that represents distributions of a sleep statistic per gender
     Args:
         genders (list of str): list of genders to be shown on the box and whisker chart
         sleep_stat (str): The statistic to be portrayed on the histogram
@@ -462,8 +470,7 @@ def show_sleep_gender_histogram(genders, sleep_stat):
     Input('efficiency-slide', 'value')
 )
 def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
-    """
-    Shows a density contour plots that shows the relationship between two variables and average sleep efficiency
+    """ Shows a density contour plots that shows the relationship between two variables and average sleep efficiency
     Args:
         sleep_stat1 (str): One statistic to be portrayed on the box plot
         sleep_stat2 (str): Another statistic to be portrayed on the box plot
@@ -496,8 +503,7 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
 )
 # ONLY SHOWING SLEEP EFFICIENCY BECAUSE THE DATA FOR THE OTHER COLUMNS DOES NOT MAKE SENSE
 def show_sleep_strip(user_responses, smoker_slider):
-    """
-    Shows a strip chart that shows the relationship between a sleep variable and smoking status
+    """ Shows a strip chart that shows the relationship between a sleep variable and smoking status
     Args:
         user_responses (list of str): List of smoking statuses that the user wants to be portrayed in the strip chart
         smoker_slider (list of ints): a range of sleep efficiencies to be represented on the plot
@@ -538,13 +544,13 @@ _parse_times(EFFICIENCY, 'Wakeup time')
 )
 def update_sleep_corr(bedtime, wakeup, show_trendline):
     """ Display the correlation between bedtime and wake time
-        Args:
-            bedtime (list): a list containing floats of the Bedtimes to display
-            wakeup (list): a list containing floats of the Wakeup times to display
-            show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
+    Args:
+        bedtime (list): a list containing floats of the Bedtimes to display
+        wakeup (list): a list containing floats of the Wakeup times to display
+        show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
 
-        Returns:
-            fig (px.scatter): the bedtime vs. the wakeup times
+    Returns:
+        fig (px.scatter): the bedtime vs. the wakeup times
     """
     trendline = None
 
@@ -563,22 +569,12 @@ def update_sleep_corr(bedtime, wakeup, show_trendline):
 
     return fig
 
-
-@app.callback(
-    Output('sleep-eff', 'children'),
-    Input('sleep-eff-age', 'value'),
-    Input('sleep-eff-bedtime', 'value'),
-    Input('sleep-eff-wakeuptime', 'value'),
-    Input('sleep-eff-awakenings', 'value'),
-    Input('sleep-eff-caffeine', 'value'),
-    Input('sleep-eff-alcohol', 'value'),
-    Input('sleep-eff-exercise', 'value'),
-    Input('sleep-eff-gender', 'value'),
-    Input('sleep-eff-smoke', 'value')
-)
-def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
-    """
-    Allow users to get their sleep efficiency score given input of all these variables
+def _m_reg(focus_col):
+    """ Builds the multiple linear regression model that predicts a y-variable
+    Args:
+        focus_col (str):  name of the y-variable of interest
+    Returns:
+        reg: fitted multiple linear regression based on the dataset
     """
     # Establish the features not used by the random forest regressor
     # Sleep duration is not used because it is calculated based on wakeup time minus bedtime
@@ -602,11 +598,22 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     # get target variable
     # (note: since we index with list -> guaranteed 2d x array, no reshape needed)
     x = df_sleep.loc[:, x_feat_list].values
-    y = df_sleep.loc[:, 'Sleep efficiency'].values
+    y = df_sleep.loc[:, focus_col].values
 
     # fit regression
     reg.fit(x, y)
 
+    return reg
+
+def _convert(gender, smoke):
+    """ Encode the passed in variables to match encoding in the multiple linear regression
+    Args:
+        gender (str): whether the user is Biological Male or Biological Female
+        smoke (str): whether the user smokes or not
+    Returns:
+        gender_value (int): encoded variable representing gender of the user
+        smoke_value (int): encoded variable representing whether the user smokes
+    """
     if gender == 'Biological Male':
         gender_value = 1
     else:
@@ -617,154 +624,264 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     else:
         smoke_value = 0
 
-    # user inputs as a list of list and then convert into numpy array
-    data = [[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]]
-    data = np.array(data)
+    return gender_value, smoke_value
+
+@app.callback(
+    Output('sleep-eff', 'children'),
+    Input('sleep-age', 'value'),
+    Input('sleep-bedtime', 'value'),
+    Input('sleep-wakeuptime', 'value'),
+    Input('sleep-awakenings', 'value'),
+    Input('sleep-caffeine', 'value'),
+    Input('sleep-alcohol', 'value'),
+    Input('sleep-exercise', 'value'),
+    Input('sleep-gender', 'value'),
+    Input('sleep-smoke', 'value')
+)
+def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
+    """ Allow users to get their sleep efficiency given input of all these variables
+    Args:
+        age (int): the age of the user
+        bedtime (float): user bedtime based on hours into the day (military time)
+        wakeuptime (float): user wakeup time based on hours into the day (military time)
+        awakenings (int): number of awakenings a user has on a given night
+        caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
+        alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+        exercise (int): how many times the user exercises in a week
+        gender (str): biological gender of the user
+        smoke (str): whether the user smokes
+    Returns:
+        y_pred (float): predicted sleep efficiency
+    """
+    reg = _m_reg('Sleep efficiency')
+
+    gender_value, smoke_value = _convert(gender, smoke)
+
+    # user inputs turned into a numpy array
+    data = np.array([[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]])
 
     # predict based on user inputs from the dropdown and sliders
     y_pred = reg.predict(data)
 
     return 'Your predicted sleep efficiency (expressed in %) is \n{}'.format(round(float(y_pred), 2))
 
-
-def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
-    """ plots feature importances in a horizontal bar chart
-
-    The x axis is labeled accordingly for a random forest regressor
-
+@app.callback(
+    Output('sleep-rem', 'children'),
+    Input('sleep-age', 'value'),
+    Input('sleep-bedtime', 'value'),
+    Input('sleep-wakeuptime', 'value'),
+    Input('sleep-awakenings', 'value'),
+    Input('sleep-caffeine', 'value'),
+    Input('sleep-alcohol', 'value'),
+    Input('sleep-exercise', 'value'),
+    Input('sleep-gender', 'value'),
+    Input('sleep-smoke', 'value')
+)
+def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
+    """ Allow users to get their REM sleep percentage given input of all these variables
     Args:
-        feat_list (list): str names of features
-        feat_import (np.array): feature importances (mean MSE reduce)
-        sort (bool): if True, sorts features in decreasing importance
-            from top to bottom of plot
-        limit (int): if passed, limits the number of features shown
-            to this value
+        age (int): the age of the user
+        bedtime (float): user bedtime based on hours into the day (military time)
+        wakeuptime (float): user wakeup time based on hours into the day (military time)
+        awakenings (int): number of awakenings a user has on a given night
+        caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
+        alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+        exercise (int): how many times the user exercises in a week
+        gender (str): biological gender of the user
+        smoke (str): whether the user smokes
     Returns:
-        None, just plots the feature importance bar chart
+        y_pred (float): predicted REM sleep percentage
     """
-    if sort:
-        # sort features in decreasing importance
-        idx = np.argsort(feat_import).astype(int)
-        feat_list = [feat_list[_idx] for _idx in idx]
-        feat_import = feat_import[idx]
+    reg = _m_reg('REM sleep percentage')
 
-    if limit is not None:
-        # limit to the first limit feature
-        feat_list = feat_list[:limit]
-        feat_import = feat_import[:limit]
+    gender_value, smoke_value = _convert(gender, smoke)
 
-    # plot and label feature importance
-    plt.barh(feat_list, feat_import)
-    plt.gcf().set_size_inches(5, len(feat_list) / 2)
-    plt.xlabel('Feature importance\n(Mean decrease in MSE across all Decision Trees)')
+    # user inputs turned into a numpy array
+    data = np.array([[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]])
 
-    # show the feature importance graph
-    plt.show()
+    # predict based on user inputs from the dropdown and sliders
+    y_pred = reg.predict(data)
 
-
-def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
-    """ Map features to their importance metrics
-
-    Args:
-        feat_list (list): str names of features
-        feat_import (np.array): feature importances (mean MSE reduce)
-        sort (bool): if True, sorts features in decreasing importance
-            from top to bottom of plot
-        limit (int): if passed, limits the number of features shown
-            to this value
-    Returns:
-        feature_dict (list): has tuples that map certain features (key) to their feature importance (mean MSE reduce)
-                             values
-    """
-    # initialize a dictionary that maps features to their importance metrics
-    feature_dict = defaultdict(lambda: 0)
-
-    if sort:
-        # sort features in decreasing importance
-        idx = np.argsort(feat_import).astype(int)
-        feat_list = [feat_list[_idx] for _idx in idx]
-        feat_import = feat_import[idx]
-
-    if limit is not None:
-        # limit to the first limit feature
-        feat_list = feat_list[:limit]
-        feat_import = feat_import[:limit]
-
-    # create a dictionary mapping features to their feature importances
-    for i in range(len(feat_list)):
-        feature_dict[feat_list[i]] = feat_import[i]
-    feature_dict = dict(feature_dict)
-    feature_dict = sorted(feature_dict.items(), key=lambda item: item[1], reverse=True)
-
-    # return the feature importance dictionary
-    return feature_dict
-
+    return 'Your predicted REM sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
 @app.callback(
-    Output('feature-importance', 'figure'),
-    Input('feat-chosen', 'value')
+    Output('sleep-deep', 'children'),
+    Input('sleep-age', 'value'),
+    Input('sleep-bedtime', 'value'),
+    Input('sleep-wakeuptime', 'value'),
+    Input('sleep-awakenings', 'value'),
+    Input('sleep-caffeine', 'value'),
+    Input('sleep-alcohol', 'value'),
+    Input('sleep-exercise', 'value'),
+    Input('sleep-gender', 'value'),
+    Input('sleep-smoke', 'value')
 )
-def plot_eff_forest(featchosen):
+def calc_deep_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
+    """ Allow users to get their deep sleep percentage given input of all these variables
+    Args:
+        age (int): the age of the user
+        bedtime (float): user bedtime based on hours into the day (military time)
+        wakeuptime (float): user wakeup time based on hours into the day (military time)
+        awakenings (int): number of awakenings a user has on a given night
+        caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
+        alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+        exercise (int): how many times the user exercises in a week
+        gender (str): biological gender of the user
+        smoke (str): whether the user smokes
+    Returns:
+        y_pred (float): predicted deep sleep percentage
     """
-    Allow users to see given the x-variables they choose, which are most important in improving sleep efficiency
-    """
-    # Establish the theme of any visualizations
-    sns.set()
+    reg = _m_reg('Deep sleep percentage')
 
-    # we can represent binary categorical variables in single indicator tags via one-hot encoding
-    df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
-    print(df_sleep.columns)
+    gender_value, smoke_value = _convert(gender, smoke)
 
-    featchosen = list(map(lambda x: x.replace('Gender', 'Gender_Male'), featchosen))
-    featchosen = list(map(lambda x: x.replace('Smoking status', 'Smoking status_Yes'), featchosen))
+    # user inputs turned into a numpy array
+    data = np.array([[age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender_value, smoke_value]])
 
-    y_feat = 'Sleep efficiency'
+    # predict based on user inputs from the dropdown and sliders
+    y_pred = reg.predict(data)
 
-    # extract data from dataframe
-    x = df_sleep.loc[:, featchosen].values
-    y = df_sleep.loc[:, y_feat].values
+    return 'Your predicted Deep sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
-    # initialize a random forest regressor
-    random_forest_reg = RandomForestRegressor()
-    y_true = y
+# I WILL WORK ON THE FEATURE IMPORTANCE PLOT BELOW. I COMMENTED OUT FOR NOW SO IT DOESN'T GIVE AN ERROR. 
+# def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
+#     """ plots feature importances in a horizontal bar chart
+#
+#     The x axis is labeled accordingly for a random forest regressor
+#
+#     Args:
+#         feat_list (list): str names of features
+#         feat_import (np.array): feature importances (mean MSE reduce)
+#         sort (bool): if True, sorts features in decreasing importance
+#             from top to bottom of plot
+#         limit (int): if passed, limits the number of features shown
+#             to this value
+#     Returns:
+#         None, just plots the feature importance bar chart
+#     """
+#     if sort:
+#         # sort features in decreasing importance
+#         idx = np.argsort(feat_import).astype(int)
+#         feat_list = [feat_list[_idx] for _idx in idx]
+#         feat_import = feat_import[idx]
+#
+#     if limit is not None:
+#         # limit to the first limit feature
+#         feat_list = feat_list[:limit]
+#         feat_import = feat_import[:limit]
+#
+#     # plot and label feature importance
+#     plt.barh(feat_list, feat_import)
+#     plt.gcf().set_size_inches(5, len(feat_list) / 2)
+#     plt.xlabel('Feature importance\n(Mean decrease in MSE across all Decision Trees)')
+#
+#     # show the feature importance graph
+#     plt.show()
+#
+#
+# def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
+#     """ Map features to their importance metrics
+#
+#     Args:
+#         feat_list (list): str names of features
+#         feat_import (np.array): feature importances (mean MSE reduce)
+#         sort (bool): if True, sorts features in decreasing importance
+#             from top to bottom of plot
+#         limit (int): if passed, limits the number of features shown
+#             to this value
+#     Returns:
+#         feature_dict (list): has tuples that map certain features (key) to their feature importance (mean MSE reduce)
+#                              values
+#     """
+#     # initialize a dictionary that maps features to their importance metrics
+#     feature_dict = defaultdict(lambda: 0)
+#
+#     if sort:
+#         # sort features in decreasing importance
+#         idx = np.argsort(feat_import).astype(int)
+#         feat_list = [feat_list[_idx] for _idx in idx]
+#         feat_import = feat_import[idx]
+#
+#     if limit is not None:
+#         # limit to the first limit feature
+#         feat_list = feat_list[:limit]
+#         feat_import = feat_import[:limit]
+#
+#     # create a dictionary mapping features to their feature importances
+#     for i in range(len(feat_list)):
+#         feature_dict[feat_list[i]] = feat_import[i]
+#     feature_dict = dict(feature_dict)
+#     feature_dict = sorted(feature_dict.items(), key=lambda item: item[1], reverse=True)
+#
+#     # return the feature importance dictionary
+#     return feature_dict
 
-    # Cross-validation:
-    # construction of (non-stratified) kfold object
-    kfold = KFold(n_splits=10, shuffle=True)
-
-    # allocate an empty array to store predictions in
-    y_pred = copy(y_true)
-
-    for train_idx, test_idx in kfold.split(x, y_true):
-        # build arrays which correspond to x, y train /test
-        x_test = x[test_idx, :]
-        x_train = x[train_idx, :]
-        y_true_train = y_true[train_idx]
-
-        # fit happens "inplace", we modify the internal state of
-        # random_forest_reg to remember all the training samples;
-        # gives the regressor the training data
-        random_forest_reg.fit(x_train, y_true_train)
-
-        # estimate the class of each test value
-        y_pred[test_idx] = random_forest_reg.predict(x_test)
-
-    # computing R2 from sklearn
-    r_squared = r2_score(y_true=y_true, y_pred=y_pred)
-
-    # # show the cross validated r^2 value of the random forest regressor
-    # print('Cross-validated r^2:', r_squared)
-
-    # creates a dictionary that maps features to their importance value
-    # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
-    sleep_important = make_feature_import_dict(featchosen, random_forest_reg.feature_importances_)
-    print(sleep_important)
-
-    # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
-    fig = plot_feat_import_rf_reg(featchosen, random_forest_reg.feature_importances_)
-    # fig = plt.gcf().set_size_inches(15, 7)
-
-    return fig
+#
+# @app.callback(
+#     Output('feature-importance', 'figure'),
+#     Input('feat-chosen', 'value')
+# )
+# def plot_eff_forest(featchosen):
+#     """
+#     Allow users to see given the x-variables they choose, which are most important in improving sleep efficiency
+#     """
+#     # Establish the theme of any visualizations
+#     sns.set()
+#
+#     # we can represent binary categorical variables in single indicator tags via one-hot encoding
+#     df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
+#     print(df_sleep.columns)
+#
+#     featchosen = list(map(lambda x: x.replace('Gender', 'Gender_Male'), featchosen))
+#     featchosen = list(map(lambda x: x.replace('Smoking status', 'Smoking status_Yes'), featchosen))
+#
+#     y_feat = 'Sleep efficiency'
+#
+#     # extract data from dataframe
+#     x = df_sleep.loc[:, featchosen].values
+#     y = df_sleep.loc[:, y_feat].values
+#
+#     # initialize a random forest regressor
+#     random_forest_reg = RandomForestRegressor()
+#     y_true = y
+#
+#     # Cross-validation:
+#     # construction of (non-stratified) kfold object
+#     kfold = KFold(n_splits=10, shuffle=True)
+#
+#     # allocate an empty array to store predictions in
+#     y_pred = copy(y_true)
+#
+#     for train_idx, test_idx in kfold.split(x, y_true):
+#         # build arrays which correspond to x, y train /test
+#         x_test = x[test_idx, :]
+#         x_train = x[train_idx, :]
+#         y_true_train = y_true[train_idx]
+#
+#         # fit happens "inplace", we modify the internal state of
+#         # random_forest_reg to remember all the training samples;
+#         # gives the regressor the training data
+#         random_forest_reg.fit(x_train, y_true_train)
+#
+#         # estimate the class of each test value
+#         y_pred[test_idx] = random_forest_reg.predict(x_test)
+#
+#     # computing R2 from sklearn
+#     r_squared = r2_score(y_true=y_true, y_pred=y_pred)
+#
+#     # # show the cross validated r^2 value of the random forest regressor
+#     # print('Cross-validated r^2:', r_squared)
+#
+#     # creates a dictionary that maps features to their importance value
+#     # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
+#     sleep_important = make_feature_import_dict(featchosen, random_forest_reg.feature_importances_)
+#     print(sleep_important)
+#
+#     # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
+#     fig = plot_feat_import_rf_reg(featchosen, random_forest_reg.feature_importances_)
+#     # fig = plt.gcf().set_size_inches(15, 7)
+#
+#     return fig
 
 
 app.run_server(debug=True)

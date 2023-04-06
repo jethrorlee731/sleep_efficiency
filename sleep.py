@@ -99,15 +99,11 @@ app.layout = html.Div([
             html.H2('Sleep Statistics Across Genders', style={'textAlign': 'center'}),
             # div for violin plot distributions of a sleep statistic by gender
             html.Div([
-                html.P('Filter by gender in the violin plot by clicking in the legend on the gender that you do not '
-                       'want to focus on.'),
                 dcc.Graph(id='violin-gender', style={'display': 'inline-block', 'width': '49%', 'float': 'left'})
             ]),
 
             # div for histogram distribution of a sleep statistic by gender (uses the same checkbox as the violin plot)
             html.Div([
-                html.P('Filter by gender in the histogram by clicking in the legend on the gender that you do not '
-                       'want to focus on.'),
                 dcc.Graph(id='hist-gender', style={'display': 'inline-block', 'width': '49%'})
             ]),
             # gender checkbox

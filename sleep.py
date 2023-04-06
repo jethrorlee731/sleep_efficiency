@@ -145,7 +145,7 @@ app.layout = html.Div([
                  'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency'],
                 value='Light sleep percentage', id='density-stat2'),
 
-            # deep sleep slider
+            # sleep efficiency slider
             html.P('Adjust the Represented Sleep Efficiency Values', style={'textAlign': 'left'}),
             dcc.RangeSlider(50, 100, 1, value=[50, 100], marks=None,
                             tooltip={"placement": "bottom", "always_visible": True},
@@ -242,7 +242,7 @@ app.layout = html.Div([
             html.Div([
                 html.H2('3D view of two independent variables against a chosen dependent variable',
                         style={'textAlign': 'center'}),
-                html.P('Select two independent variables you are interested in looking at.'),
+                html.P('Select three independent variables you are interested in looking at.'),
                 dcc.Dropdown(['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                               'Exercise frequency'],
                              value='Age', clearable=False, id='independent-3D-feat1'),
@@ -253,12 +253,15 @@ app.layout = html.Div([
                 dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                              value='Sleep efficiency',
                              clearable=False, id='dependent-feature'),
-                dcc.Graph(id="three-dim-plot", style={'display': 'inline-block', 'width': '100%', 'height': '100%'})
+                html.P('Click on female or male from the 3d scatter legend to remove points if you only want to '
+                       'focus on one gender.'),
+                dcc.Graph(id="three-dim-plot", style={'display': 'inline-block', 'width': '100%'})
             ],
-                # Add style parameters, placing the Div in the right 49% of the right column
-                style={'width': '49%', 'display': 'inline-block', 'float': 'left'})
+                # Add style parameters to this Div, placing it in the right 49% of the right column
+                style={'width': '49%', 'display': 'inline-block', 'float': 'right'}
+            )
         ],
-            # Add style parameters to this Div, placing it in the right 49% of the page
+            # Add style parameters to this Div, placing it in the right 70% of the page
             style={'width': '70%', 'display': 'inline-block', 'float': 'right'}
         )
     ])
@@ -777,6 +780,7 @@ def plot_m_reg(x_var1, x_var2, focus_col):
     """
     x_var1 (str): one x-variable of interest
     x_var2 (str): another x-variable of interest
+    x_var3 (str): 3rd x-variable of interest
     focus_col (str): y-variable of interest
     """
     # Create the linear regression model
@@ -786,7 +790,7 @@ def plot_m_reg(x_var1, x_var2, focus_col):
     model.fit(filt_parsed[[x_var1, x_var2]], filt_parsed[focus_col])
 
     # mutliple linear regression plot
-    fig = px.scatter_3d(filt_parsed, x=x_var1, y=x_var2, z=focus_col)
+    fig = px.scatter_3d(filt_parsed, x=x_var1, y=x_var2, z=focus_col, color='Gender')
 
     return fig
 

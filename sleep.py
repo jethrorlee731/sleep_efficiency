@@ -227,7 +227,8 @@ app.layout = html.Div([
             dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                          value='Sleep efficiency',
                          clearable=False, id='dependent-feature'),
-            html.P('Filter by gender in the 3d scatter by clicking on the gender you are not interested in the.'),
+            html.P('Filter by gender in the 3d scatter by clicking on the gender (located in the legend) that '
+                   'you are not interested.'),
             dcc.Graph(id="three-dim-plot", style={'display': 'inline-block'})
         ])
     ])

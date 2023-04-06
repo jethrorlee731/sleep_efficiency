@@ -18,6 +18,8 @@ app = Dash(__name__)
 
 # multiply sleep efficiencies by 100 to represent them as percentages
 EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
+
+
 # EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'].apply(lambda x: x*100)
 
 # WE SHOULD GIVE AN INTRODUCTION AT THE TOP OF THE DASHBOARD REGARDING HOW WE THINK LOOKING AT SLEEP EFFICIENCY
@@ -36,11 +38,10 @@ def _parse_times(df_sleep):
     df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
     df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
 
-
     # parse the wakeup time columns to only include hours into the day (military time)
     df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
     df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
-                                df_sleep['Wakeup time'].str[3:5].astype(float) / 60
+                              df_sleep['Wakeup time'].str[3:5].astype(float) / 60
     return df_sleep
 
 
@@ -63,7 +64,7 @@ app.layout = html.Div([
         # drop down menu to choose the value represented on the y-axis
         dcc.Dropdown(['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                       'Light sleep percentage', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                      'Exercise frequency', 'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
+                      'Exercise frequency', 'Age', 'Wakeup time', 'Bedtime'],
                      value='Sleep duration', id='sleep-stat-dep')
     ]),
 
@@ -77,14 +78,13 @@ app.layout = html.Div([
             html.P('Select an independent variable you are interested in observing.'),
             dcc.Dropdown(['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                           'Light sleep percentage', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                          'Exercise frequency', 'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
+                          'Exercise frequency', 'Age', 'Wakeup time', 'Bedtime'],
                          value='Age', clearable=False, id='sleep-stat-ind', style={'display': 'inline-block',
                                                                                    'width': '100%'}),
 
-            # A slider that allows the user to control how much of the dependent variable gets represented
-            html.P('Adjust the Percentage Range of the Dependent Variable', style={'textAlign': 'left'}),
-            dcc.RangeSlider(0, 100, 1, value=[0, 100], id='sleep-scatter-slider', marks=None,
-                            tooltip={"placement": "bottom", "always_visible": True}),
+            # Add instructors that tell users how to control how much data gets represented
+            html.P('Adjust the axes values by brushing over points you want to inspect more closely',
+                   style={'textAlign': 'left'}),
 
             # checkbox to toggle trend-line
             dcc.Checklist(
@@ -120,20 +120,19 @@ app.layout = html.Div([
 
     # div for strip and density plots
     html.Div([
+        # a slider that allows users to adjust the range of sleep efficiency values on the strip and contour plots
+        html.P('Adjust the sleep efficiency percentages presented on the two plots below', style={'textAlign': 'left'}),
+        dcc.RangeSlider(50, 100, 1, value=[50, 100], id='efficiency-slider',
+                        tooltip={"placement": "bottom", "always_visible": True}, marks=None),
         # div for smoking status strip chart
         html.Div([
             # creating a strip chart showing the relationship between one's smoking status and a sleep variable
             html.H2('How Smoking Affects Your Sleep Quality', style={'textAlign': 'center'}),
             dcc.Graph(id='smoke-vs-sleep', style={'display': 'inline-block'}),
 
-            # sleep efficiency slider
-            html.P('Adjust Sleep Efficiency Percentage', style={'textAlign': 'left'}),
-            dcc.RangeSlider(50, 100, 1, value=[50, 100], id='smoker-slider',
-                            tooltip={"placement": "bottom", "always_visible": True}, marks=None),
-
             # specify to the users how they can filter the data by smoking status
-            html.P("Filter by gender in the strip chart by clicking in the legend on the gender that you do not want"
-                   " to focus on."),
+            html.P("Filter by smoking status in the strip chart by clicking in the legend on the smoking status that "
+                   "you do not want to focus on."),
         ],
             # Add style parameters to this Div, placing it in the left 49% of the page
             style={'width': '49%', 'display': 'inline-block', 'float': 'left'}),
@@ -165,13 +164,7 @@ app.layout = html.Div([
                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
                  'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency', 'Age',
                  'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                value='Light sleep percentage', id='density-stat2'),
-
-            # sleep efficiency slider
-            html.P('Adjust the Represented Sleep Efficiency Values', style={'textAlign': 'left'}),
-            dcc.RangeSlider(50, 100, 1, value=[50, 100], marks=None,
-                            tooltip={"placement": "bottom", "always_visible": True},
-                            id='efficiency-slide')
+                value='Light sleep percentage', id='density-stat2')
         ],
             # Add style parameters to this Div, placing it in the right 49% of the page
             style={'width': '49%', 'display': 'inline-block', 'float': 'right'}),
@@ -313,15 +306,13 @@ def filt_vals(df, vals, col, lcols):
 
 @app.callback(
     Output('sleep-scatter', 'figure'),
-    Input('sleep-scatter-slider', 'value'),
     Input('scatter-trend-line', 'value'),
     Input('sleep-stat-ind', 'value'),
     Input('sleep-stat-dep', 'value')
 )
-def make_sleep_scatter(slider_values, show_trendline, sleep_stat_ind, sleep_stat_dep):
+def make_sleep_scatter(show_trendline, sleep_stat_ind, sleep_stat_dep):
     """ Creates a scatter plot showing the relationship between two sleep statistics
     Args:
-        slider_values (list of floats): a range of values for the independent variable to be represented on the plot
         show_trendline (string): a string indicating whether a trend line should appear on the scatter plot
         sleep_stat_ind (string): the independent variable of the scatter plot
         sleep_stat_dep (string): the dependent variable of the scatter plot
@@ -342,16 +333,12 @@ def make_sleep_scatter(slider_values, show_trendline, sleep_stat_ind, sleep_stat
     # initialize the trend-line as None
     trend_line = None
 
-    # filter out appropriate values
-    cols = ['ID', sleep_stat_ind, sleep_stat_dep]
-    filt_deepsleep = filt_vals(df_sleep, slider_values, sleep_stat_dep, cols)
-
     # show a trend line or not based on the user's input
     if 'Show Trend Line' in show_trendline:
         trend_line = 'ols'
 
     # plot the sleep statistic (x) and the other sleep statistic (y)
-    fig = px.scatter(filt_deepsleep, x=sleep_stat_ind, y=sleep_stat_dep, trendline=trend_line,
+    fig = px.scatter(EFFICIENCY, x=sleep_stat_ind, y=sleep_stat_dep, trendline=trend_line,
                      labels={'x': sleep_stat_ind, 'index': sleep_stat_dep})
 
     return fig
@@ -420,7 +407,7 @@ def show_sleep_gender_histogram(genders, sleep_stat):
     Output('efficiency-contour', 'figure'),
     Input('density-stat1', 'value'),
     Input('density-stat2', 'value'),
-    Input('efficiency-slide', 'value')
+    Input('efficiency-slider', 'value')
 )
 def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     """ Shows a density contour plots that shows the relationship between two variables and average sleep efficiency
@@ -468,7 +455,7 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
 
 @app.callback(
     Output('smoke-vs-sleep', 'figure'),
-    Input('smoker-slider', 'value')
+    Input('efficiency-slider', 'value')
 )
 # ONLY SHOWING SLEEP EFFICIENCY BECAUSE THE DATA FOR THE OTHER COLUMNS DOES NOT MAKE SENSE
 def show_sleep_strip(smoker_slider):

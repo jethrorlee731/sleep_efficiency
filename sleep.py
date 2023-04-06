@@ -89,11 +89,12 @@ app.layout = html.Div([
             # checkbox to toggle trend-line
             dcc.Checklist(
                 ['Show Trend Line'],
-                ['Show Trend Line'], id='scatter-trend-line', inline=True
+                ['Show Trend Line'], id='scatter-trend-line', inline=True, style={'background-color': 'midnightblue'}
             ),
         ],
             # Add style parameters to this Div, placing it in the left 49% of the page
-            style={'width': '49%', 'display': 'inline-block', 'float': 'left', 'height': '45vh'}),
+            style={'width': '49%', 'display': 'inline-block', 'float': 'left', 'height': '45vh',
+                   'background-color': 'midnightblue'}),
 
         # div for comparing sleep statistic distributions between genders
         html.Div([
@@ -116,7 +117,8 @@ app.layout = html.Div([
         ],
             # Add style parameters to this Div, placing it in the right 49% of the page
             style={'width': '49%', 'display': 'inline-block'}),
-    ]),
+    ], style={'background-color': 'midnightblue', 'color': 'white'}
+    ),
 
     # div for strip and density plots
     html.Div([
@@ -168,7 +170,8 @@ app.layout = html.Div([
         ],
             # Add style parameters to this Div, placing it in the right 49% of the page
             style={'width': '49%', 'display': 'inline-block', 'float': 'right'}),
-    ]),
+    ], style={'background-color': 'indigo', 'color': 'silver'}
+    ),
 
     # div for machine learning components
     html.Div([
@@ -252,7 +255,7 @@ app.layout = html.Div([
                 dcc.Graph(id="feature-importance", style={'display': 'inline-block', 'width': '100%', 'height': '45vh'})
             ],
                 # Add style parameters to this Div, placing it in the left 49% of the right column
-                style={'width': '49%', 'display': 'inline-block', 'float': 'left'}),
+                style={'width': '49%', 'display': 'inline-block', 'float': 'left', 'background-color': 'darkviolet'}),
 
             html.Div([
                 html.H2('3D view of two independent variables against a chosen dependent variable',
@@ -273,14 +276,15 @@ app.layout = html.Div([
                 dcc.Graph(id="three-dim-plot", style={'display': 'inline-block', 'width': '100%'})
             ],
                 # Add style parameters to this Div, placing it in the right 49% of the right column
-                style={'width': '49%', 'display': 'inline-block', 'float': 'right'}
+                style={'width': '49%', 'display': 'inline-block', 'float': 'right', 'background-color':
+                    'darkviolet'}
             )
         ],
             # Add style parameters to this Div, placing it in the right 70% of the page
             style={'width': '70%', 'display': 'inline-block', 'float': 'right'}
         )
-    ])
-])
+    ], style={'background-color': 'purple', 'color': 'black'})
+], style={'background-color': 'blue', 'color': 'white'})
 
 
 def filt_vals(df, vals, col, lcols):

@@ -227,6 +227,8 @@ app.layout = html.Div([
             dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                          value='Sleep efficiency',
                          clearable=False, id='dependent-feature'),
+            html.P('Click on female or male from the 3d scatter legend to remove points if you only want to '
+                   'focus on one gender.'),
             dcc.Graph(id="three-dim-plot", style={'display': 'inline-block'})
         ])
     ])

@@ -216,7 +216,7 @@ app.layout = html.Div([
         html.Div([
             html.H2('3d view of two independent variables against a chosen dependent variable',
                     style={'textAlign': 'center'}),
-            html.P('Select two independent variables you are interested in looking at.'),
+            html.P('Select three independent variables you are interested in looking at.'),
             dcc.Dropdown(['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                           'Exercise frequency'],
                          value='Age', clearable=False, id='independent-3D-feat1'),
@@ -812,6 +812,7 @@ def plot_m_reg(x_var1, x_var2, focus_col):
     """
     x_var1 (str): one x-variable of interest
     x_var2 (str): another x-variable of interest
+    x_var3 (str): 3rd x-variable of interest
     focus_col (str): y-variable of interest
     """
     # Create the linear regression model
@@ -821,7 +822,7 @@ def plot_m_reg(x_var1, x_var2, focus_col):
     model.fit(filt_parsed[[x_var1, x_var2]], filt_parsed[focus_col])
 
     # mutliple linear regression plot
-    fig = px.scatter_3d(filt_parsed, x=x_var1, y=x_var2, z=focus_col)
+    fig = px.scatter_3d(filt_parsed, x=x_var1, y=x_var2, z=focus_col, color='Gender')
 
     return fig
 

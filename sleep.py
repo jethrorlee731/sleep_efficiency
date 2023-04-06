@@ -78,7 +78,8 @@ app.layout = html.Div([
             dcc.Dropdown(['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                           'Light sleep percentage', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                           'Exercise frequency', 'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                         value='Age', clearable=False, id='sleep-stat-ind', style={'display': 'inline-block'}),
+                         value='Age', clearable=False, id='sleep-stat-ind', style={'display': 'inline-block',
+                                                                                   'width': '100%'}),
 
             # A slider that allows the user to control how much of the dependent variable gets represented
             html.P('Adjust the Percentage Range of the Dependent Variable', style={'textAlign': 'left'}),

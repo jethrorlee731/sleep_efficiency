@@ -109,11 +109,8 @@ app.layout = html.Div([
             dcc.RangeSlider(50, 100, 1, value=[50, 100], id='smoker-slider',
                             tooltip={"placement": "bottom", "always_visible": True}, marks=None),
 
-            # checkbox that allows users to filter the data by smoking status
-            html.P('Filter by smoking status'),
-            dcc.Checklist(
-                ['Smokers', 'Non-smokers'],
-                ['Smokers', 'Non-smokers'], id='strip-smoker-options', inline=True),
+            # specify to the users how they can filter the data by smoking status
+            html.P("Click in the legend on smoking statuses you don't want represented on the plot"),
         ],
             # Add style parameters to this Div, placing it in the left 49% of the page
             style={'width': '49%', 'display': 'inline-block', 'float': 'left'}),
@@ -253,8 +250,8 @@ app.layout = html.Div([
                 dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                              value='Sleep efficiency',
                              clearable=False, id='dependent-feature'),
-                html.P('Click on female or male from the 3d scatter legend to remove points if you only want to '
-                       'focus on one gender.'),
+                html.P('Filter by gender in the 3D scatter by clicking in the legend on the gender that you are not '
+                       'interested in.'),
                 dcc.Graph(id="three-dim-plot", style={'display': 'inline-block', 'width': '100%'})
             ],
                 # Add style parameters to this Div, placing it in the right 49% of the right column
@@ -478,33 +475,24 @@ filt_parsed = _parse_times(filt_parsed, "Wakeup time")
 
 @app.callback(
     Output('smoke-vs-sleep', 'figure'),
-    Input('strip-smoker-options', 'value'),
     Input('smoker-slider', 'value')
 )
 # ONLY SHOWING SLEEP EFFICIENCY BECAUSE THE DATA FOR THE OTHER COLUMNS DOES NOT MAKE SENSE
-def show_sleep_strip(user_responses, smoker_slider):
+def show_sleep_strip(smoker_slider):
     """ Shows a strip chart that shows the relationship between a sleep variable and smoking status
     Args:
-        user_responses (list of str): List of smoking statuses that the user wants to be portrayed in the strip chart
         smoker_slider (list of ints): a range of sleep efficiencies to be represented on the plot
     Returns:
         fig: the strip chart itself
     """
-    smoking_statuses = []
     SMOKING_STATUS_COL = 'Smoking status'
     SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
 
-    for user_response in user_responses:
-        if user_response == 'Smokers':
-            smoking_statuses.append('Yes')
-        elif user_response == 'Non-smokers':
-            smoking_statuses.append('No')
-
-    # filter the data based on the chosen smoking statuses and sleep efficiency range
+    # filter the data based on the sleep efficiency range
     cols = ['ID', SMOKING_STATUS_COL, SLEEP_EFFICIENCY_COL]
-    sleep_smoking = EFFICIENCY.loc[EFFICIENCY[SMOKING_STATUS_COL].isin(smoking_statuses),]
-    sleep_smoking = filt_vals(sleep_smoking, smoker_slider, SLEEP_EFFICIENCY_COL, cols)
+    sleep_smoking = filt_vals(EFFICIENCY, smoker_slider, SLEEP_EFFICIENCY_COL, cols)
 
+    # plot the strip chart showing the relationship between smoking statuses and sleep efficiency
     fig = px.strip(sleep_smoking, x=SLEEP_EFFICIENCY_COL, y=SMOKING_STATUS_COL, color=SMOKING_STATUS_COL,
                    color_discrete_map={'Yes': 'forestgreen', 'No': 'red'})
 

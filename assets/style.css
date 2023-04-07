@@ -2,10 +2,9 @@ body {
     font-family: Courier New;
 }
 
-#scatter-and-gender {
-    background-color: "midnightblue";
 }
 
-.scatter-trend-line {
-    background-color: "midnightblue";
+.dash-table-container.Select-menu-outer {
+    background: black;
+    color: white;
 }

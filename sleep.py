@@ -213,8 +213,7 @@ app.layout = html.Div([
                             html.P('Indicate the dependent variable you are interested in looking at.'),
                             dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                                          value='Sleep efficiency',
-                                         clearable=False, id='feature', style={'margin': 'auto', 'width': '70%',
-                                                                               'background-color': 'mediumpurple',
+                                         clearable=False, id='feature', style={'background-color': 'mediumpurple',
                                                                                'color': 'black'}),
                             dcc.Graph(id="feature-importance",
                                       style={'display': 'inline-block', 'width': '100%', 'height': '45vh'})
@@ -251,7 +250,7 @@ app.layout = html.Div([
                         ],
                             # Add style parameters to this Div
                             style={'width': '50%', 'display': 'inline-block', 'float': 'right', 'background-color':
-                                   'darkviolet', 'height': '50vw'}
+                                'darkviolet', 'height': '50vw'}
                         )
                     ])
                 ], style={'background-color': 'indigo', 'color': 'white'})
@@ -268,60 +267,84 @@ app.layout = html.Div([
                             style={'textAlign': 'center'}),
 
                     # Ask user information that are going to be inputs into the multiple learning regression model
+                    # Div for sliders
+                    html.Div([
+                        # Ask a user for their age
+                        html.Div([
+                            html.P('How old are you?', style={'textAlign': 'center'}),
+                            dcc.Slider(0, 100, 1, value=15, marks=None, id='sleep-age',
+                                       tooltip={"placement": "bottom", "always_visible": True})]),
 
-                    # Ask a user for their age
-                    html.P('How old are you?', style={'textAlign': 'center'}),
-                    dcc.Slider(0, 100, 1, value=15, marks=None, id='sleep-age',
-                               tooltip={"placement": "bottom", "always_visible": True}),
+                        # Ask a user what is their bedtime (hours into the day)
+                        html.Div([
+                            html.P('What is your bedtime based on hours into the day (military time)?',
+                                   style={'textAlign': 'center'}),
+                            dcc.Slider(0, 24, 0.25, value=23, marks=None, id='sleep-bedtime',
+                                       tooltip={'placement': 'bottom', 'always_visible': True})]),
 
-                    # Ask a user for their biological gender
-                    html.P("What's your biological gender?", style={'textAlign': 'center'}),
-                    dcc.Dropdown(['Biological Male', 'Biological Female'], value='Biological Male',
-                                 clearable=False, id='sleep-gender'),
+                        # Ask a user what is their wakeup time (hours into the day)
+                        html.Div([
+                            html.P('What is your wakeup time based on hours into the day (military time)?',
+                                   style={'textAlign': 'center'}),
+                            dcc.Slider(0, 24, 0.25, value=9, marks=None, id='sleep-wakeuptime',
+                                       tooltip={'placement': 'bottom', 'always_visible': True})]),
 
-                    # Ask a user what is their bedtime (hours into the day)
-                    html.P('What is your bedtime based on hours into the day (military time)?',
-                           style={'textAlign': 'center'}),
-                    dcc.Slider(0, 24, 0.25, value=23, marks=None, id='sleep-bedtime', tooltip={'placement': 'bottom',
-                                                                                               'always_visible': True}),
+                        # Ask a user how long they sleep for (wakeup time minus bedtime)
+                        html.Div([
+                            html.P('What is the total amount of time you slept (in hours)?',
+                                   style={'textAlign': 'center'}),
+                            dcc.Slider(0, 15, 0.25, value=7, marks=None, id='sleep-duration',
+                                       tooltip={'placement': 'bottom', 'always_visible': True})]),
 
-                    # Ask a user what is their wakeup time (hours into the day)
-                    html.P('What is your wakeup time based on hours into the day (military time)?',
-                           style={'textAlign': 'center'}),
-                    dcc.Slider(0, 24, 0.25, value=9, marks=None, id='sleep-wakeuptime',
-                               tooltip={'placement': 'bottom', 'always_visible': True}),
+                        # Ask a user the amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
+                        html.Div([
+                            html.P(
+                                'What is your amount of caffeine consumption in the 24 hours prior to bedtime (in mg)?',
+                                style={'textAlign': 'center'}), dcc.Slider(0, 200, 1, value=50,
+                                                                           marks=None, id='sleep-caffeine',
+                                                                           tooltip={'placement': 'bottom',
+                                                                                    'always_visible': True})])
+                    ],
+                        style={'width': '50%', 'float': 'left', 'height': '35vw'}),
 
-                    # Ask a user how long they sleep for (wakeup time minus bedtime)
-                    html.P('What is the total amount of time you slept (in hours)?', style={'textAlign': 'center'}),
-                    dcc.Slider(0, 15, 0.25, value=7, marks=None, id='sleep-duration', tooltip={'placement': 'bottom',
-                                                                                               'always_visible': True}),
+                    # Div for drop down menus
+                    html.Div([
+                        # Ask a user for their biological gender
+                        html.Div([
+                            html.P("What's your biological gender?", style={'textAlign': 'center'}),
+                            dcc.Dropdown(['Biological Male', 'Biological Female'], value='Biological Male',
+                                         clearable=False, id='sleep-gender', style={'margin': 'auto', 'width': '70%',
+                                                                                    'color': 'black'})]),
 
-                    # Ask a user the number of awakenings they have for a given night
-                    html.P('What is the number of awakenings you have for a given night?',
-                           style={'textAlign': 'center'}),
-                    dcc.Dropdown([0, 1, 2, 3, 4], value=0, clearable=False, id='sleep-awakenings'),
+                        # Ask a user the number of awakenings they have for a given night
+                        html.Div([
+                            html.P('What is the number of awakenings you have for a given night?',
+                                   style={'textAlign': 'center'}),
+                            dcc.Dropdown([0, 1, 2, 3, 4], value=0, clearable=False, id='sleep-awakenings',
+                                         style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
-                    # Ask a user the amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
-                    html.P('What is your amount of caffeine consumption in the 24 hours prior to bedtime (in mg)?',
-                           style={'textAlign': 'center'}), dcc.Slider(0, 200, 1, value=50,
-                                                                      marks=None, id='sleep-caffeine',
-                                                                      tooltip={'placement': 'bottom',
-                                                                               'always_visible': True}),
+                        # Ask a user the amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+                        html.Div([
+                            html.P(
+                                'What is your amount of alcohol consumption in the 24 hours prior to bedtime (in oz)?',
+                                style={'textAlign': 'center'}),
+                            dcc.Dropdown([0, 1, 2, 3, 4, 5], value=0, clearable=False,
+                                         id='sleep-alcohol',
+                                         style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
-                    # Ask a user the amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
-                    html.P('What is your amount of alcohol consumption in the 24 hours prior to bedtime (in oz)?',
-                           style={'textAlign': 'center'}), dcc.Dropdown([0, 1, 2, 3, 4, 5], value=0, clearable=False,
-                                                                        id='sleep-alcohol'),
+                        # Ask a user about whether they smoke/vape
+                        html.Div([
+                            html.P('Do you smoke/vape?', style={'textAlign': 'center'}),
+                            dcc.Dropdown(['Yes', 'No'], value='No', clearable=False, id='sleep-smoke',
+                                         style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
-                    # Ask a user about whether they smoke/vape
-                    html.P('Do you smoke/vape?', style={'textAlign': 'center'}),
-                    dcc.Dropdown(['Yes', 'No'], value='No', clearable=False, id='sleep-smoke'),
+                        # Ask a user the number of times the test subject exercises per week
+                        html.Div([
+                            html.P('How many times do you exercise per week?', style={'textAlign': 'center'}),
+                            dcc.Dropdown([0, 1, 2, 3, 4, 5], value=2, clearable=False, id='sleep-exercise',
+                                         style={'margin': 'auto', 'width': '70%', 'color': 'black'})])
+                    ], style={'width': '50%', 'float': 'right', 'height': '35vw'}),
 
-                    # Ask a user the number of times the test subject exercises per week
-                    html.P('How many times do you exercise per week?', style={'textAlign': 'center'}),
-                    dcc.Dropdown([0, 1, 2, 3, 4, 5], value=2, clearable=False, id='sleep-exercise'),
-
-                    html.Br(),
                     html.H2(id='sleep-eff', style={'textAlign': 'center'}),
                     html.H2(id='sleep-rem', style={'textAlign': 'center'}),
                     html.H2(id='sleep-deep', style={'textAlign': 'center'})
@@ -413,7 +436,7 @@ def show_sleep_gender_violin_plot(genders, sleep_stat):
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders), ]
+    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders),]
 
     # plot the violin chart
     fig = px.violin(sleep_gender, x='Gender', y=sleep_stat, color='Gender', template='plotly_dark',
@@ -442,7 +465,7 @@ def show_sleep_gender_histogram(genders, sleep_stat):
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders), ]
+    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders),]
 
     # plot the histogram
     # show multiple histograms color coded by biological gender if both the "male" and "female" checkboxes are ticked

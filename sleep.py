@@ -257,7 +257,7 @@ app.layout = html.Div([
             ], style={'background-color': 'midnightblue'})
         ], style={'background-color': 'black', 'color': 'white'}),
 
-        dcc.Tab(label='Find Your Sleep Efficiency!', children=[
+        dcc.Tab(label='Sleep Quality Predictor', children=[
             # div for machine learning components
             html.Div([
                 # div for calculating sleep efficiency, REM sleep percentage, and Deep sleep percentage

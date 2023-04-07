@@ -5,6 +5,7 @@ import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
+import dash_bootstrap_components as dbc
 
 # read the csv files into dataframes
 efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
@@ -54,7 +55,7 @@ app.layout = html.Div([
         dcc.Tab(label='Sleep Statistics', children=[
             html.Div([
                 html.Div([
-                    html.H1("snoozless", style={'textAlign': 'center'}),
+                    html.H1("snoozeless", style={'textAlign': 'center'}),
 
                     # Define what "sleep efficiency" actually means
                     html.P('"Sleep efficiency" refers to the ratio of time that one rests in bed while actually asleep')
@@ -63,6 +64,7 @@ app.layout = html.Div([
 
                 # div for drop down filter for all the plots except the machine learning models, strip chart,
                 # and deep contour plot
+                dbc.Row([
                 html.Div([
                     html.P('Choose the dependent variable.',
                            style={'textAlign': 'center'}),
@@ -74,10 +76,12 @@ app.layout = html.Div([
                                  value='Sleep duration', id='sleep-stat-dep', style={'background-color': 'royalblue',
                                                                                      'color': 'black'})
                 ], style={'background-color': 'midnightblue', 'color': 'white'}
-                ),
+                )
+                    ]),
 
                 # div containing the scatter plot and gender distribution plots
                 # div for a scatter plot comparing the relationship between two sleep variables
+                dbc.Row([
                 html.Div([
                     html.Div([
                         html.H2('How Certain Factors Affect Your Sleep Quality', style={'textAlign': 'center'}),
@@ -132,10 +136,11 @@ app.layout = html.Div([
                     ],
                         # Add style parameters to this Div, placing it in the right 49% of the page
                         style={'width': '49%', 'display': 'inline-block'}),
-                ], style={'background-color': 'midnightblue', 'color': 'white'}
-                ),
+                ], id='scatter-and-gender', style={'background-color': 'midnightblue', 'color': 'white'}
+                )]),
 
                 # div for strip and density plots
+                dbc.Row([
                 html.Div([
                     # a slider that allows users to adjust the range of sleep efficiency values on the strip and
                     # contour plots
@@ -202,9 +207,10 @@ app.layout = html.Div([
                     ],
                         # Add style parameters to this Div
                         style={'width': '50%', 'display': 'inline-block', 'float': 'right',
-                               'background-color': 'indigo', 'height': '48vw'}),
+                               'background-color': 'indigo', 'height': '48vw'})]),
 
                     # div for the two graphs created by a random forest regressor and multiple regression model
+                    dbc.Row([
                     html.Div([
                         html.Div([
                             html.H2('Which variables are most important in determining sleep efficiency, '
@@ -255,7 +261,8 @@ app.layout = html.Div([
                     ])
                 ], style={'background-color': 'indigo', 'color': 'white'})
             ], style={'background-color': 'midnightblue'})
-        ], style={'background-color': 'black', 'color': 'white'}),
+        ], style={'background-color': 'black', 'color': 'white'})
+        ]),
 
         dcc.Tab(label='Sleep Quality Predictor', children=[
             # div for machine learning components
@@ -352,7 +359,7 @@ app.layout = html.Div([
             ], style={'background-color': 'darkslateblue', 'color': 'white'})
         ], style={'background-color': 'black', 'color': 'white'})
     ])
-])
+], style={'font-family': 'Courier New'})
 
 
 def filt_vals(df, vals, col, lcols):

@@ -8,7 +8,7 @@ file = 'data/Sleep_Efficiency.csv'
 df = pd.read_csv(file).dropna()
 hygiene = df[['Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency']]
 hygiene['Caffeine consumption'] = np.log(df['Caffeine consumption'] + 1)
-df_transposed = hygiene.T
+
 
 data = []
 

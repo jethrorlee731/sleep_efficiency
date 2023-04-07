@@ -71,7 +71,8 @@ app.layout = html.Div([
                     dcc.Dropdown(['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                                   'Light sleep percentage', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                                   'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime'],
-                                 value='Sleep duration', id='sleep-stat-dep', style={'background-color': 'royalblue'})
+                                 value='Sleep duration', id='sleep-stat-dep', style={'background-color': 'royalblue',
+                                                                                     'color': 'black'})
                 ], style={'background-color': 'midnightblue', 'color': 'white'}
                 ),
 
@@ -90,7 +91,8 @@ app.layout = html.Div([
                              'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime'],
                             value='Age', clearable=False, id='sleep-stat-ind', style={'display': 'inline-block',
                                                                                       'width': '100%',
-                                                                                      'background-color': 'royalblue'}),
+                                                                                      'background-color': 'royalblue',
+                                                                                      'color': 'black'}),
 
                         # Add instructors that tell users how to control how much data gets represented
                         html.P('Adjust the axes values by brushing over points you want to inspect more closely',
@@ -179,7 +181,8 @@ app.layout = html.Div([
                              'Exercise frequency (in days per week)',
                              'Age',
                              'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                            value='Sleep duration', id='density-stat1', style={'background-color': 'mediumslateblue'}),
+                            value='Sleep duration', id='density-stat1', style={'background-color': 'mediumslateblue',
+                                                                               'color': 'black'}),
 
                         html.P(
                             'Choose the another variable to be represented in the density contour plot (light sleep '
@@ -195,7 +198,7 @@ app.layout = html.Div([
                              'Age',
                              'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                             value='Light sleep percentage', id='density-stat2',
-                            style={'background-color': 'mediumslateblue'})
+                            style={'background-color': 'mediumslateblue', 'color': 'black'})
                     ],
                         # Add style parameters to this Div
                         style={'width': '50%', 'display': 'inline-block', 'float': 'right',
@@ -211,7 +214,8 @@ app.layout = html.Div([
                             dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                                          value='Sleep efficiency',
                                          clearable=False, id='feature', style={'margin': 'auto', 'width': '70%',
-                                                                               'background-color': 'mediumpurple'}),
+                                                                               'background-color': 'mediumpurple',
+                                                                               'color': 'black'}),
                             dcc.Graph(id="feature-importance",
                                       style={'display': 'inline-block', 'width': '100%', 'height': '45vh'})
                         ],
@@ -228,18 +232,18 @@ app.layout = html.Div([
                                  'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime',
                                  'Smoking status'],
                                 value='Age', clearable=False, id='independent-3D-feat1',
-                                style={'background-color': 'mediumpurple'}),
+                                style={'background-color': 'mediumpurple', 'color': 'black'}),
                             dcc.Dropdown(
                                 ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                                  'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime',
                                  'Smoking status'],
                                 value='Awakenings', clearable=False, id='independent-3D-feat2',
-                                style={'background-color': 'mediumpurple'}),
+                                style={'background-color': 'mediumpurple', 'color': 'black'}),
                             html.P('Select dependent variable you are interested in looking at.'),
                             dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                                          value='Sleep efficiency',
                                          clearable=False, id='dependent-feature',
-                                         style={'background-color': 'mediumpurple'}),
+                                         style={'background-color': 'mediumpurple', 'color': 'black'}),
                             html.P(
                                 'Filter by gender in the 3D scatter by clicking in the legend on the gender that you '
                                 'do not want to focus on.'),

@@ -2,50 +2,20 @@ from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
 import seaborn as sns
-from sklearn.linear_model import LinearRegression
-from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+import utils
 
-# read the csv files into dataframes
-efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
-EFFICIENCY = efficiency.copy()
-EFFICIENCY = EFFICIENCY.dropna()
-TIMES = pd.read_csv('data/sleepdata_2.csv')
+# read in the file as a dataframe and do basic cleaning
+EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
+
+# parse the bedtime and wakeup times
+EFFICIENCY = utils.parse_times(EFFICIENCY)
 
 app = Dash(__name__)
 
-# multiply sleep efficiencies by 100 to represent them as percentages
-EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
-
-# clarifying metrics
-EFFICIENCY = EFFICIENCY.rename(columns={'Exercise frequency': 'Exercise frequency (in days per week)'})
-
-
-def _parse_times(df_sleep):
-    """ Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
-    Args:
-        df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
-    Returns:
-        df_sleep (Pandas data frame): a newer version of the data frame with the parsed times
-    """
-    # parse the bedtime columns to only include hours into the day (military time)
-    df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
-    df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
-
-    # parse the wakeup time columns to only include hours into the day (military time)
-    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
-    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
-                              df_sleep['Wakeup time'].str[3:5].astype(float) / 60
-    return df_sleep
-
-
-EFFICIENCY = _parse_times(EFFICIENCY)
-
 # layout for the dashboard
-# WE CAN DECIDE ON THE FORMAT OF THE LAYOUT LATER AND USE CHILDRENS TO REFORMAT
-
 app.layout = html.Div([
     dcc.Tabs([
         dcc.Tab(label='Sleep Statistics', children=[
@@ -414,27 +384,6 @@ app.layout = html.Div([
 ], style={'font-family': 'Courier New'})
 
 
-def filt_vals(df, vals, col, lcols):
-    """ Filter the user-selected values from the dataframe
-    Args:
-        df: (dataframe) a dataframe with the values we are seeking and additional attributes
-        vals (list): two user-defined values, a min and max
-        col (str): the column to filter by
-        lcols (list): a list of column names to return
-    Returns:
-        df_updated (dataframe): the dataframe filtered to just include the values within the user specified range
-    """
-    # identify the beginning and end of the range
-    least = vals[0]
-    most = vals[1]
-
-    # filter out the rows for which the column values are within the range
-    df_update = df[df[col].between(least, most)][lcols]
-
-    # return the updated dataframe to user
-    return df_update
-
-
 @app.callback(
     Output('sleep-scatter', 'figure'),
     Input('scatter-trend-line', 'value'),
@@ -447,7 +396,6 @@ def make_sleep_scatter(show_trend_line, sleep_stat_ind, sleep_stat_dep):
         show_trend_line (string): a string indicating whether a trend line should appear on the scatter plot
         sleep_stat_ind (string): the independent variable of the scatter plot
         sleep_stat_dep (string): the dependent variable of the scatter plot
-
     Returns:
         fig (px.scatter): the scatter plot itself
     """
@@ -495,7 +443,7 @@ def show_sleep_gender_violin_plot(genders, sleep_stat):
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders),]
+    sleep_gender = df_sleep[df_sleep.Gender.isin(genders)]
 
     # plot the violin chart
     fig = px.violin(sleep_gender, x='Gender', y=sleep_stat, color='Gender', template='plotly_dark',
@@ -524,7 +472,7 @@ def show_sleep_gender_histogram(genders, sleep_stat):
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders),]
+    sleep_gender = df_sleep[df_sleep.Gender.isin(genders)]
 
     # plot the histogram
     # show multiple histograms color coded by biological gender if both the "male" and "female" checkboxes are ticked
@@ -560,7 +508,7 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
     # assign a variable name to the string "Sleep efficiency"
-    SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
+    sleep_efficiency_col = 'Sleep efficiency'
 
     # check whether the sleep statistics are equal to each other
     if sleep_stat2 == sleep_stat1:
@@ -574,8 +522,8 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
             sleep_stat2 = 'Deep sleep percentage'
 
     # filter out appropriate values
-    cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
-    filt_efficiency = filt_vals(df_sleep, slider_values, SLEEP_EFFICIENCY_COL, cols)
+    cols = ['ID', sleep_stat1, sleep_stat2, sleep_efficiency_col]
+    filt_efficiency = utils.filt_vals(df_sleep, slider_values, sleep_efficiency_col, cols)
 
     # plot the sleep statistics in a density contour plot
     fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z='Sleep efficiency', histfunc="avg",
@@ -589,7 +537,6 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     Output('smoke-vs-sleep', 'figure'),
     Input('efficiency-slider', 'value')
 )
-# ONLY SHOWING SLEEP EFFICIENCY BECAUSE THE DATA FOR THE OTHER COLUMNS DOES NOT MAKE SENSE
 def show_sleep_strip(smoker_slider):
     """ Shows a strip chart that shows the relationship between a sleep variable and smoking status
     Args:
@@ -597,71 +544,18 @@ def show_sleep_strip(smoker_slider):
     Returns:
         fig: the strip chart itself
     """
-    SMOKING_STATUS_COL = 'Smoking status'
-    SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
+    smoking_status_col = 'Smoking status'
+    sleep_efficiency_col = 'Sleep efficiency'
 
     # filter the data based on the sleep efficiency range
-    cols = ['ID', SMOKING_STATUS_COL, SLEEP_EFFICIENCY_COL]
-    sleep_smoking = filt_vals(EFFICIENCY, smoker_slider, SLEEP_EFFICIENCY_COL, cols)
+    cols = ['ID', smoking_status_col, sleep_efficiency_col]
+    sleep_smoking = utils.filt_vals(EFFICIENCY, smoker_slider, sleep_efficiency_col, cols)
 
     # plot the strip chart showing the relationship between smoking statuses and sleep efficiency
-    fig = px.strip(sleep_smoking, x=SLEEP_EFFICIENCY_COL, y=SMOKING_STATUS_COL, color=SMOKING_STATUS_COL,
+    fig = px.strip(sleep_smoking, x=sleep_efficiency_col, y=smoking_status_col, color=smoking_status_col,
                    color_discrete_map={'Yes': 'forestgreen', 'No': 'red'}, template='plotly_dark')
 
     return fig
-
-
-def _forest_reg(focus_col):
-    """ Builds the random forest regressor model that predicts a y-variable
-    Args:
-        focus_col (str): name of the y-variable of interest
-    Returns:
-        random_forest_reg: fitted random forest regressor based on the dataset
-    """
-    # Establish the features not used by the random forest regressor
-    unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
-                      'Light sleep percentage']
-
-    # we can represent binary categorical variables in single indicator tags via one-hot encoding
-    df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
-
-    # the x features for the regressor should be quantitative
-    x_feat_list = list(df_sleep.columns)
-    for feat in unwanted_feats:
-        x_feat_list.remove(feat)
-
-    # extract data from dataframe
-    x = df_sleep.loc[:, x_feat_list].values
-    y = df_sleep.loc[:, focus_col].values
-
-    # initialize a random forest regressor
-    random_forest_reg = RandomForestRegressor()
-
-    random_forest_reg.fit(x, y)
-
-    return random_forest_reg
-
-
-def _convert(gender, smoke):
-    """ Encode the passed in variables to match encoding in the random forest regressor
-    Args:
-        gender (str): whether the user is Biological Male or Biological Female
-        smoke (str): whether the user smokes or not
-    Returns:
-        gender_value (int): encoded variable representing gender of the user
-        smoke_value (int): encoded variable representing whether the user smokes
-    """
-    if gender == 'Biological Male':
-        gender_value = 1
-    else:
-        gender_value = 0
-
-    if smoke == 'Yes':
-        smoke_value = 1
-    else:
-        smoke_value = 0
-
-    return gender_value, smoke_value
 
 
 @app.callback(
@@ -693,9 +587,9 @@ def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Returns:
         y_pred (float): predicted sleep efficiency
     """
-    random_forest_reg = _forest_reg('Sleep efficiency')
+    random_forest_reg = utils.forest_reg('Sleep efficiency', EFFICIENCY)
 
-    gender_value, smoke_value = _convert(gender, smoke)
+    gender_value, smoke_value = utils.convert(gender, smoke)
 
     # user inputs turned into a numpy array
     data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
@@ -736,9 +630,9 @@ def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Returns:
         y_pred (float): predicted REM sleep percentage
     """
-    random_forest_reg = _forest_reg('REM sleep percentage')
+    random_forest_reg = utils.forest_reg('REM sleep percentage', EFFICIENCY)
 
-    gender_value, smoke_value = _convert(gender, smoke)
+    gender_value, smoke_value = utils.convert(gender, smoke)
 
     # user inputs turned into a numpy array
     data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
@@ -779,9 +673,9 @@ def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alco
     Returns:
         y_pred (float): predicted deep sleep percentage
     """
-    random_forest_reg = _forest_reg('Deep sleep percentage')
+    random_forest_reg = utils.forest_reg('Deep sleep percentage', EFFICIENCY)
 
-    gender_value, smoke_value = _convert(gender, smoke)
+    gender_value, smoke_value = utils.convert(gender, smoke)
 
     # user inputs turned into a numpy array
     data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
@@ -793,38 +687,6 @@ def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alco
     return 'Your predicted deep sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
 
-def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
-    """ plots feature importances in a horizontal bar chart
-
-    The x-axis is labeled accordingly for a random forest regressor
-
-    Args:
-        feat_list (list): str names of features
-        feat_import (np.array): feature importances (mean MSE reduce)
-        sort (bool): if True, sorts features in decreasing importance
-            from top to bottom of plot
-        limit (int): if passed, limits the number of features shown
-            to this value
-    Returns:
-        None, just plots the feature importance bar chart
-    """
-    if sort:
-        # sort features in decreasing importance
-        idx = np.argsort(feat_import).astype(int)
-        feat_list = [feat_list[_idx] for _idx in idx]
-        feat_import = feat_import[idx]
-
-    if limit is not None:
-        # limit to the first limit feature
-        feat_list = feat_list[:limit]
-        feat_import = feat_import[:limit]
-
-    fig = px.bar(x=feat_list, y=feat_import, labels={'x': 'Features', 'y': 'feature importance'},
-                 template='plotly_dark')
-
-    return fig
-
-
 @app.callback(
     Output('feature-importance', 'figure'),
     Input('feature', 'value')
@@ -834,7 +696,7 @@ def plot_eff_forest(focus_col):
     Args:
         focus_col (str): interested y-variable (either sleep efficiency, rem sleep percentage, or deep sleep percentage
     Return:
-        None (just a bar chart)
+        fig: a bar chart
     """
     # Establish the theme of any visualizations
     sns.set()
@@ -851,22 +713,10 @@ def plot_eff_forest(focus_col):
     for feat in unwanted_feats:
         x_feat_list.remove(feat)
 
-    # extract data from dataframe
-    x = df_sleep.loc[:, x_feat_list].values
-    y = df_sleep.loc[:, focus_col].values
-
-    # creates a dictionary that maps features to their importance value
-    # THIS SHOULD MAKE BE SHOWED TO THE USER ALONG WITH THE PLOT
-    # sleep_important = make_feature_import_dict(featchosen, random_forest_reg.feature_importances_)
-    # print(sleep_important)
-
-    # initialize a random forest regressor
-    random_forest_reg = RandomForestRegressor()
-
-    random_forest_reg.fit(x, y)
+    random_forest_reg = utils.forest_reg(focus_col, EFFICIENCY)
 
     # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
-    fig = plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
+    fig = utils.plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
 
     return fig
 
@@ -878,10 +728,13 @@ def plot_eff_forest(focus_col):
     Input('dependent-feature', 'value')
 )
 def plot_m_reg(x_var1, x_var2, focus_col):
-    """
-    x_var1 (str): one x-variable of interest
-    x_var2 (str): another x-variable of interest
-    focus_col (str): y-variable of interest
+    """ Plot a 3d scatter plot
+    Args:
+        x_var1 (str): one x-variable of interest
+        x_var2 (str): another x-variable of interest
+        focus_col (str): y-variable of interest
+    Returns:
+        fig: a 3d scatter plot
     """
     df_sleep = EFFICIENCY
 
@@ -889,13 +742,7 @@ def plot_m_reg(x_var1, x_var2, focus_col):
         df_sleep = pd.get_dummies(data=df_sleep, columns=['Smoking status'], drop_first=True)
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
-    # Create the linear regression model
-    model = LinearRegression()
-
-    # Fit the model
-    model.fit(df_sleep[[x_var1, x_var2]], df_sleep[focus_col])
-
-    # multiple linear regression plot
+    # plot 3d scatter
     fig = px.scatter_3d(df_sleep, x=x_var1, y=x_var2, z=focus_col, color='Gender', template='plotly_dark', width=710,
                         height=350)
 
@@ -907,19 +754,18 @@ def plot_m_reg(x_var1, x_var2, focus_col):
     Input('radar-features', 'value')
 )
 def plot_sleep_hygiene(radar_features):
-    """
-    Makes a radar graph of sleep hygiene
+    """ Makes a radar graph of sleep hygiene
     Args:
         radar_features (list of strings): a list of the features that will be represented on the radar graph
     Returns:
-        None, just plots the radar graph
+        fig: plots the radar graph
     """
     df_sleep = EFFICIENCY
-    CAFFEINE_COL = 'Caffeine consumption'
+    caffeine_col = 'Caffeine consumption'
 
     hygiene = df_sleep[radar_features]
-    if CAFFEINE_COL in radar_features:
-        hygiene.loc[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
+    if caffeine_col in radar_features:
+        hygiene[caffeine_col] = np.log(df_sleep[caffeine_col] + 1)
 
     fig = go.Figure()
     values = hygiene.values.tolist()
@@ -945,4 +791,9 @@ def plot_sleep_hygiene(radar_features):
     return fig
 
 
-app.run_server(debug=True)
+def main():
+    # run app
+    app.run_server(debug=True)
+
+
+main()

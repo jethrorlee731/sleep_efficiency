@@ -53,6 +53,10 @@ app.layout = html.Div([
                 html.Div([
                     html.H1("snoozeless", style={'textAlign': 'center', 'font-family': 'Cursive'}),
 
+                    # Make a note that the viewer of the dashboard may have to adjust their zoom settings
+                    html.H2("NOTE: To see the dashboard properly formatted, you may have to adjust your window zoom "
+                            "settings."),
+
                     # Define what "sleep efficiency" actually means
                     html.P('"Sleep efficiency" refers to the ratio of time that one rests in bed while actually '
                            'asleep'),
@@ -915,7 +919,7 @@ def plot_sleep_hygiene(radar_features):
 
     hygiene = df_sleep[radar_features]
     if CAFFEINE_COL in radar_features:
-        hygiene[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
+        hygiene.loc[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
 
     fig = go.Figure()
     values = hygiene.values.tolist()

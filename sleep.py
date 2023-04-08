@@ -252,7 +252,7 @@ app.layout = html.Div([
                                 dcc.Dropdown(
                                     ['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                                      'Exercise frequency (in days per week)'],
-                                    id='radar-features', style={'background-color': 'white', 'color': 'black'},
+                                    id='radar-features', style={'background-color': 'black', 'color': 'black'},
                                     multi=True,
                                     value=['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
                                            'Exercise frequency (in days per week)'],

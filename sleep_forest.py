@@ -1,15 +1,12 @@
-# MOVED EVERYTHING TO SLEEP.PY. MIGHT MOVE IT BACK HERE AFTER EVERYTHING WORKS.
-# THIS DOCUMENT IS ALSO NECESSARY TO SHOW THAT THE RANDOM FOREST REGRESSOR MODEL IS ALRIGHT IN PREDICTING SLEEP
-# EFFICIENCY, REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE BASED ON THE CROSS VALIDATED R2 SCORE.
-
+# RANDOM FOREST REGRESSOR WAS ALREADY IMPLEMENTED IN THE SLEEP.PY FILE. THIS FILE IS USED TO SHOW HOW THE
+# R2 SCORE FOR PREDICTING SLEEP EFFICIENCY, REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE IS BETTER FOR THIS
+# RANDOM FOREST THAN THE MULTIPLE LINEAR REGRESSION. THAT'S WHY WE ENDED UP ONLY USING RANDOM FOREST REGRESSOR.
 """
 sleep_forest.py: Build a random forest regressor to determine the attributes that best determine one's sleep
                      efficiency
 """
-
 # Import statements
 import seaborn as sns
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import KFold
@@ -17,73 +14,7 @@ from copy import copy
 from sklearn.metrics import r2_score
 from sklearn.ensemble import RandomForestRegressor
 from collections import defaultdict
-
-efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
-# I JUST DID THIS FOR NOW SO WE DON'T RUN INTO ISSUES WITH NA VALUES BELOW. WE CAN FIX THIS BY REPLACING WITH MEDIAN
-# OF THE COLUMN IF WE WANT.
-EFFICIENCY = efficiency.dropna()
-
-def _parse_times(df_sleep, sleep_stat):
-    """ Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
-    Args:
-        df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
-        sleep_stat (str): The statistic to be portrayed on the box plot
-    Returns:
-        sleep_df (Pandas data frame): a newer version of the data frame with the parsed times
-    """
-    # parse the bedtime columns to only include hours into the day
-    if sleep_stat == 'Bedtime':
-        df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
-        df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / \
-                              60
-
-    # parse the wakeup time columns to only include hours into the day
-    elif sleep_stat == 'Wakeup time':
-        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
-        df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
-                                  df_sleep['Wakeup time'].str[3:5].astype(float) / 60
-
-    # Parse no data if neither the bedtime or wakeup time columns are specified via the sleep_stat parameter
-    # else:
-    #     None
-
-    return df_sleep
-
-
-# def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
-#     """ plots feature importances in a horizontal bar chart
-#
-#     The x axis is labeled accordingly for a random forest regressor
-#
-#     Args:
-#         feat_list (list): str names of features
-#         feat_import (np.array): feature importances (mean MSE reduce)
-#         sort (bool): if True, sorts features in decreasing importance
-#             from top to bottom of plot
-#         limit (int): if passed, limits the number of features shown
-#             to this value
-#     Returns:
-#         None, just plots the feature importance bar chart
-#     """
-#     if sort:
-#         # sort features in decreasing importance
-#         idx = np.argsort(feat_import).astype(int)
-#         feat_list = [feat_list[_idx] for _idx in idx]
-#         feat_import = feat_import[idx]
-#
-#     if limit is not None:
-#         # limit to the first limit feature
-#         feat_list = feat_list[:limit]
-#         feat_import = feat_import[:limit]
-#
-#     # plot and label feature importance
-#     plt.barh(feat_list, feat_import)
-#     plt.gcf().set_size_inches(5, len(feat_list) / 2)
-#     plt.xlabel('Feature importance\n(Mean decrease in MSE across all Decision Trees)')
-#
-#     # show the feature importance graph
-#     plt.show()
-#
+import utils
 
 def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
     """ Map features to their importance metrics
@@ -124,25 +55,17 @@ def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
 
 
 def main():
+    EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
 
+    EFFICIENCY = utils.parse_times(EFFICIENCY)
     # Establish the features not used by the random forest regressor
     unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                       'Light sleep percentage']
     # Establish the theme of any visualizations
     sns.set()
 
-    # load sleep data
-    df_sleep = pd.read_csv('data/Sleep_Efficiency.csv')
-    df_sleep.dropna(axis=0, inplace=True)
-
-    # parse the bedtime columns to only include hours into the day
-    df_sleep = _parse_times(df_sleep, 'Bedtime')
-
-    # parse the wakeup time columns to only include hours into the day
-    df_sleep = _parse_times(df_sleep, 'Wakeup time')
-
     # we can represent binary categorical variables in single indicator tags via one-hot encoding
-    df_sleep = pd.get_dummies(data=df_sleep, columns=['Gender', 'Smoking status'], drop_first=True)
+    df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
     print(df_sleep.columns)
 
     # define the true and testing values

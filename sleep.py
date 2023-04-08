@@ -33,7 +33,7 @@ app.layout = html.Div([
 
                     # Define what "sleep efficiency" actually means
                     html.P('"Sleep efficiency" refers to the ratio of time that one rests in bed while actually '
-                           'asleep'),
+                           'asleep.'),
 
                     # Explain the importance of sleep efficiency, REM sleep percentage, and deep sleep percentage
                     html.P('Allowing people to sleep the most efficiently is essential as the amount of rest we get '
@@ -43,10 +43,10 @@ app.layout = html.Div([
                            'benefit from understanding what factors help to maximize REM sleep percentages or deep '
                            'sleep percentages. Sleep is a necessity, so it would be difficult for one to not be '
                            'interested in learning more about how to better their sleep through methods such as '
-                           'maximizing the time they are in the deep sleep stage. '),
+                           'maximizing the time they are in the deep sleep stage.'),
                     html.P("REM sleep is responsible for helping people process new knowledge and execute motor "
                            "skills to their fullest potential. Deep sleep enables the body to release vital growth "
-                           "hormones that work to build muscles, tissues, and bones")
+                           "hormones that work to build muscles, tissues, and bones.")
                 ], style={'background-color': 'blue', 'color': 'white'}
                 ),
 
@@ -292,6 +292,10 @@ app.layout = html.Div([
                 html.Div([
                     html.H2('Find your sleep efficiency, REM sleep percentage, and deep sleep percentage!',
                             style={'textAlign': 'center'}),
+                    # guide users to a website that helps them determine how much REM and deep sleep they should get
+                    html.Label([html.A('(What constitutes healthy REM and deep sleep percentages?)',
+                                       style={'background-color': 'white'},
+                                href='https://www.healthline.com/health/how-much-deep-sleep-do-you-need#takeaway')],),
 
                     # Ask user information that are going to be inputs into the multiple learning regression model
                     # Div for sliders
@@ -765,11 +769,11 @@ def plot_sleep_hygiene(radar_features):
         fig: plots the radar graph
     """
     df_sleep = EFFICIENCY
-    caffeine_col = 'Caffeine consumption'
+    CAFFEINE_COL = 'Caffeine consumption'
 
     hygiene = df_sleep[radar_features]
-    if caffeine_col in radar_features:
-        hygiene[caffeine_col] = np.log(df_sleep[caffeine_col] + 1)
+    if CAFFEINE_COL in radar_features:
+        hygiene[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
 
     fig = go.Figure()
     values = hygiene.values.tolist()

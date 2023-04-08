@@ -1,7 +1,13 @@
 """
-sleep.py: runs the general script of the dashboard
+Colbe Chang, Jocelyn Ju, Jethro R. Lee, Michelle Wang, and Ceara Zhang
+DS3500
+Final Project: Sleep Efficiency Dashboard (sleep.py)
+April 19, 2023
+
+sleep.py: runs the general code for the dashboard
 """
 
+# import statements
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
@@ -11,10 +17,10 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import utils
 
-# read in the file as a dataframe and do basic cleaning
+# read in the file as a dataframe and perform basic cleaning
 EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
 
-# parse the bedtime and wakeup times
+# parse the bedtime and wakeup times and convert them to military times
 EFFICIENCY = utils.parse_times(EFFICIENCY)
 
 app = Dash(__name__)
@@ -22,12 +28,15 @@ app = Dash(__name__)
 # layout for the dashboard
 app.layout = html.Div([
     dcc.Tabs([
+        # create a tab with the sleep statistic graphs
         dcc.Tab(label='Sleep Statistics', children=[
             html.Div([
                 html.Div([
+                    # add a header containing the title of the dashboard
                     html.H1("snoozeless", style={'textAlign': 'center', 'font-family': 'Cursive'}),
 
-                    # Make a note that the viewer of the dashboard may have to adjust their zoom settings
+                    # Make a note that the viewer of the dashboard may have to adjust their zoom settings to see the
+                    # dashboard properly
                     html.H2("NOTE: To see the dashboard properly formatted, you may have to adjust your window zoom "
                             "settings."),
 
@@ -50,14 +59,15 @@ app.layout = html.Div([
                 ], style={'background-color': 'blue', 'color': 'white'}
                 ),
 
-                # div for drop down filter for all the plots except the machine learning models, strip chart,
-                # and deep contour plot
                 dbc.Row([
+                    # div for a drop down filter that controls the dependent variable of the plots in the midnight blue
+                    # region
                     html.Div([
                         html.P('Choose the dependent variable.',
                                style={'textAlign': 'center'}),
 
-                        # drop down menu to choose the value represented on the y-axis
+                        # drop down menu to choose the value represented on the y-axes of the plots in the midnight blue
+                        # region
                         dcc.Dropdown(
                             ['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                              'Light sleep percentage', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
@@ -68,15 +78,16 @@ app.layout = html.Div([
                     )
                 ]),
 
-                # div containing the scatter plot and gender distribution plots
-                # div for a scatter plot comparing the relationship between two sleep variables
                 dbc.Row([
+                    # div containing the scatter plot and gender distribution plots
                     html.Div([
+                        # div for a scatter plot comparing the relationship between two sleep variables
                         html.Div([
                             html.H2('How Certain Factors Affect Your Sleep Quality', style={'textAlign': 'center'}),
                             dcc.Graph(id='sleep-scatter',
                                       style={'display': 'inline-block', 'width': '45vw', 'height': '45vh'}),
 
+                            # drop down menu that allows users to control the scatter plot's independent variable
                             html.P('Select an independent variable you are interested in observing.'),
                             dcc.Dropdown(
                                 ['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
@@ -92,14 +103,14 @@ app.layout = html.Div([
                             html.P('Adjust the axes values by brushing over points you want to inspect more closely',
                                    style={'textAlign': 'left'}),
 
-                            # checkbox to toggle trend-line
+                            # checkbox to toggle the trend-line on the scatter plot
                             dcc.Checklist(
                                 ['Show Trend Line'],
                                 ['Show Trend Line'], id='scatter-trend-line', inline=True,
                                 style={'background-color': 'midnightblue'}
                             ),
                         ],
-                            # Add style parameters to this Div, placing it in the left 49% of the page
+                            # Add style parameters to this Div
                             style={'width': '49%', 'display': 'inline-block', 'float': 'left',
                                    'background-color': 'midnightblue'}),
 
@@ -112,12 +123,12 @@ app.layout = html.Div([
                                           style={'display': 'inline-block', 'width': '49%', 'float': 'left'})
                             ]),
 
-                            # div for histogram distribution of a sleep statistic by gender (uses the same checkbox as
-                            # the violin plot)
+                            # div for a histogram distribution of a sleep statistic by gender
                             html.Div([
                                 dcc.Graph(id='hist-gender', style={'display': 'inline-block', 'width': '49%'})
                             ]),
-                            # gender checkbox
+
+                            # checkbox that allows users to filter the violin plot and histogram by gender
                             html.P('Filter the plots by gender', style={'textAlign': 'center'}),
                             dcc.Checklist(
                                 ['Male', 'Female'],
@@ -163,12 +174,10 @@ app.layout = html.Div([
                             html.H2('How Various Features Affect Sleep Efficiency', style={'textAlign': 'center'}),
                             dcc.Graph(id='efficiency-contour', style={'display': 'inline-block', 'height': '45vh'}),
 
-                            html.P(
-                                'Choose one independent variable to be represented in the density contour plot (sleep '
-                                'duration by default, including when invalid values are chosen)',
-                                style={'textAlign': 'center'}),
-
                             # drop down menu to choose the first independent variable for the density contour plot
+                            html.P(
+                                'Choose one independent variable to be represented in the density contour plot',
+                                style={'textAlign': 'center'}),
                             dcc.Dropdown(
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
@@ -180,12 +189,10 @@ app.layout = html.Div([
                                 style={'background-color': 'mediumslateblue',
                                        'color': 'black'}),
 
-                            html.P(
-                                'Choose the another variable to be represented in the density contour plot (light '
-                                'sleep percentage by default, including when invalid values are chosen)',
-                                style={'textAlign': 'center'}),
-
                             # drop down menu to choose the second independent variable for the density contour plot
+                            html.P(
+                                'Choose the another variable to be represented in the density contour plot',
+                                style={'textAlign': 'center'}),
                             dcc.Dropdown(
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
@@ -200,11 +207,9 @@ app.layout = html.Div([
                             style={'width': '50%', 'display': 'inline-block', 'float': 'right',
                                    'background-color': 'indigo', 'height': '48vw'})]),
 
-                    # div for the two graphs created by a random forest regressor and multiple regression model +
-                    # sleep hygiene plot
+                    # div for the feature importance graph, sleep hygiene radial chart, and 3D scatter plot
                     dbc.Row([
                         html.Div([
-
                             # div for the feature importance bar chart
                             html.Div([
                                 html.H2('Which variables are most important in determining sleep efficiency, '
@@ -215,6 +220,8 @@ app.layout = html.Div([
                                              value='Sleep efficiency',
                                              clearable=False, id='feature', style={'background-color': 'mediumpurple',
                                                                                    'color': 'black'}),
+
+                                # display the feature importance chart
                                 dcc.Graph(id="feature-importance",
                                           style={'display': 'inline-block', 'width': '100%', 'height': '60%'})
                             ],
@@ -249,7 +256,9 @@ app.layout = html.Div([
                             html.Div([
                                 html.H2('3D view of two independent variables against a chosen dependent variable',
                                         style={'textAlign': 'center'}),
-                                html.P('Select three independent variables you are interested in looking at.'),
+
+                                # allows the users to control the two independent variables on the scatter plot
+                                html.P('Select two independent variables you are interested in looking at.'),
                                 dcc.Dropdown(
                                     ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption',
                                      'Alcohol consumption',
@@ -264,11 +273,15 @@ app.layout = html.Div([
                                      'Smoking status'],
                                     value='Awakenings', clearable=False, id='independent-3D-feat2',
                                     style={'background-color': 'mediumpurple', 'color': 'black'}),
+
+                                # allows users to control the dependent variable of the scatter plot
                                 html.P('Select dependent variable you are interested in looking at.'),
                                 dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                                              value='Sleep efficiency',
                                              clearable=False, id='dependent-feature',
                                              style={'background-color': 'mediumpurple', 'color': 'black'}),
+
+                                # instructs users as to how they can filter the scatter plot by gender
                                 html.P(
                                     'Filter by gender in the 3D scatter by clicking in the legend on the gender '
                                     'that you do not want to focus on.'),
@@ -284,20 +297,23 @@ app.layout = html.Div([
             ], style={'background-color': 'midnightblue', 'color': 'white'})
         ], style={'background-color': 'black', 'color': 'white'}),
 
+        # tab containing a section in which users can find their predicted sleep efficiencies, REM sleep percentages,
+        # and deep sleep percentages with a random forest regressor
         dcc.Tab(label='Sleep Quality Predictor', children=[
-            # div for machine learning components
             html.Div([
-                # div for calculating sleep efficiency, REM sleep percentage, and Deep sleep percentage
-                # based on the multiple learning regression model
+                # div for calculating sleep efficiency, REM sleep percentage, and deep sleep percentage
+                # based on the random forest regressor
                 html.Div([
                     html.H2('Find your sleep efficiency, REM sleep percentage, and deep sleep percentage!',
                             style={'textAlign': 'center'}),
+
                     # guide users to a website that helps them determine how much REM and deep sleep they should get
                     html.Label([html.A('(What constitutes healthy REM and deep sleep percentages?)',
                                        style={'background-color': 'white'},
-                                href='https://www.healthline.com/health/how-much-deep-sleep-do-you-need#takeaway')],),
+                                       href='https://www.healthline.com/health/how-much-deep-sleep-do-you-need#takeaway')], ),
 
-                    # Ask user information that are going to be inputs into the multiple learning regression model
+                    # Ask user for information that are going to be inputs for the random forest regressor
+
                     # Div for sliders
                     dbc.Col([
                         html.Div([
@@ -307,14 +323,14 @@ app.layout = html.Div([
                                 dcc.Slider(0, 100, 1, value=15, marks=None, id='sleep-age',
                                            tooltip={"placement": "bottom", "always_visible": True})]),
 
-                            # Ask a user what is their bedtime (hours into the day)
+                            # Ask a user for their typical bedtime (as hours into the day)
                             html.Div([
                                 html.P('What is your bedtime based on hours into the day (military time)?',
                                        style={'textAlign': 'center'}),
                                 dcc.Slider(0, 24, 0.25, value=23, marks=None, id='sleep-bedtime',
                                            tooltip={'placement': 'bottom', 'always_visible': True})]),
 
-                            # Ask a user what is their wakeup time (hours into the day)
+                            # Ask a user for their typical wakeup time (hours into the day)
                             html.Div([
                                 html.P('What is your wakeup time based on hours into the day (military time)?',
                                        style={'textAlign': 'center'}),
@@ -323,16 +339,15 @@ app.layout = html.Div([
 
                             # Ask a user how long they sleep for (wakeup time minus bedtime)
                             html.Div([
-                                html.P('What is the total amount of time you slept (in hours)?',
+                                html.P('What is the total amount of time you sleep (in hours)?',
                                        style={'textAlign': 'center'}),
                                 dcc.Slider(0, 15, 0.25, value=7, marks=None, id='sleep-duration',
                                            tooltip={'placement': 'bottom', 'always_visible': True})]),
 
-                            # Ask a user the amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
+                            # Ask a user for how much caffeine they consume in the 24 hours prior to bedtime (in mg)
                             html.Div([
                                 html.P(
-                                    'What is your amount of caffeine consumption in the 24 hours prior to bedtime '
-                                    '(in mg)?',
+                                    'How much caffeine do you consume in the 24 hours prior to bedtime (in mg)?',
                                     style={'textAlign': 'center'}), dcc.Slider(0, 200, 1, value=50,
                                                                                marks=None, id='sleep-caffeine',
                                                                                tooltip={'placement': 'bottom',
@@ -351,18 +366,17 @@ app.layout = html.Div([
                                              style={'margin': 'auto', 'width': '70%',
                                                     'color': 'black'})]),
 
-                            # Ask a user the number of awakenings they have for a given night
+                            # Ask a user for the number of awakenings they have for a given night
                             html.Div([
                                 html.P('What is the number of awakenings you have for a given night?',
                                        style={'textAlign': 'center'}),
                                 dcc.Dropdown([0, 1, 2, 3, 4], value=0, clearable=False, id='sleep-awakenings',
                                              style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
-                            # Ask a user the amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+                            # Ask a user about their alcohol consumption in the 24 hours prior to bedtime (in oz)
                             html.Div([
                                 html.P(
-                                    'What is your amount of alcohol consumption in the 24 hours prior to bedtime (in '
-                                    'oz)?',
+                                    'How much alcohol do you consume in the 24 hours prior to bedtime (in oz)?',
                                     style={'textAlign': 'center'}),
                                 dcc.Dropdown([0, 1, 2, 3, 4, 5], value=0, clearable=False,
                                              id='sleep-alcohol',
@@ -374,7 +388,7 @@ app.layout = html.Div([
                                 dcc.Dropdown(['Yes', 'No'], value='No', clearable=False, id='sleep-smoke',
                                              style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
-                            # Ask a user the number of times the test subject exercises per week
+                            # Ask a user for the number of times they exercise per week
                             html.Div([
                                 html.P('How many times do you exercise per week?', style={'textAlign': 'center'}),
                                 dcc.Dropdown([0, 1, 2, 3, 4, 5], value=2, clearable=False, id='sleep-exercise',
@@ -407,16 +421,6 @@ def make_sleep_scatter(show_trend_line, sleep_stat_ind, sleep_stat_dep):
     Returns:
         fig (px.scatter): the scatter plot itself
     """
-    df_sleep = EFFICIENCY
-
-    if sleep_stat_ind == 'Gender' or sleep_stat_dep == 'Gender':
-        df_sleep = pd.get_dummies(data=df_sleep, columns=['Gender'], drop_first=True)
-        df_sleep = df_sleep.rename(columns={'Gender_Male': 'Gender'})
-
-    if sleep_stat_ind == 'Smoking status' or sleep_stat_dep == 'Smoking status':
-        df_sleep = pd.get_dummies(data=df_sleep, columns=['Smoking status'], drop_first=True)
-        df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
-
     # initialize the trend-line as None
     trend_line = None
 
@@ -424,7 +428,8 @@ def make_sleep_scatter(show_trend_line, sleep_stat_ind, sleep_stat_dep):
     if 'Show Trend Line' in show_trend_line:
         trend_line = 'ols'
 
-    # plot the sleep statistic (x) and the other sleep statistic (y)
+    # plot the relationship between the user-specified independent sleep statistic and user-specified dependent sleep
+    # statistic (y) in a scatter plot
     fig = px.scatter(EFFICIENCY, x=sleep_stat_ind, y=sleep_stat_dep, trendline=trend_line, template='plotly_dark',
                      labels={'x': sleep_stat_ind, 'index': sleep_stat_dep})
 
@@ -437,24 +442,21 @@ def make_sleep_scatter(show_trend_line, sleep_stat_ind, sleep_stat_dep):
     Input('sleep-stat-dep', 'value')
 )
 def show_sleep_gender_violin_plot(genders, sleep_stat):
-    """ Shows violin plots that represents distributions of a sleep statistic per gender
+    """ Shows a violin plot that represent distributions of a sleep statistic per gender
     Args:
         genders (list of str): list of genders to be shown on the violin plot
         sleep_stat (str): The statistic to be portrayed on the violin plot
     Returns:
         fig: the violin plot
     """
-    df_sleep = EFFICIENCY
-
-    if sleep_stat == 'Smoking status':
-        df_sleep = pd.get_dummies(data=df_sleep, columns=['Smoking status'], drop_first=True)
-        df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
+    # saving column names into constants
+    GENDER_COL = 'Gender'
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep[df_sleep.Gender.isin(genders)]
+    sleep_gender = EFFICIENCY[EFFICIENCY.Gender.isin(genders)]
 
     # plot the violin chart
-    fig = px.violin(sleep_gender, x='Gender', y=sleep_stat, color='Gender', template='plotly_dark',
+    fig = px.violin(sleep_gender, x=GENDER_COL, y=sleep_stat, color=GENDER_COL, template='plotly_dark',
                     color_discrete_map={'Female': 'sienna', 'Male': 'blue'})
 
     return fig
@@ -473,18 +475,15 @@ def show_sleep_gender_histogram(genders, sleep_stat):
     Returns:
         fig: the histogram itself
     """
-    df_sleep = EFFICIENCY
-
-    if sleep_stat == 'Smoking status':
-        df_sleep = pd.get_dummies(data=df_sleep, columns=['Smoking status'], drop_first=True)
-        df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
+    # saving column names into constants
+    GENDER_COL = 'Gender'
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep[df_sleep.Gender.isin(genders)]
+    sleep_gender = EFFICIENCY[EFFICIENCY.Gender.isin(genders)]
 
     # plot the histogram
     # show multiple histograms color coded by biological gender if both the "male" and "female" checkboxes are ticked
-    fig = px.histogram(sleep_gender, x=sleep_stat, color='Gender', template='plotly_dark',
+    fig = px.histogram(sleep_gender, x=sleep_stat, color=GENDER_COL, template='plotly_dark',
                        color_discrete_map={'Female': 'sienna', 'Male': 'blue'})
 
     return fig
@@ -501,40 +500,22 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     Args:
         sleep_stat1 (str): One statistic to be portrayed on the density contour plot
         sleep_stat2 (str): Another statistic to be portrayed on the density contour plot
-        slider_values (list of floats): a range of sleep efficiencies to be represented on the plot
+        slider_values (list of floats): a range of average sleep efficiencies to be represented on the plot
     Returns:
         fig: the density contour plot
     """
-    df_sleep = EFFICIENCY
+    # saving sleep efficiency column into a constant
+    SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
 
-    if sleep_stat1 == 'Gender' or sleep_stat2 == 'Gender':
-        df_sleep = pd.get_dummies(data=df_sleep, columns=['Gender'], drop_first=True)
-        df_sleep = df_sleep.rename(columns={'Gender_Male': 'Gender'})
-
-    if sleep_stat1 == 'Smoking status' or sleep_stat2 == 'Smoking status':
-        df_sleep = pd.get_dummies(data=df_sleep, columns=['Smoking status'], drop_first=True)
-        df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
-
-    # assign a variable name to the string "Sleep efficiency"
-    sleep_efficiency_col = 'Sleep efficiency'
-
-    # check whether the sleep statistics are equal to each other
-    if sleep_stat2 == sleep_stat1:
-
-        # if they are equal and the first is not Light sleep percentage, set the second as Light sleep percentage
-        if sleep_stat1 != 'Light sleep percentage':
-            sleep_stat2 = 'Light sleep percentage'
-
-        # if they are equal and the first is Light sleep percentage, set the second as Deep sleep percentage
-        else:
-            sleep_stat2 = 'Deep sleep percentage'
+    # performing one hot encoding if gender or smoking status needs to be shown on the plot
+    df_sleep = utils._encode(sleep_stat1, sleep_stat2, EFFICIENCY)
 
     # filter out appropriate values
-    cols = ['ID', sleep_stat1, sleep_stat2, sleep_efficiency_col]
-    filt_efficiency = utils.filt_vals(df_sleep, slider_values, sleep_efficiency_col, cols)
+    cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
+    filt_efficiency = utils.filt_vals(df_sleep, slider_values, SLEEP_EFFICIENCY_COL, cols)
 
     # plot the sleep statistics in a density contour plot
-    fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z='Sleep efficiency', histfunc="avg",
+    fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z=SLEEP_EFFICIENCY_COL, histfunc="avg",
                              template='plotly_dark')
     fig.update_traces(contours_coloring="fill", contours_showlabels=True)
 
@@ -552,15 +533,16 @@ def show_sleep_strip(smoker_slider):
     Returns:
         fig: the strip chart itself
     """
-    smoking_status_col = 'Smoking status'
-    sleep_efficiency_col = 'Sleep efficiency'
+    # saving column names into constants
+    SMOKING_COL = 'Smoking status'
+    SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
 
     # filter the data based on the sleep efficiency range
-    cols = ['ID', smoking_status_col, sleep_efficiency_col]
-    sleep_smoking = utils.filt_vals(EFFICIENCY, smoker_slider, sleep_efficiency_col, cols)
+    cols = ['ID', SMOKING_COL, SLEEP_EFFICIENCY_COL]
+    sleep_smoking = utils.filt_vals(EFFICIENCY, smoker_slider, SLEEP_EFFICIENCY_COL, cols)
 
     # plot the strip chart showing the relationship between smoking statuses and sleep efficiency
-    fig = px.strip(sleep_smoking, x=sleep_efficiency_col, y=smoking_status_col, color=smoking_status_col,
+    fig = px.strip(sleep_smoking, x=SLEEP_EFFICIENCY_COL, y=SMOKING_COL, color=SMOKING_COL,
                    color_discrete_map={'Yes': 'forestgreen', 'No': 'red'}, template='plotly_dark')
 
     return fig
@@ -580,32 +562,26 @@ def show_sleep_strip(smoker_slider):
     Input('sleep-smoke', 'value')
 )
 def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
-    """ Allow users to get their sleep efficiency given input of all these variables
+    """ Allow users to get their predicted sleep efficiency given information about them
     Args:
         age (int): the age of the user
-        bedtime (float): user bedtime based on hours into the day (military time)
-        wakeuptime (float): user wakeup time based on hours into the day (military time)
+        bedtime (float): user's bedtime based on hours into the day (military time)
+        wakeuptime (float): user's wakeup time based on hours into the day (military time)
         duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
-        caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
-        alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+        caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
+        alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
         exercise (int): how many times the user exercises in a week
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
     Returns:
         y_pred (float): predicted sleep efficiency
     """
-    random_forest_reg = utils.forest_reg('Sleep efficiency', EFFICIENCY)
+    # predict sleep efficiency based on user inputs from the dropdown and sliders
+    y_pred = utils.predict_sleep_quality('Sleep efficiency', EFFICIENCY, age, bedtime, wakeuptime, duration, awakenings,
+                                         caffeine, alcohol, exercise, gender, smoke)
 
-    gender_value, smoke_value = utils.convert(gender, smoke)
-
-    # user inputs turned into a numpy array
-    data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
-                      gender_value, smoke_value]])
-
-    # predict based on user inputs from the dropdown and sliders
-    y_pred = random_forest_reg.predict(data)
-
+    # display the user's predicted sleep efficiency
     return 'Your predicted sleep efficiency (expressed in %) is \n{}'.format(round(float(y_pred), 2))
 
 
@@ -623,32 +599,26 @@ def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Input('sleep-smoke', 'value')
 )
 def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
-    """ Allow users to get their REM sleep percentage given input of all these variables
+    """ Allow users to get their predicted REM sleep percentage given information about them
     Args:
         age (int): the age of the user
-        bedtime (float): user bedtime based on hours into the day (military time)
-        wakeuptime (float): user wakeup time based on hours into the day (military time)
+        bedtime (float): user's bedtime based on hours into the day (military time)
+        wakeuptime (float): user's wakeup time based on hours into the day (military time)
         duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
-        caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
-        alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+        caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
+        alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
         exercise (int): how many times the user exercises in a week
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
     Returns:
         y_pred (float): predicted REM sleep percentage
     """
-    random_forest_reg = utils.forest_reg('REM sleep percentage', EFFICIENCY)
+    # predict REM sleep percentage based on user inputs from the dropdown and sliders
+    y_pred = utils.predict_sleep_quality('REM sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, duration,
+                                         awakenings, caffeine, alcohol, exercise, gender, smoke)
 
-    gender_value, smoke_value = utils.convert(gender, smoke)
-
-    # user inputs turned into a numpy array
-    data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
-                      gender_value, smoke_value]])
-
-    # predict based on user inputs from the dropdown and sliders
-    y_pred = random_forest_reg.predict(data)
-
+    # display the user's predicted sleep REM sleep percentage
     return 'Your predicted REM sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
 
@@ -666,32 +636,26 @@ def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Input('sleep-smoke', 'value')
 )
 def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
-    """ Allow users to get their deep sleep percentage given input of all these variables
+    """ Allow users to get their predicted deep sleep percentage given information about them
     Args:
         age (int): the age of the user
-        bedtime (float): user bedtime based on hours into the day (military time)
-        wakeuptime (float): user wakeup time based on hours into the day (military time)
+        bedtime (float): user's bedtime based on hours into the day (military time)
+        wakeuptime (float): user's wakeup time based on hours into the day (military time)
         duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
-        caffeine (int): amount of caffeine consumption in the 24 hours prior to bedtime (in mg)
-        alcohol (int): amount of alcohol consumption in the 24 hours prior to bedtime (in oz)
+        caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
+        alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
         exercise (int): how many times the user exercises in a week
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
     Returns:
         y_pred (float): predicted deep sleep percentage
     """
-    random_forest_reg = utils.forest_reg('Deep sleep percentage', EFFICIENCY)
+    # predict deep sleep percentage based on user inputs from the dropdown and sliders
+    y_pred = utils.predict_sleep_quality('Deep sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, duration,
+                                         awakenings, caffeine, alcohol, exercise, gender, smoke)
 
-    gender_value, smoke_value = utils.convert(gender, smoke)
-
-    # user inputs turned into a numpy array
-    data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
-                      gender_value, smoke_value]])
-
-    # predict based on user inputs from the dropdown and sliders
-    y_pred = random_forest_reg.predict(data)
-
+    # display the user's predicted sleep deep sleep percentage
     return 'Your predicted deep sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
 
@@ -702,11 +666,11 @@ def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alco
 def plot_eff_forest(focus_col):
     """ Plot the feature importance graph for the y-variable that the user chooses
     Args:
-        focus_col (str): interested y-variable (either sleep efficiency, rem sleep percentage, or deep sleep percentage
+        focus_col (str): y-variable of interest (sleep efficiency, REM sleep percentage, or deep sleep percentage)
     Return:
-        fig: a bar chart
+        fig: a bar chart containing the feature importances
     """
-    # Establish the theme of any visualizations
+    # Establish the theme of the visualization
     sns.set()
 
     # Establish the features not used by the random forest regressor
@@ -721,9 +685,11 @@ def plot_eff_forest(focus_col):
     for feat in unwanted_feats:
         x_feat_list.remove(feat)
 
+    # Builds the random forest regressor model that predicts the user-specified y-variable for people
     random_forest_reg = utils.forest_reg(focus_col, EFFICIENCY)
 
-    # plots the importance of features in determining a person's sleep efficiency by the random forest regressor
+    # plots the importance of features in determining the user-specified y variable for a person by the random forest
+    # regressor
     fig = utils.plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
 
     return fig
@@ -735,24 +701,21 @@ def plot_eff_forest(focus_col):
     Input('independent-3D-feat2', 'value'),
     Input('dependent-feature', 'value')
 )
-def plot_m_reg(x_var1, x_var2, focus_col):
-    """ Plot a 3d scatter plot
+def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
+    """ Plot a 3d scatter plot showing the relationship between 3 sleep variables
     Args:
-        x_var1 (str): one x-variable of interest
-        x_var2 (str): another x-variable of interest
-        focus_col (str): y-variable of interest
+        sleep_stat_x (str): one sleep variable of interest
+        sleep_stat_y (str): another sleep variable of interest
+        sleep_stat_z (str): another sleep variable of interest
     Returns:
         fig: a 3d scatter plot
     """
-    df_sleep = EFFICIENCY
+    # performing one hot encoding if gender or smoking status needs to be shown on the plot
+    df_sleep = utils._encode(sleep_stat_x, sleep_stat_y, EFFICIENCY)
 
-    if x_var1 == 'Smoking status' or x_var1 == 'Smoking status':
-        df_sleep = pd.get_dummies(data=df_sleep, columns=['Smoking status'], drop_first=True)
-        df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
-
-    # plot 3d scatter
-    fig = px.scatter_3d(df_sleep, x=x_var1, y=x_var2, z=focus_col, color='Gender', template='plotly_dark', width=710,
-                        height=350)
+    # plot the 3d scatter plot
+    fig = px.scatter_3d(df_sleep, x=sleep_stat_x, y=sleep_stat_y, z=sleep_stat_z, color='Gender',
+                        template='plotly_dark', width=710, height=350)
 
     return fig
 
@@ -766,18 +729,28 @@ def plot_sleep_hygiene(radar_features):
     Args:
         radar_features (list of strings): a list of the features that will be represented on the radar graph
     Returns:
-        fig: plots the radar graph
+        fig: None, just plots the radar graph
     """
+    # saving the sleep efficiency data frame into a variable
     df_sleep = EFFICIENCY
+
+    # saving column names as constants
     CAFFEINE_COL = 'Caffeine consumption'
 
+    # plotting the radar graph based on the user-specified input variables
     hygiene = df_sleep[radar_features]
+
+    # performing logarithmic transformation on the caffeine consumption column if it's specified for the plot
     if CAFFEINE_COL in radar_features:
         hygiene[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
 
+    # initialize the radar chart
     fig = go.Figure()
+
+    # store the input variables specified by the user into a list
     values = hygiene.values.tolist()
 
+    # plot the radar graph
     for i in range(len(values)):
         fig.add_trace(go.Scatterpolar(
             r=values[i],
@@ -786,6 +759,7 @@ def plot_sleep_hygiene(radar_features):
             name='Person ' + str(i)
         ))
 
+    # update the layout of the radar graph
     fig.update_layout(
         polar=dict(
             radialaxis=dict(

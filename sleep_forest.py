@@ -1,9 +1,17 @@
-# RANDOM FOREST REGRESSOR WAS ALREADY IMPLEMENTED IN THE SLEEP.PY FILE. THIS FILE IS USED TO SHOW HOW THE
-# R2 SCORE FOR PREDICTING SLEEP EFFICIENCY, REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE IS BETTER FOR THIS
-# RANDOM FOREST THAN THE MULTIPLE LINEAR REGRESSION. THAT'S WHY WE ENDED UP ONLY USING RANDOM FOREST REGRESSOR.
 """
+Colbe Chang, Jocelyn Ju, Jethro R. Lee, Michelle Wang, and Ceara Zhang
+DS3500
+Final Project: Sleep Efficiency Dashboard (sleep_forest.py)
+April 19, 2023
+
 sleep_forest.py: Build a random forest regressor to determine the attributes that best determine one's sleep
-                     efficiency
+                 efficiency, REM sleep percentage, and deep sleep percentage
+
+A random forest regressor was already implemented in the sleep.py file. This file presents how the r^2 for when the
+regressor predicts sleep efficiency, REM sleep percentage, and deep sleep percentage is higher than that for the
+multiple linear regression model. Combined with how the multiple linear regression model uses the same data to train and
+predict and that the multiple linear regression model cannot even be shown on the dashboard, we decided to only use the
+random forest regressor.
 """
 # Import statements
 import seaborn as sns

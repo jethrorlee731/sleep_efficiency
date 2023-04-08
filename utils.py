@@ -1,4 +1,9 @@
 """
+Colbe Chang, Jocelyn Ju, Jethro R. Lee, Michelle Wang, and Ceara Zhang
+DS3500
+Final Project: Sleep Efficiency Dashboard (utils.py)
+April 19, 2023
+
 utils.py: Helper functions for sleep.py
 """
 import pandas as pd
@@ -155,3 +160,71 @@ def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
                  template='plotly_dark')
 
     return fig
+
+
+def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime, duration, awakenings, caffeine,
+                          alcohol, exercise, gender, smoke):
+    """ Allow users to get their predicted sleep quality given information about a user
+    Args:
+        sleep_quality_stat (str): the sleep statistic to be predicted for the user
+        df_sleep (pandas df): data frame containing information about the sleep quality of multiple individuals
+        age (int): the age of the user
+        bedtime (float): user's bedtime based on hours into the day (military time)
+        wakeuptime (float): user's wakeup time based on hours into the day (military time)
+        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
+        awakenings (int): number of awakenings a user has on a given night
+        caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
+        alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
+        exercise (int): how many times the user exercises in a week
+        gender (str): biological gender of the user
+        smoke (str): whether the user smokes
+    Returns:
+        y_pred (float): predicted sleep efficiency
+    """
+    # Builds the random forest regressor model that predicts a user's sleep efficiency, REM sleep percentage, or deep
+    # sleep percentage
+    random_forest_reg = forest_reg(sleep_quality_stat, df_sleep)
+
+    # Encode the passed-in values for gender and smoking status to match the encoding in the random forest regressor
+    gender_value, smoke_value = convert(gender, smoke)
+
+    # convert the user inputs  into a numpy array
+    data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
+                      gender_value, smoke_value]])
+
+    # predict sleep efficiency, REM sleep percentage, or deep sleep percentage based on user inputs from the dropdown
+    # and sliders
+    y_pred = random_forest_reg.predict(data)
+
+    return y_pred
+
+
+def _encode(var1, var2, df_sleep):
+    """
+    Encodes quantitative binary variables to qualitative variables via one-hot encoding
+
+    Args:
+        var1 (str): one variable that may contain binary data in a dataframe
+        var2 (str): another variable that may contain binary data in the dataframe
+        df_sleep (Pandas df): data frame containing information about the sleep quality of multiple individuals
+
+    Returns:
+        df (Pandas df): a new version of the data frame that contains the encoded columns (if they get encoded)
+    """
+    # saving column names into constants
+    GENDER_COL = 'Gender'
+    SMOKING_COL = 'Smoking status'
+
+    # performing one hot encoding on the gender column (a binary variable) to make it quantitative instead of
+    # qualitative if it's needed for the plot
+    if var1 == GENDER_COL or var2 == GENDER_COL:
+        df_sleep = pd.get_dummies(data=df_sleep, columns=[GENDER_COL], drop_first=True)
+        df_sleep = df_sleep.rename(columns={'Gender_Male': 'Gender'})
+
+    # performing one hot encoding on the smoking status column (a binary variable) to make it quantitative instead of
+    # qualitative if it's needed for the plot
+    if var1 == SMOKING_COL or var2 == SMOKING_COL:
+        df_sleep = pd.get_dummies(data=df_sleep, columns=[SMOKING_COL], drop_first=True)
+        df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
+
+    return df_sleep

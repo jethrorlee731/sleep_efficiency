@@ -6,6 +6,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
 
 # read the csv files into dataframes
 efficiency = pd.read_csv('data/Sleep_Efficiency.csv')
@@ -221,9 +222,12 @@ app.layout = html.Div([
                             style={'width': '50%', 'display': 'inline-block', 'float': 'right',
                                    'background-color': 'indigo', 'height': '48vw'})]),
 
-                    # div for the two graphs created by a random forest regressor and multiple regression model
+                    # div for the two graphs created by a random forest regressor and multiple regression model +
+                    # sleep hygiene plot
                     dbc.Row([
                         html.Div([
+
+                            # div for the feature importance bar chart
                             html.Div([
                                 html.H2('Which variables are most important in determining sleep efficiency, '
                                         'REM sleep percentage, or deep sleep percentage?',
@@ -234,12 +238,36 @@ app.layout = html.Div([
                                              clearable=False, id='feature', style={'background-color': 'mediumpurple',
                                                                                    'color': 'black'}),
                                 dcc.Graph(id="feature-importance",
-                                          style={'display': 'inline-block', 'width': '100%', 'height': '45vh'})
+                                          style={'display': 'inline-block', 'width': '100%', 'height': '60%'})
                             ],
-                                # Add style parameters to this Div, placing it in the left 50% of the dashboard
-                                style={'width': '50%', 'display': 'inline-block', 'float': 'left',
-                                       'background-color': 'darkviolet', 'height': '50vw'}),
+                                # Add style parameters to this Div
+                                style={'width': '25%', 'display': 'inline-block', 'float': 'left',
+                                       'background-color': 'darkviolet', 'height': '51vw'}),
 
+                            # div for radar graph of sleep hygiene
+                            html.Div([
+                                html.H2('Sleep Hygiene', style={'textAlign': 'center'}),
+
+                                # allows the user to control the variables displayed on the graph
+                                dcc.Dropdown(
+                                    ['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
+                                     'Exercise frequency (in days per week)'],
+                                    id='radar-features', style={'background-color': 'white', 'color': 'black'},
+                                    multi=True,
+                                    value=['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
+                                           'Exercise frequency (in days per week)'],
+                                ),
+
+                                # plots the radar graph on the dashboard
+                                dcc.Graph(id="sleep-hygiene", style={'display': 'inline-block', 'width': '100%'})
+                            ],
+                                # Add style parameters to this Div
+                                style={'width': '25%', 'display': 'inline-block', 'float': 'left',
+                                       'background-color': 'darkviolet', 'height': '51vw'}
+                            ),
+
+                            # div for a 3D scatter plot showing relationship between 2 independent sleep variables
+                            # and 1 dependent sleep variable
                             html.Div([
                                 html.H2('3D view of two independent variables against a chosen dependent variable',
                                         style={'textAlign': 'center'}),
@@ -264,16 +292,16 @@ app.layout = html.Div([
                                              clearable=False, id='dependent-feature',
                                              style={'background-color': 'mediumpurple', 'color': 'black'}),
                                 html.P(
-                                    'Filter by gender in the 3D scatter by clicking in the legend on the gender that '
-                                    'you do not want to focus on.'),
-                                dcc.Graph(id="three-dim-plot", style={'display': 'inline-block', 'width': '100%'})
+                                    'Filter by gender in the 3D scatter by clicking in the legend on the gender '
+                                    'that you do not want to focus on.'),
+                                dcc.Graph(id="three-dim-plot", style={'display': 'inline-block'})
                             ],
                                 # Add style parameters to this Div
-                                style={'width': '50%', 'display': 'inline-block', 'float': 'right', 'background-color':
-                                       'darkviolet', 'height': '50vw'}
-                            )
+                                style={'width': '50%', 'display': 'inline-block', 'float': 'right',
+                                       'background-color': 'darkviolet', 'height': '51vw'}
+                            ),
                         ])
-                    ], style={'background-color': 'indigo', 'color': 'white'})
+                    ])
                 ]),
             ], style={'background-color': 'midnightblue', 'color': 'white'})
         ], style={'background-color': 'black', 'color': 'white'}),
@@ -463,7 +491,7 @@ def show_sleep_gender_violin_plot(genders, sleep_stat):
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders), ]
+    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders),]
 
     # plot the violin chart
     fig = px.violin(sleep_gender, x='Gender', y=sleep_stat, color='Gender', template='plotly_dark',
@@ -492,7 +520,7 @@ def show_sleep_gender_histogram(genders, sleep_stat):
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})
 
     # filter the data based on the chosen genders
-    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders), ]
+    sleep_gender = df_sleep.loc[df_sleep.Gender.isin(genders),]
 
     # plot the histogram
     # show multiple histograms color coded by biological gender if both the "male" and "female" checkboxes are ticked
@@ -866,6 +894,49 @@ def plot_m_reg(x_var1, x_var2, focus_col):
     # multiple linear regression plot
     fig = px.scatter_3d(df_sleep, x=x_var1, y=x_var2, z=focus_col, color='Gender', template='plotly_dark', width=710,
                         height=350)
+
+    return fig
+
+
+@app.callback(
+    Output('sleep-hygiene', 'figure'),
+    Input('radar-features', 'value')
+)
+def plot_sleep_hygiene(radar_features):
+    """
+    Makes a radar graph of sleep hygiene
+    Args:
+        radar_features (list of strings): a list of the features that will be represented on the radar graph
+    Returns:
+        None, just plots the radar graph
+    """
+    df_sleep = EFFICIENCY
+    CAFFEINE_COL = 'Caffeine consumption'
+
+    hygiene = df_sleep[radar_features]
+    if CAFFEINE_COL in radar_features:
+        hygiene[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
+
+    fig = go.Figure()
+    values = hygiene.values.tolist()
+
+    for i in range(len(values)):
+        fig.add_trace(go.Scatterpolar(
+            r=values[i],
+            theta=list(hygiene.columns),
+            fill='toself',
+            name='Person ' + str(i)
+        ))
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, 5]
+            )),
+        showlegend=False,
+        template='plotly_dark'
+    )
 
     return fig
 

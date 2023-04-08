@@ -1,3 +1,7 @@
+"""
+sleep.py: runs the general script of the dashboard
+"""
+
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd

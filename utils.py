@@ -162,7 +162,7 @@ def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
     return fig
 
 
-def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime, duration, awakenings, caffeine,
+def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime, awakenings, caffeine,
                           alcohol, exercise, gender, smoke):
     """ Allow users to get their predicted sleep quality given information about a user
     Args:
@@ -171,7 +171,6 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
         age (int): the age of the user
         bedtime (float): user's bedtime based on hours into the day (military time)
         wakeuptime (float): user's wakeup time based on hours into the day (military time)
-        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
         caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
         alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
@@ -188,6 +187,12 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
     # Encode the passed-in values for gender and smoking status to match the encoding in the random forest regressor
     gender_value, smoke_value = convert(gender, smoke)
 
+    # calculate the sleep duration of a user based on their inputted bedtime and wakeup time
+    if wakeuptime < bedtime:
+        duration = wakeuptime + 24 - bedtime
+    else:
+        duration = wakeuptime - bedtime
+
     # convert the user inputs  into a numpy array
     data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
                       gender_value, smoke_value]])
@@ -199,7 +204,7 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
     return y_pred
 
 
-def _encode(var1, var2, df_sleep):
+def encode(var1, var2, df_sleep):
     """
     Encodes quantitative binary variables to qualitative variables via one-hot encoding
 

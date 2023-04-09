@@ -337,13 +337,6 @@ app.layout = html.Div([
                                 dcc.Slider(0, 24, 0.25, value=9, marks=None, id='sleep-wakeuptime',
                                            tooltip={'placement': 'bottom', 'always_visible': True})]),
 
-                            # Ask a user how long they sleep for (wakeup time minus bedtime)
-                            html.Div([
-                                html.P('What is the total amount of time you sleep (in hours)?',
-                                       style={'textAlign': 'center'}),
-                                dcc.Slider(0, 15, 0.25, value=7, marks=None, id='sleep-duration',
-                                           tooltip={'placement': 'bottom', 'always_visible': True})]),
-
                             # Ask a user for how much caffeine they consume in the 24 hours prior to bedtime (in mg)
                             html.Div([
                                 html.P(
@@ -508,7 +501,7 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     SLEEP_EFFICIENCY_COL = 'Sleep efficiency'
 
     # performing one hot encoding if gender or smoking status needs to be shown on the plot
-    df_sleep = utils._encode(sleep_stat1, sleep_stat2, EFFICIENCY)
+    df_sleep = utils.encode(sleep_stat1, sleep_stat2, EFFICIENCY)
 
     # filter out appropriate values
     cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
@@ -553,7 +546,6 @@ def show_sleep_strip(smoker_slider):
     Input('sleep-age', 'value'),
     Input('sleep-bedtime', 'value'),
     Input('sleep-wakeuptime', 'value'),
-    Input('sleep-duration', 'value'),
     Input('sleep-awakenings', 'value'),
     Input('sleep-caffeine', 'value'),
     Input('sleep-alcohol', 'value'),
@@ -561,13 +553,12 @@ def show_sleep_strip(smoker_slider):
     Input('sleep-gender', 'value'),
     Input('sleep-smoke', 'value')
 )
-def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
+def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
     """ Allow users to get their predicted sleep efficiency given information about them
     Args:
         age (int): the age of the user
         bedtime (float): user's bedtime based on hours into the day (military time)
         wakeuptime (float): user's wakeup time based on hours into the day (military time)
-        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
         caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
         alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
@@ -578,8 +569,8 @@ def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
         y_pred (float): predicted sleep efficiency
     """
     # predict sleep efficiency based on user inputs from the dropdown and sliders
-    y_pred = utils.predict_sleep_quality('Sleep efficiency', EFFICIENCY, age, bedtime, wakeuptime, duration, awakenings,
-                                         caffeine, alcohol, exercise, gender, smoke)
+    y_pred = utils.predict_sleep_quality('Sleep efficiency', EFFICIENCY, age, bedtime, wakeuptime, awakenings, caffeine,
+                                         alcohol, exercise, gender, smoke)
 
     # display the user's predicted sleep efficiency
     return 'Your predicted sleep efficiency (expressed in %) is \n{}'.format(round(float(y_pred), 2))
@@ -590,7 +581,6 @@ def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Input('sleep-age', 'value'),
     Input('sleep-bedtime', 'value'),
     Input('sleep-wakeuptime', 'value'),
-    Input('sleep-duration', 'value'),
     Input('sleep-awakenings', 'value'),
     Input('sleep-caffeine', 'value'),
     Input('sleep-alcohol', 'value'),
@@ -598,13 +588,12 @@ def calc_eff_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Input('sleep-gender', 'value'),
     Input('sleep-smoke', 'value')
 )
-def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
+def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
     """ Allow users to get their predicted REM sleep percentage given information about them
     Args:
         age (int): the age of the user
         bedtime (float): user's bedtime based on hours into the day (military time)
         wakeuptime (float): user's wakeup time based on hours into the day (military time)
-        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
         caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
         alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
@@ -615,8 +604,8 @@ def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
         y_pred (float): predicted REM sleep percentage
     """
     # predict REM sleep percentage based on user inputs from the dropdown and sliders
-    y_pred = utils.predict_sleep_quality('REM sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, duration,
-                                         awakenings, caffeine, alcohol, exercise, gender, smoke)
+    y_pred = utils.predict_sleep_quality('REM sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, awakenings,
+                                         caffeine, alcohol, exercise, gender, smoke)
 
     # display the user's predicted sleep REM sleep percentage
     return 'Your predicted REM sleep percentage is \n{}'.format(round(float(y_pred), 2))
@@ -627,7 +616,6 @@ def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Input('sleep-age', 'value'),
     Input('sleep-bedtime', 'value'),
     Input('sleep-wakeuptime', 'value'),
-    Input('sleep-duration', 'value'),
     Input('sleep-awakenings', 'value'),
     Input('sleep-caffeine', 'value'),
     Input('sleep-alcohol', 'value'),
@@ -635,13 +623,12 @@ def calc_rem_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcoh
     Input('sleep-gender', 'value'),
     Input('sleep-smoke', 'value')
 )
-def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise, gender, smoke):
+def calc_deep_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exercise, gender, smoke):
     """ Allow users to get their predicted deep sleep percentage given information about them
     Args:
         age (int): the age of the user
         bedtime (float): user's bedtime based on hours into the day (military time)
         wakeuptime (float): user's wakeup time based on hours into the day (military time)
-        duration (float): number of hours that the user was asleep (wakeup time minus bedtime)
         awakenings (int): number of awakenings a user has on a given night
         caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
         alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
@@ -652,8 +639,8 @@ def calc_deep_reg(age, bedtime, wakeuptime, duration, awakenings, caffeine, alco
         y_pred (float): predicted deep sleep percentage
     """
     # predict deep sleep percentage based on user inputs from the dropdown and sliders
-    y_pred = utils.predict_sleep_quality('Deep sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, duration,
-                                         awakenings, caffeine, alcohol, exercise, gender, smoke)
+    y_pred = utils.predict_sleep_quality('Deep sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, awakenings,
+                                         caffeine, alcohol, exercise, gender, smoke)
 
     # display the user's predicted sleep deep sleep percentage
     return 'Your predicted deep sleep percentage is \n{}'.format(round(float(y_pred), 2))
@@ -711,7 +698,7 @@ def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
         fig: a 3d scatter plot
     """
     # performing one hot encoding if gender or smoking status needs to be shown on the plot
-    df_sleep = utils._encode(sleep_stat_x, sleep_stat_y, EFFICIENCY)
+    df_sleep = utils.encode(sleep_stat_x, sleep_stat_y, EFFICIENCY)
 
     # plot the 3d scatter plot
     fig = px.scatter_3d(df_sleep, x=sleep_stat_x, y=sleep_stat_y, z=sleep_stat_z, color='Gender',

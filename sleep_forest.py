@@ -7,11 +7,11 @@ April 19, 2023
 sleep_forest.py: Build a random forest regressor to determine the attributes that best determine one's sleep
                  efficiency, REM sleep percentage, and deep sleep percentage
 
-A random forest regressor was already implemented in the sleep.py file. This file presents how the r^2 for when the
-regressor predicts sleep efficiency, REM sleep percentage, and deep sleep percentage is higher than that for the
-multiple linear regression model. Combined with how the multiple linear regression model uses the same data to train and
-predict and that the multiple linear regression model cannot even be shown on the dashboard, we decided to only use the
-random forest regressor.
+A random forest regressor is already built in the utils.py file. This file presents how the r^2 for when the regressor
+predicts sleep efficiency, REM sleep percentage, and deep sleep percentage is higher than that for the multiple linear
+regression model. Combined with how the multiple linear regression model uses the same data to train and predict and
+that the multiple linear regression model cannot even be shown on the dashboard, we decided to only use the random
+forest regressor.
 """
 # Import statements
 import seaborn as sns
@@ -23,6 +23,7 @@ from sklearn.metrics import r2_score
 from sklearn.ensemble import RandomForestRegressor
 from collections import defaultdict
 import utils
+
 
 def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
     """ Map features to their importance metrics

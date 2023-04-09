@@ -7,11 +7,11 @@ April 19, 2023
 sleep_reg.py: Using a multiple linear regression model to predict sleep efficiency, REM sleep percentages, and deep
               sleep percentages
 
-A random forest regressor was already implemented in the sleep.py file. This file presents how the r^2 for when the
-regressor predicts sleep efficiency, REM sleep percentage, and deep sleep percentage is higher than that for the
-multiple linear regression model. Combined with how the multiple linear regression model uses the same data to train and
-predict and that the multiple linear regression model cannot even be shown on the dashboard, we decided to only use the
-random forest regressor.
+A random forest regressor is already built in the utils.py file. This file presents how the r^2 for when the regressor
+predicts sleep efficiency, REM sleep percentage, and deep sleep percentage is higher than that for the multiple linear
+regression model. Combined with how the multiple linear regression model uses the same data to train and predict and
+that the multiple linear regression model cannot even be shown on the dashboard, we decided to only use the random
+forest regressor.
 """
 
 from sklearn.linear_model import LinearRegression

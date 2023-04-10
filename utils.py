@@ -6,6 +6,7 @@ April 19, 2023
 
 utils.py: Helper functions for sleep.py
 """
+# import statements
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
@@ -13,11 +14,11 @@ import plotly.express as px
 
 
 def read_file(filename):
-    """ Read in the file interested in, convert to dataframe, and do some cleaning
+    """ Read in a file, convert it to dataframe, and do some cleaning
     Args:
-        filename (str): name of interested file
+        filename (str): name of file of interest
     Returns:
-        file_copy (dataframe): cleaned dataframe
+        file_copy (Pandas data frame): cleaned dataframe
     """
     # read the csv files into dataframes
     file = pd.read_csv(filename)
@@ -31,7 +32,7 @@ def read_file(filename):
     # multiply sleep efficiencies by 100 to represent them as percentages
     file_copy.loc[:, 'Sleep efficiency'] = file_copy['Sleep efficiency'] * 100
 
-    # clarifying metrics
+    # renaming the exercise frequency column to clarify what it represents
     file_copy = file_copy.rename(columns={'Exercise frequency': 'Exercise frequency (in days per week)'})
 
     return file_copy
@@ -58,31 +59,31 @@ def parse_times(df_sleep):
 def filt_vals(df, vals, col, lcols):
     """ Filter the user-selected values from the dataframe
     Args:
-        df: (dataframe) a dataframe with the values we are seeking and additional attributes
-        vals (list): two user-defined values, a min and max
+        df: (Pandas dataframe) a dataframe with the values we are seeking and additional attributes
+        vals (list): two user-defined values, a min and max for "col"
         col (str): the column to filter by
         lcols (list): a list of column names to return
     Returns:
-        df_update (dataframe): the dataframe filtered to just include the values within the user specified range
+        df_updated (dataframe): the dataframe filtered, with just the values for "col" within the user specified range
     """
-    # identify the beginning and end of the range
+    # identify the beginning and end of the range user-specified range for "col"
     least = vals[0]
     most = vals[1]
 
     # filter out the rows for which the column values are within the range
-    df_update = df[df[col].between(least, most)][lcols]
+    df_updated = df[df[col].between(least, most)][lcols]
 
     # return the updated dataframe to user
-    return df_update
+    return df_updated
 
 
 def forest_reg(focus_col, data):
-    """ Builds the random forest regressor model that predicts a y-variable
+    """ Builds a random forest regressor model that predicts a y-variable
     Args:
         focus_col (str): name of the y-variable of interest
-        data (pd.DataFrame): dataframe of interest
+        data (pd.DataFrame): dataframe of interest that contains data used to train the regressor
     Returns:
-        random_forest_reg: fitted random forest regressor based on the dataset
+        random_forest_reg: fitted random forest regressor that makes predictions based on the inputted dataset
     """
     # Establish the features not used by the random forest regressor
     unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
@@ -103,25 +104,28 @@ def forest_reg(focus_col, data):
     # initialize a random forest regressor
     random_forest_reg = RandomForestRegressor()
 
+    # fit the data extracted from the data frame
     random_forest_reg.fit(x, y)
 
     return random_forest_reg
 
 
 def convert(gender, smoke):
-    """ Encode the passed in variables to match encoding in the random forest regressor
+    """ Encode the passed-in variables to match the encoding in the random forest regressor
     Args:
-        gender (str): whether the user is Biological Male or Biological Female
-        smoke (str): whether the user smokes or not
+        gender (str): indicates whether the user is a Biological Male or Biological Female
+        smoke (str): indicates whether the user smokes or not
     Returns:
-        gender_value (int): encoded variable representing gender of the user
+        gender_value (int): encoded variable representing the biological gender of the user
         smoke_value (int): encoded variable representing whether the user smokes
     """
+    # encode the passed-in variable indicating the user's biological gender
     if gender == 'Biological Male':
         gender_value = 1
     else:
         gender_value = 0
 
+    # encode the passed-in variable indicating the user's smoking status
     if smoke == 'Yes':
         smoke_value = 1
     else:
@@ -131,13 +135,13 @@ def convert(gender, smoke):
 
 
 def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
-    """ plots feature importances in a horizontal bar chart
+    """ plots feature importance values in a horizontal bar chart
 
     The x-axis is labeled accordingly for a random forest regressor
 
     Args:
         feat_list (list): str names of features
-        feat_import (np.array): feature importances (mean MSE reduce)
+        feat_import (np.array): feature importance values (mean MSE reduce)
         sort (bool): if True, sorts features in decreasing importance
             from top to bottom of plot
         limit (int): if passed, limits the number of features shown
@@ -146,7 +150,7 @@ def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
         None, just plots the feature importance bar chart
     """
     if sort:
-        # sort features in decreasing importance
+        # sort features by decreasing importance
         idx = np.argsort(feat_import).astype(int)
         feat_list = [feat_list[_idx] for _idx in idx]
         feat_import = feat_import[idx]
@@ -156,6 +160,7 @@ def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
         feat_list = feat_list[:limit]
         feat_import = feat_import[:limit]
 
+    # plot the feature importance bar chart
     fig = px.bar(x=feat_list, y=feat_import, labels={'x': 'Features', 'y': 'feature importance'},
                  template='plotly_dark')
 
@@ -167,13 +172,13 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
     """ Allow users to get their predicted sleep quality given information about a user
     Args:
         sleep_quality_stat (str): the sleep statistic to be predicted for the user
-        df_sleep (pandas df): data frame containing information about the sleep quality of multiple individuals
+        df_sleep (Pandas df): data frame containing information about the sleep quality of multiple individuals
         age (int): the age of the user
         bedtime (float): user's bedtime based on hours into the day (military time)
         wakeuptime (float): user's wakeup time based on hours into the day (military time)
         awakenings (int): number of awakenings a user has on a given night
-        caffeine (int): amount of caffeine a user consumes in the 24 hours prior to bedtime (in mg)
-        alcohol (int): amount of alcohol a user consumes in the 24 hours prior to bedtime (in oz)
+        caffeine (int): amount of caffeine a user consumes in the 24 hours prior to their bedtime (in mg)
+        alcohol (int): amount of alcohol a user consumes in the 24 hours prior to their bedtime (in oz)
         exercise (int): how many times the user exercises in a week
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
@@ -193,7 +198,7 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
     else:
         duration = wakeuptime - bedtime
 
-    # convert the user inputs  into a numpy array
+    # store information about the user into a numpy array
     data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
                       gender_value, smoke_value]])
 
@@ -205,8 +210,7 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
 
 
 def encode(var1, var2, df_sleep):
-    """
-    Encodes quantitative binary variables to qualitative variables via one-hot encoding
+    """ Encodes quantitative binary variables to qualitative variables via one-hot encoding
 
     Args:
         var1 (str): one variable that may contain binary data in a dataframe
@@ -214,7 +218,7 @@ def encode(var1, var2, df_sleep):
         df_sleep (Pandas df): data frame containing information about the sleep quality of multiple individuals
 
     Returns:
-        df (Pandas df): a new version of the data frame that contains the encoded columns (if they get encoded)
+        df (Pandas df): a new version of the data frame that contains any encoded columns
     """
     # saving column names into constants
     GENDER_COL = 'Gender'

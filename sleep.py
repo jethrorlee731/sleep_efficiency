@@ -60,8 +60,7 @@ app.layout = html.Div([
                 ),
 
                 dbc.Row([
-                    # div for a drop down filter that controls the dependent variable of the plots in the midnight blue
-                    # region
+                    # div for a dropdown that controls the dependent variable of the plots in the midnight blue region
                     html.Div([
                         html.P('Choose the dependent variable.',
                                style={'textAlign': 'center'}),
@@ -655,7 +654,7 @@ def plot_eff_forest(focus_col):
     Args:
         focus_col (str): y-variable of interest (sleep efficiency, REM sleep percentage, or deep sleep percentage)
     Return:
-        fig: a bar chart containing the feature importances
+        fig: a bar chart containing the feature importance values
     """
     # Establish the theme of the visualization
     sns.set()

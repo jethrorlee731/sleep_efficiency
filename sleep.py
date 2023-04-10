@@ -31,18 +31,6 @@ EFFICIENCY = utils.parse_times(EFFICIENCY)
 
 app = Dash(__name__)
 
-# multiply sleep efficiencies by 100 to represent them as percentages
-EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
-
-# clarifying metrics
-EFFICIENCY = EFFICIENCY.rename(columns={'Exercise frequency': 'Exercise frequency (in days per week)'})
-
-
-# WE SHOULD GIVE AN INTRODUCTION AT THE TOP OF THE DASHBOARD REGARDING HOW WE THINK LOOKING AT SLEEP EFFICIENCY
-# , REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE ARE ALL VERY IMPORTANT. REM SLEEP IS RESPONSIBLE FOR HELPING
-# THE BRAIN PROCESS NEW LEARNINGS AND MOTOR SKILLS FOR THE DAY. DEEP SLEEP IS RESPONSIBLE FOR ALLOWING THE
-# BODY TO RELEASE GROWTH HORMONES AND WORKS TO BUILD AND REPAIR MUSCLES, BONES, AND TISSUES
-
 # layout for the dashboard
 app.layout = html.Div([
     dcc.Tabs([
@@ -639,6 +627,8 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
     filt_efficiency = utils.filt_vals(df_sleep, slider_values, SLEEP_EFFICIENCY_COL, cols)
 
+    print(filt_efficiency)
+
     # plot the sleep statistics in a density contour plot
     fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z=SLEEP_EFFICIENCY_COL, histfunc="avg",
                              template='plotly_dark')
@@ -851,17 +841,19 @@ def plot_sleep_hygiene(radar_features):
         fig: None, just plots the radar graph
     """
     # saving the sleep efficiency data frame into a variable
-    df_sleep = EFFICIENCY
+    df_sleep = EFFICIENCY.copy()
 
     # saving column names as constants
     CAFFEINE_COL = 'Caffeine consumption'
 
     # plotting the radar graph based on the user-specified input variables
-    hygiene = df_sleep[radar_features]
+    # hygiene = df_sleep[radar_features]
 
     # performing logarithmic transformation on the caffeine consumption column if it's specified for the plot
     if CAFFEINE_COL in radar_features:
-        hygiene[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
+        # hygiene[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
+        df_sleep.loc[:, CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
+        hygiene = df_sleep[radar_features]
 
     # initialize the radar chart
     fig = go.Figure()

@@ -43,26 +43,6 @@ EFFICIENCY = EFFICIENCY.rename(columns={'Exercise frequency': 'Exercise frequenc
 # THE BRAIN PROCESS NEW LEARNINGS AND MOTOR SKILLS FOR THE DAY. DEEP SLEEP IS RESPONSIBLE FOR ALLOWING THE
 # BODY TO RELEASE GROWTH HORMONES AND WORKS TO BUILD AND REPAIR MUSCLES, BONES, AND TISSUES
 
-def _parse_times(df_sleep):
-    """ Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
-    Args:
-        df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
-    Returns:
-        df_sleep (Pandas data frame): a newer version of the data frame with the parsed times
-    """
-    # parse the bedtime columns to only include hours into the day (military time)
-    df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
-    df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
-
-    # parse the wakeup time columns to only include hours into the day (military time)
-    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
-    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
-                              df_sleep['Wakeup time'].str[3:5].astype(float) / 60
-    return df_sleep
-
-
-EFFICIENCY = _parse_times(EFFICIENCY)
-
 # layout for the dashboard
 app.layout = html.Div([
     dcc.Tabs([

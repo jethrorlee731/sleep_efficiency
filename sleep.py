@@ -1,3 +1,10 @@
+"""
+Colbe Chang, Jocelyn Ju, Jethro Lee, Michelle Wang, Ceara Zhang
+DS3500 / Final Project
+Sleep Efficiency Dashboard
+Date Created: 3/30/23
+Last Updated: 4/6/2023
+"""
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
@@ -19,6 +26,7 @@ EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
 
 # clarifying metrics
 EFFICIENCY = EFFICIENCY.rename(columns={'Exercise frequency': 'Exercise frequency (in days per week)'})
+
 
 # WE SHOULD GIVE AN INTRODUCTION AT THE TOP OF THE DASHBOARD REGARDING HOW WE THINK LOOKING AT SLEEP EFFICIENCY
 # , REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE ARE ALL VERY IMPORTANT. REM SLEEP IS RESPONSIBLE FOR HELPING
@@ -46,8 +54,6 @@ def _parse_times(df_sleep):
 EFFICIENCY = _parse_times(EFFICIENCY)
 
 # layout for the dashboard
-# WE CAN DECIDE ON THE FORMAT OF THE LAYOUT LATER AND USE CHILDRENS TO REFORMAT
-
 app.layout = html.Div([
     html.H1("snoozless", style={'textAlign': 'center'}),
 
@@ -148,7 +154,8 @@ app.layout = html.Div([
             # drop down menu to choose the first independent variable for the density contour plot
             dcc.Dropdown(
                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
-                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency (in days per week)', 'Age',
+                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency (in days per week)',
+                 'Age',
                  'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                 value='Sleep duration', id='density-stat1'),
 
@@ -160,7 +167,8 @@ app.layout = html.Div([
             # drop down menu to choose the second independent variable for the density contour plot
             dcc.Dropdown(
                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
-                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency (in days per week)', 'Age',
+                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency (in days per week)',
+                 'Age',
                  'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                 value='Light sleep percentage', id='density-stat2')
         ],
@@ -257,10 +265,12 @@ app.layout = html.Div([
                         style={'textAlign': 'center'}),
                 html.P('Select three independent variables you are interested in looking at.'),
                 dcc.Dropdown(['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                              'Exercise frequency (in days per week)', 'Age', 'Wageup time', 'Bedtime', 'Smoking status'],
+                              'Exercise frequency (in days per week)', 'Age', 'Wageup time', 'Bedtime',
+                              'Smoking status'],
                              value='Age', clearable=False, id='independent-3D-feat1'),
                 dcc.Dropdown(['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                              'Exercise frequency (in days per week)', 'Age', 'Wageup time', 'Bedtime', 'Smoking status'],
+                              'Exercise frequency (in days per week)', 'Age', 'Wageup time', 'Bedtime',
+                              'Smoking status'],
                              value='Awakenings', clearable=False, id='independent-3D-feat2'),
                 html.P('Select dependent variable you are interested in looking at.'),
                 dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],

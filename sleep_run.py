@@ -1,3 +1,10 @@
+"""
+Colbe Chang, Jocelyn Ju, Jethro Lee, Michelle Wang, Ceara Zhang
+DS3500 / Final Project
+Sleep Efficiency Dashboard
+Date Created: 3/30/23
+Last Updated: 4/6/2023
+"""
 import sleep
 from dash import Dash, Input, Output
 

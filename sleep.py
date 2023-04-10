@@ -13,7 +13,6 @@ April 19, 2023
 
 sleep.py: runs the general code for the dashboard
 """
-
 # import statements
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
@@ -31,7 +30,6 @@ EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
 EFFICIENCY = utils.parse_times(EFFICIENCY)
 
 app = Dash(__name__)
-
 
 # multiply sleep efficiencies by 100 to represent them as percentages
 EFFICIENCY.loc[:, 'Sleep efficiency'] = EFFICIENCY['Sleep efficiency'] * 100
@@ -64,7 +62,6 @@ def _parse_times(df_sleep):
 
 
 EFFICIENCY = _parse_times(EFFICIENCY)
-
 
 # layout for the dashboard
 app.layout = html.Div([
@@ -370,14 +367,15 @@ app.layout = html.Div([
                                 dcc.Slider(0, 24, 0.25, value=23, marks=None, id='sleep-bedtime',
                                            tooltip={'placement': 'bottom', 'always_visible': True})]),
 
-
-            # drop down menu to choose the first independent variable for the density contour plot
-            dcc.Dropdown(
-                ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
-                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency (in days per week)',
-                 'Age',
-                 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                value='Sleep duration', id='density-stat1'),
+                            # drop down menu to choose the first independent variable for the density contour plot
+                            dcc.Dropdown(
+                                ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
+                                 'Light sleep percentage',
+                                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
+                                 'Exercise frequency (in days per week)',
+                                 'Age',
+                                 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
+                                value='Sleep duration', id='density-stat1'),
 
                             # Ask a user for their typical wakeup time (hours into the day)
                             html.Div([
@@ -385,7 +383,6 @@ app.layout = html.Div([
                                        style={'textAlign': 'center'}),
                                 dcc.Slider(0, 24, 0.25, value=9, marks=None, id='sleep-wakeuptime',
                                            tooltip={'placement': 'bottom', 'always_visible': True})]),
-
 
                             # Ask a user for how much caffeine they consume in the 24 hours prior to bedtime (in mg)
                             html.Div([
@@ -398,59 +395,57 @@ app.layout = html.Div([
                         ],
                             style={'width': '50%', 'float': 'left', 'height': '35vw'})]),
 
+                    # drop down menu to choose the second independent variable for the density contour plot
+                    dcc.Dropdown(
+                        ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
+                         'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
+                         'Exercise frequency (in days per week)',
+                         'Age',
+                         'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
+                        value='Light sleep percentage', id='density-stat2')
+                ],
+                    # Add style parameters to this Div, placing it in the right 49% of the page
+                    style={'width': '49%', 'display': 'inline-block', 'float': 'right'}),
+            ]),
+            # Div for drop down menus
+            dbc.Col([
+                html.Div([
+                    # Ask a user for their biological gender
+                    html.Div([
+                        html.P("What's your biological gender?", style={'textAlign': 'center'}),
+                        dcc.Dropdown(['Biological Male', 'Biological Female'], value='Biological Male',
+                                     clearable=False, id='sleep-gender',
+                                     style={'margin': 'auto', 'width': '70%',
+                                            'color': 'black'})]),
 
-            # drop down menu to choose the second independent variable for the density contour plot
-            dcc.Dropdown(
-                ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage', 'Light sleep percentage',
-                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency (in days per week)',
-                 'Age',
-                 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                value='Light sleep percentage', id='density-stat2')
-        ],
-            # Add style parameters to this Div, placing it in the right 49% of the page
-            style={'width': '49%', 'display': 'inline-block', 'float': 'right'}),
-    ]),
-                    # Div for drop down menus
-                    dbc.Col([
-                        html.Div([
-                            # Ask a user for their biological gender
-                            html.Div([
-                                html.P("What's your biological gender?", style={'textAlign': 'center'}),
-                                dcc.Dropdown(['Biological Male', 'Biological Female'], value='Biological Male',
-                                             clearable=False, id='sleep-gender',
-                                             style={'margin': 'auto', 'width': '70%',
-                                                    'color': 'black'})]),
+                    # Ask a user for the number of awakenings they have for a given night
+                    html.Div([
+                        html.P('What is the number of awakenings you have for a given night?',
+                               style={'textAlign': 'center'}),
+                        dcc.Dropdown([0, 1, 2, 3, 4], value=0, clearable=False, id='sleep-awakenings',
+                                     style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
+                    # Ask a user about their alcohol consumption in the 24 hours prior to bedtime (in oz)
+                    html.Div([
+                        html.P(
+                            'How much alcohol do you consume in the 24 hours prior to bedtime (in oz)?',
+                            style={'textAlign': 'center'}),
+                        dcc.Dropdown([0, 1, 2, 3, 4, 5], value=0, clearable=False,
+                                     id='sleep-alcohol',
+                                     style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
-                            # Ask a user for the number of awakenings they have for a given night
-                            html.Div([
-                                html.P('What is the number of awakenings you have for a given night?',
-                                       style={'textAlign': 'center'}),
-                                dcc.Dropdown([0, 1, 2, 3, 4], value=0, clearable=False, id='sleep-awakenings',
-                                             style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
+                    # Ask a user about whether they smoke/vape
+                    html.Div([
+                        html.P('Do you smoke/vape?', style={'textAlign': 'center'}),
+                        dcc.Dropdown(['Yes', 'No'], value='No', clearable=False, id='sleep-smoke',
+                                     style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
 
-                            # Ask a user about their alcohol consumption in the 24 hours prior to bedtime (in oz)
-                            html.Div([
-                                html.P(
-                                    'How much alcohol do you consume in the 24 hours prior to bedtime (in oz)?',
-                                    style={'textAlign': 'center'}),
-                                dcc.Dropdown([0, 1, 2, 3, 4, 5], value=0, clearable=False,
-                                             id='sleep-alcohol',
-                                             style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
-
-                            # Ask a user about whether they smoke/vape
-                            html.Div([
-                                html.P('Do you smoke/vape?', style={'textAlign': 'center'}),
-                                dcc.Dropdown(['Yes', 'No'], value='No', clearable=False, id='sleep-smoke',
-                                             style={'margin': 'auto', 'width': '70%', 'color': 'black'})]),
-
-                            # Ask a user for the number of times they exercise per week
-                            html.Div([
-                                html.P('How many times do you exercise per week?', style={'textAlign': 'center'}),
-                                dcc.Dropdown([0, 1, 2, 3, 4, 5], value=2, clearable=False, id='sleep-exercise',
-                                             style={'margin': 'auto', 'width': '70%', 'color': 'black'})])
-                        ], style={'width': '50%', 'float': 'right', 'height': '35vw'})]),
-
+                    # Ask a user for the number of times they exercise per week
+                    html.Div([
+                        html.P('How many times do you exercise per week?', style={'textAlign': 'center'}),
+                        dcc.Dropdown([0, 1, 2, 3, 4, 5], value=2, clearable=False, id='sleep-exercise',
+                                     style={'margin': 'auto', 'width': '70%', 'color': 'black'})])
+                ], style={'width': '50%', 'float': 'right', 'height': '35vw'})]),
 
             # Ask a user what is their bedtime (hours into the day)
             html.P('What is your bedtime based on hours into the day (military time)?',
@@ -498,8 +493,8 @@ app.layout = html.Div([
             html.H2(id='sleep-rem', style={'textAlign': 'center'}),
             html.H2(id='sleep-deep', style={'textAlign': 'center'})
         ],
-            # Add style parameters to this Div, placing it in the left 33% of the dashboard and making it shorter
-            style={'width': '30%', 'display': 'inline-block', 'float': 'left', 'height': '10vh'}),
+                # Add style parameters to this Div, placing it in the left 33% of the dashboard and making it shorter
+                style={'width': '30%', 'display': 'inline-block', 'float': 'left', 'height': '10vh'}),
 
         # div for the two graphs created by a random forest regressor and multiple regression model
         html.Div([
@@ -544,15 +539,16 @@ app.layout = html.Div([
             style={'width': '70%', 'display': 'inline-block', 'float': 'right'}
         ),
 
-                    dbc.Row([
-                        html.H2(id='sleep-eff', style={'textAlign': 'center'}),
-                        html.H2(id='sleep-rem', style={'textAlign': 'center'}),
-                        html.H2(id='sleep-deep', style={'textAlign': 'center'})])
-                ])
-            ], style={'background-color': 'darkslateblue', 'color': 'white'})
-        ], style={'background-color': 'black', 'color': 'white'})
+        dbc.Row([
+            html.H2(id='sleep-eff', style={'textAlign': 'center'}),
+            html.H2(id='sleep-rem', style={'textAlign': 'center'}),
+            html.H2(id='sleep-deep', style={'textAlign': 'center'})])
     ])
-], style={'font-family': 'Courier New'})
+], style={'background-color': 'darkslateblue', 'color': 'white'})
+
+
+# ], style={'background-color': 'black', 'color': 'white'})])
+# ], style={'font-family': 'Courier New'})
 
 
 @app.callback(

@@ -244,8 +244,46 @@ app.layout = html.Div([
                             # div for radar graph of sleep hygiene
                             html.Div([
                                 html.H2('Sleep Hygiene', style={'textAlign': 'center'}),
+                                dbc.Col([
+                                    html.Div([
+                                        # Ask a user for their age
+                                        html.Div([
+                                            html.P('How many times do you wake up during your sleep?', style={'textAlign': 'center'}),
+                                            dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-awakening',
+                                                       tooltip={"placement": "bottom", "always_visible": True})]),
 
+                                        # Ask a user for their typical bedtime (as hours into the day)
+                                        html.Div([
+                                            html.P('How much caffeine do you consume 24 hrs prior to bedtime (in mg)?',
+                                                   style={'textAlign': 'center'}),
+                                            dcc.Slider(0, 1000, 50, value=1, marks=None, id='hygiene-caffeine',
+                                                       tooltip={'placement': 'bottom', 'always_visible': True})]),
+
+                                        html.Div([
+                                            html.P('How much alcohol do you consume 24 hrs prior to bedtime (in oz)?',
+                                                   style={'textAlign': 'center'}),
+                                            dcc.Slider(0, 15, 1, value=1, marks=None, id='hygiene-alcohol',
+                                                       tooltip={'placement': 'bottom', 'always_visible': True})
+                                        ]),
+
+                                        html.Div([
+                                            html.P('How many times do you exercise per week?',
+                                                   style={'textAlign': 'center'}),
+                                            dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-exercise',
+                                                       tooltip={'placement': 'bottom', 'always_visible': True})
+                                        ])
+
+                                    ])]),
+                                # dcc.Dropdown(
+                                #     ['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
+                                #      'Exercise frequency (in days per week)'],
+                                #     id='radar-features', style={'background-color': 'black', 'color': 'black'},
+                                #     multi=True,
+                                #     value=['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
+                                #            'Exercise frequency (in days per week)'],
+                                # ),
                                 # allows the user to control the variables displayed on the graph
+
                                 dcc.Dropdown(
                                     ['Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
                                                                                                        'consumption 24 hrs before sleeping (oz)',
@@ -258,6 +296,24 @@ app.layout = html.Div([
                                            'Exercise frequency (in days per '
                                            'week)'],
                                 ),
+
+                                # html.P('How many times do you wake up in your sleep?',
+                                #        style={'textAlign': 'center'}),
+                                # dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-awakenings',
+                                #            tooltip={'placement': 'bottom', 'always_visible': True})]),
+                                # html.P('How much caffeine do you drink in 24 hrs prior to bedtime (in mg)?',
+                                #        style={'textAlign': 'center'}),
+                                # dcc.Slider(0, 1000, 50, value=1, marks=None, id='hygiene-caffeine',
+                                #            tooltip={'placement': 'bottom', 'always_visible': True})]),
+                                # html.P('How much alcohol do you drink in 24 hrs prior to bedtime (in oz)?',
+                                #        style={'textAlign': 'center'}),
+                                # dcc.Slider(0, 15, 1, value=1, marks=None, id='hygiene-alcohol',
+                                #            tooltip={'placement': 'bottom', 'always_visible': True})]),
+                                # html.P('How many times do you exercise per week?',
+                                #        style={'textAlign': 'center'}),
+                                # dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-exercise',
+                                #            tooltip={'placement': 'bottom', 'always_visible': True})]),
+
 
                                 # plots the radar graph on the dashboard
                                 dcc.Graph(id="sleep-hygiene", style={'display': 'inline-block', 'width': '100%'})
@@ -853,9 +909,12 @@ def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
 
 @app.callback(
     Output('sleep-hygiene', 'figure'),
-    Input('radar-features', 'value')
+    Input('hygiene-awakening', 'value'),
+    Input('hygiene-caffeine', 'value'),
+    Input('hygiene-alcohol', 'value'),
+    Input('hygiene-exercise', 'value')
 )
-def plot_sleep_hygiene(radar_features):
+def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
     """ Makes a radar graph of sleep hygiene
     Args:
         radar_features (list of strings): a list of the features that will be represented on the radar graph
@@ -865,32 +924,38 @@ def plot_sleep_hygiene(radar_features):
     # saving the sleep efficiency data frame into a variable
     df_sleep = EFFICIENCY.copy()
 
+
     # saving column names as constants
     CAFFEINE_COL = 'Caffeine consumption 24 hrs before sleeping (mg)'
 
     # plotting the radar graph based on the user-specified input variables
     # hygiene = df_sleep[radar_features]
 
-    # performing logarithmic transformation on the caffeine consumption column if it's specified for the plot
-    if CAFFEINE_COL in radar_features:
-        # hygiene[CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
-        df_sleep.loc[:, CAFFEINE_COL] = np.log(df_sleep[CAFFEINE_COL] + 1)
-        hygiene = df_sleep[radar_features]
+    hygiene = df_sleep[['Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency']]
+    hygiene['Caffeine consumption'] = np.log(hygiene['Caffeine consumption'] + 1)
+    average_hygiene = hygiene.mean()
 
-    # initialize the radar chart
+
+    avg_values = average_hygiene.values.tolist()
     fig = go.Figure()
-
-    # store the input variables specified by the user into a list
-    values = hygiene.values.tolist()
-
     # plot the radar graph
-    for i in range(len(values)):
-        fig.add_trace(go.Scatterpolar(
-            r=values[i],
-            theta=list(hygiene.columns),
-            fill='toself',
-            name='Person ' + str(i)
-        ))
+
+    fig.add_trace(go.Scatterpolar(
+        r=avg_values,
+        theta=list(hygiene.columns),
+        fill='toself',
+        name='Average Person'
+    ))
+
+    caffeine = np.log(caffeine + 1)
+    user_values = [awakenings, caffeine, alcohol, exercise]
+
+    fig.add_trace(go.Scatterpolar(
+        r=user_values,
+        theta=list(hygiene.columns),
+        fill='toself',
+        name='Your hygiene'
+    ))
 
     # update the layout of the radar graph
     fig.update_layout(

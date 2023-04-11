@@ -8,22 +8,23 @@ file = 'data/Sleep_Efficiency.csv'
 df = pd.read_csv(file).dropna()
 hygiene = df[['Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency']]
 hygiene['Caffeine consumption'] = np.log(df['Caffeine consumption'] + 1)
+average_hygiene = hygiene.mean()
 
 
-data = []
+
 
 fig = go.Figure()
-values = hygiene.values.tolist()
+values = average_hygiene.values.tolist()
 
 
 
-for i in range(len(values)):
-    fig.add_trace(go.Scatterpolar(
-        r = values[i],
-        theta = list(hygiene.columns),
-        fill = 'toself',
-        name = 'Person ' + str(i)
-    ))
+
+fig.add_trace(go.Scatterpolar(
+    r = values,
+    theta = list(hygiene.columns),
+    fill = 'toself',
+    name = 'Average Person'
+))
 
 
 

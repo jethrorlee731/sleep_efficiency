@@ -1,14 +1,3 @@
-# MOVED EVERYTHING TO SLEEP.PY. MIGHT MOVE IT BACK HERE AFTER EVERYTHING WORKS.
-# THIS DOCUMENT IS ALSO NECESSARY TO SHOW THAT THE RANDOM FOREST REGRESSOR MODEL IS ALRIGHT IN PREDICTING SLEEP
-# EFFICIENCY, REM SLEEP PERCENTAGE, AND DEEP SLEEP PERCENTAGE BASED ON THE CROSS VALIDATED R2 SCORE.
-"""
-Colbe Chang, Jocelyn Ju, Jethro Lee, Michelle Wang, Ceara Zhang
-DS3500 / Final Project
-Sleep Efficiency Dashboard
-Date Created: 3/30/23
-Last Updated: 4/6/2023
-"""
-
 """
 sleep_forest.py: Build a random forest regressor to determine the attributes that best determine one's sleep
                      efficiency

@@ -227,7 +227,7 @@ app.layout = html.Div([
 
                                 # display the feature importance chart
                                 dcc.Graph(id="feature-importance",
-                                          style={'display': 'inline-block', 'width': '100%', 'height': '60%'})
+                                          style={'display': 'inline-block', 'width': '100%'})
                             ],
                                 # Add style parameters to this Div
                                 style={'width': '25%', 'display': 'inline-block', 'float': 'left',

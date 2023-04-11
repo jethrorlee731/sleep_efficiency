@@ -69,8 +69,9 @@ app.layout = html.Div([
                         # region
                         dcc.Dropdown(
                             ['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
-                             'Light sleep percentage', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                             'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime'],
+                             'Light sleep percentage', 'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)',
+                             'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
+                             'Age', 'Wakeup time', 'Bedtime'],
                             value='Sleep duration', id='sleep-stat-dep', style={'background-color': 'royalblue',
                                                                                 'color': 'black'})
                     ], style={'background-color': 'midnightblue', 'color': 'white'}
@@ -90,8 +91,9 @@ app.layout = html.Div([
                             html.P('Select an independent variable you are interested in observing.'),
                             dcc.Dropdown(
                                 ['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
-                                 'Light sleep percentage', 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                                 'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime'],
+                                 'Light sleep percentage', 'Awakenings', 'Caffeine consumption 24 hrs before sleeping '
+                                 '(mg)', 'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in '
+                                 'days per week)', 'Age', 'Wakeup time', 'Bedtime'],
                                 value='Age', clearable=False, id='sleep-stat-ind', style={'display': 'inline-block',
                                                                                           'width': '100%',
                                                                                           'background-color':
@@ -171,6 +173,8 @@ app.layout = html.Div([
                         # div for density contour plot (comparing a combination of variables with sleep efficiency)
                         html.Div([
                             html.H2('How Various Features Affect Sleep Efficiency', style={'textAlign': 'center'}),
+                            html.P('Independent variables on the graph will default to different values if the same '
+                                   'value is chosen for both independent variables in the dropdown menus'),
                             dcc.Graph(id='efficiency-contour', style={'display': 'inline-block', 'height': '45vh'}),
 
                             # drop down menu to choose the first independent variable for the density contour plot
@@ -180,10 +184,9 @@ app.layout = html.Div([
                             dcc.Dropdown(
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
-                                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                                 'Exercise frequency (in days per week)',
-                                 'Age',
-                                 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
+                                 'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
+                                 'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
+                                 'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Sleep duration', id='density-stat1',
                                 style={'background-color': 'mediumslateblue',
                                        'color': 'black'}),
@@ -195,10 +198,9 @@ app.layout = html.Div([
                             dcc.Dropdown(
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
-                                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                                 'Exercise frequency (in days per week)',
-                                 'Age',
-                                 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
+                                 'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
+                                 'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
+                                 'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Light sleep percentage', id='density-stat2',
                                 style={'background-color': 'mediumslateblue', 'color': 'black'})
                         ],
@@ -226,7 +228,7 @@ app.layout = html.Div([
                             ],
                                 # Add style parameters to this Div
                                 style={'width': '25%', 'display': 'inline-block', 'float': 'left',
-                                       'background-color': 'darkviolet', 'height': '51vw'}),
+                                       'background-color': 'darkviolet', 'height': '58vw'}),
 
                             # div for radar graph of sleep hygiene
                             html.Div([
@@ -234,12 +236,14 @@ app.layout = html.Div([
 
                                 # allows the user to control the variables displayed on the graph
                                 dcc.Dropdown(
-                                    ['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                                     'Exercise frequency (in days per week)'],
+                                    ['Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
+                                     'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per '
+                                                                                'week)'],
                                     id='radar-features', style={'background-color': 'black', 'color': 'black'},
                                     multi=True,
-                                    value=['Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                                           'Exercise frequency (in days per week)'],
+                                    value=['Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
+                                           'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per '
+                                                                                      'week)'],
                                 ),
 
                                 # plots the radar graph on the dashboard
@@ -247,7 +251,7 @@ app.layout = html.Div([
                             ],
                                 # Add style parameters to this Div
                                 style={'width': '25%', 'display': 'inline-block', 'float': 'left',
-                                       'background-color': 'darkviolet', 'height': '51vw'}
+                                       'background-color': 'darkviolet', 'height': '58vw'}
                             ),
 
                             # div for a 3D scatter plot showing relationship between 2 independent sleep variables
@@ -259,17 +263,15 @@ app.layout = html.Div([
                                 # allows the users to control the two independent variables on the scatter plot
                                 html.P('Select two independent variables you are interested in looking at.'),
                                 dcc.Dropdown(
-                                    ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption',
-                                     'Alcohol consumption',
-                                     'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime',
-                                     'Smoking status'],
+                                    ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption 24 hrs before '
+                                     'sleeping (mg)', 'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise '
+                                     'frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime', 'Smoking status'],
                                     value='Age', clearable=False, id='independent-3D-feat1',
                                     style={'background-color': 'mediumpurple', 'color': 'black'}),
                                 dcc.Dropdown(
-                                    ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption',
-                                     'Alcohol consumption',
-                                     'Exercise frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime',
-                                     'Smoking status'],
+                                    ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption 24 hrs before '
+                                     'sleeping (mg)', 'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise '
+                                     'frequency (in days per week)', 'Age', 'Wakeup time', 'Bedtime', 'Smoking status'],
                                     value='Awakenings', clearable=False, id='independent-3D-feat2',
                                     style={'background-color': 'mediumpurple', 'color': 'black'}),
 
@@ -288,7 +290,7 @@ app.layout = html.Div([
                             ],
                                 # Add style parameters to this Div
                                 style={'width': '50%', 'display': 'inline-block', 'float': 'right',
-                                       'background-color': 'darkviolet', 'height': '51vw'}
+                                       'background-color': 'darkviolet', 'height': '58vw'}
                             ),
                         ])
                     ])
@@ -501,6 +503,13 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
 
     # performing one hot encoding if gender or smoking status needs to be shown on the plot
     df_sleep = utils.encode(sleep_stat1, sleep_stat2, EFFICIENCY)
+
+    # change the second independent variable if it's the same with the first
+    if sleep_stat1 == sleep_stat2:
+        if sleep_stat1 != 'Sleep duration':
+            sleep_stat2 = 'Sleep duration'
+        else:
+            sleep_stat2 = 'Caffeine consumption 24 hrs before sleeping (mg)'
 
     # filter out appropriate values
     cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
@@ -721,7 +730,7 @@ def plot_sleep_hygiene(radar_features):
     df_sleep = EFFICIENCY
 
     # saving column names as constants
-    CAFFEINE_COL = 'Caffeine consumption'
+    CAFFEINE_COL = 'Caffeine consumption 24 hrs before sleeping (mg)'
 
     # plotting the radar graph based on the user-specified input variables
     hygiene = df_sleep[radar_features]

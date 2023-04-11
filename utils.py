@@ -32,8 +32,10 @@ def read_file(filename):
     # multiply sleep efficiencies by 100 to represent them as percentages
     file_copy.loc[:, 'Sleep efficiency'] = file_copy['Sleep efficiency'] * 100
 
-    # renaming the exercise frequency column to clarify what it represents
+    # renaming columns to clarify metrics
     file_copy = file_copy.rename(columns={'Exercise frequency': 'Exercise frequency (in days per week)'})
+    file_copy = file_copy.rename(columns={'Caffeine consumption': 'Caffeine consumption 24 hrs before sleeping (mg)'})
+    file_copy = file_copy.rename(columns={'Alcohol consumption': 'Alcohol consumption 24 hrs before sleeping (oz)'})
 
     return file_copy
 

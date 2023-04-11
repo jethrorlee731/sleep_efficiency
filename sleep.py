@@ -55,7 +55,7 @@ app.layout = html.Div([
                     html.P("REM sleep is responsible for helping people process new knowledge and execute motor "
                            "skills to their fullest potential. Deep sleep enables the body to release vital growth "
                            "hormones that work to build muscles, tissues, and bones.")
-                ], style={'background-color': 'blue', 'color': 'white'}
+                ], style={'background-color': '#4579ac', 'color': 'white'}
                 ),
 
                 dbc.Row([
@@ -82,7 +82,9 @@ app.layout = html.Div([
                     html.Div([
                         # div for a scatter plot comparing the relationship between two sleep variables
                         html.Div([
-                            html.H2('How Certain Factors Affect Your Sleep Quality', style={'textAlign': 'center'}),
+                            # html.H2('How Certain Factors Affect Your Sleep Quality', style={'textAlign': 'center'},
+                            #         id='sleep-qual-title'),
+                            html.Div(id='sleep-qual-title'),
                             dcc.Graph(id='sleep-scatter',
                                       style={'display': 'inline-block', 'width': '45vw', 'height': '45vh'}),
 
@@ -90,8 +92,8 @@ app.layout = html.Div([
                             html.P('Select an independent variable you are interested in observing.'),
                             dcc.Dropdown(
                                 ['Sleep duration', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
-                                 'Light sleep percentage', 'Awakenings', 'Caffeine consumption 24 hrs before sleeping '
-                                                                         '(mg)',
+                                 'Light sleep percentage', 'Awakenings', 'Caffeine consumption 24 hrs before '
+                                                                         'sleeping (mg)',
                                  'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in '
                                                                                     'days per week)', 'Age',
                                  'Wakeup time', 'Bedtime'],
@@ -173,7 +175,8 @@ app.layout = html.Div([
 
                         # div for density contour plot (comparing a combination of variables with sleep efficiency)
                         html.Div([
-                            html.H2('How Various Features Affect Sleep Efficiency', style={'textAlign': 'center'}),
+                            # html.H2('How Various Features Affect Sleep Efficiency', style={'textAlign': 'center'}),
+                            html.Div(id='mult-feat-eff'),
                             html.P('Independent variables on the graph will default to different values if the same '
                                    'value is chosen for both independent variables in the dropdown menus'),
                             dcc.Graph(id='efficiency-contour', style={'display': 'inline-block', 'height': '45vh'}),
@@ -338,7 +341,10 @@ app.layout = html.Div([
                     # guide users to a website that helps them determine how much REM and deep sleep they should get
                     html.Label([html.A('(What constitutes healthy REM and deep sleep percentages?)',
                                        style={'background-color': 'white'},
-                                       href='https://www.healthline.com/health/how-much-deep-sleep-do-you-need#takeaway')], ),
+                                       target='_blank',
+                                       href='https://www.healthline.com/health/how-much-deep-sleep-do-you-need#takeaway',
+                                       title='HealthLine Healthy Sleep Article')],
+                               style={'textAlign': 'center'}),
 
                     # Ask user for information that are going to be inputs for the random forest regressor
 
@@ -429,6 +435,7 @@ app.layout = html.Div([
 
 @app.callback(
     Output('sleep-scatter', 'figure'),
+    Output('sleep-qual-title', 'children'),
     Input('scatter-trend-line', 'value'),
     Input('sleep-stat-ind', 'value'),
     Input('sleep-stat-dep', 'value')
@@ -453,8 +460,7 @@ def make_sleep_scatter(show_trend_line, sleep_stat_ind, sleep_stat_dep):
     # statistic (y) in a scatter plot
     fig = px.scatter(EFFICIENCY, x=sleep_stat_ind, y=sleep_stat_dep, trendline=trend_line, template='plotly_dark',
                      labels={'x': sleep_stat_ind, 'index': sleep_stat_dep})
-
-    return fig
+    return fig, html.H2('How ' + sleep_stat_ind + ' Affects ' + sleep_stat_dep, style={'textAlign': 'center'})
 
 
 @app.callback(
@@ -512,6 +518,7 @@ def show_sleep_gender_histogram(genders, sleep_stat):
 
 @app.callback(
     Output('efficiency-contour', 'figure'),
+    Output('mult-feat-eff', 'children'),
     Input('density-stat1', 'value'),
     Input('density-stat2', 'value'),
     Input('efficiency-slider', 'value')
@@ -551,7 +558,9 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     fig.update_layout(xaxis_title=sleep_stat1, yaxis_title=sleep_stat2)
 
     print(filt_efficiency)
-    return fig
+    return fig, html.H2('How ' + sleep_stat1 + ' and ' + sleep_stat2 + ' Affect Sleep Efficiency',
+                        style={'textAlign': 'center'})
+
 
 
 @app.callback(

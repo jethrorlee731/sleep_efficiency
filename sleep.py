@@ -242,7 +242,7 @@ app.layout = html.Div([
                                         # Ask a user for their age
                                         html.Div([
                                             html.P('How many times do you wake up during your sleep?', style={'textAlign': 'center'}),
-                                            dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-awakenings',
+                                            dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-awakening',
                                                        tooltip={"placement": "bottom", "always_visible": True})]),
 
                                         # Ask a user for their typical bedtime (as hours into the day)
@@ -881,10 +881,10 @@ def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
     Output('sleep-hygiene', 'figure'),
     Input('hygiene-awakening', 'value'),
     Input('hygiene-caffeine', 'value'),
-    Input('hygiene-awakenings', 'value'),
+    Input('hygiene-alcohol', 'value'),
     Input('hygiene-exercise', 'value')
 )
-def plot_sleep_hygiene(alcohol, caffeine, awakenings, exercise):
+def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
     """ Makes a radar graph of sleep hygiene
     Args:
         radar_features (list of strings): a list of the features that will be represented on the radar graph

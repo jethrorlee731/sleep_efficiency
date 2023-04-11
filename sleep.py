@@ -23,7 +23,6 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import utils
 
-
 # read in the file as a dataframe and perform basic cleaning
 EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
 
@@ -192,11 +191,11 @@ app.layout = html.Div([
                                 style={'textAlign': 'center'}),
                             dcc.Dropdown(
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
-                                 'Light sleep percentage',
-                                 'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
-                                                                                                   'consumption 24 hrs before sleeping (oz)',
-                                 'Exercise frequency (in days per week)',
-                                 'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
+                                 'Light sleep percentage', 'Awakenings', 'Caffeine consumption 24 hrs before sleeping '
+                                                                         '(mg)',
+                                 'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in '
+                                                                                    'days per week)', 'Age',
+                                 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Awakenings', id='density-stat1',
                                 style={'background-color': 'mediumslateblue',
                                        'color': 'black'}),
@@ -248,7 +247,8 @@ app.layout = html.Div([
                                     html.Div([
                                         # Ask a user for their age
                                         html.Div([
-                                            html.P('How many times do you wake up during your sleep?', style={'textAlign': 'center'}),
+                                            html.P('How many times do you wake up during your sleep?',
+                                                   style={'textAlign': 'center'}),
                                             dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-awakening',
                                                        tooltip={"placement": "bottom", "always_visible": True})]),
 
@@ -313,7 +313,6 @@ app.layout = html.Div([
                                 #        style={'textAlign': 'center'}),
                                 # dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-exercise',
                                 #            tooltip={'placement': 'bottom', 'always_visible': True})]),
-
 
                                 # plots the radar graph on the dashboard
                                 dcc.Graph(id="sleep-hygiene", style={'display': 'inline-block', 'width': '100%'})
@@ -403,16 +402,6 @@ app.layout = html.Div([
                                        style={'textAlign': 'center'}),
                                 dcc.Slider(0, 24, 0.25, value=23, marks=None, id='sleep-bedtime',
                                            tooltip={'placement': 'bottom', 'always_visible': True})]),
-
-                            # drop down menu to choose the first independent variable for the density contour plot
-                            dcc.Dropdown(
-                                ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
-                                 'Light sleep percentage',
-                                 'Awakenings', 'Caffeine consumption', 'Alcohol consumption',
-                                 'Exercise frequency (in days per week)',
-                                 'Age',
-                                 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                                value='Sleep duration', id='density-stat1'),
 
                             # Ask a user for their typical wakeup time (hours into the day)
                             html.Div([
@@ -924,17 +913,16 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
     # saving the sleep efficiency data frame into a variable
     df_sleep = EFFICIENCY.copy()
 
-
     # saving column names as constants
     CAFFEINE_COL = 'Caffeine consumption 24 hrs before sleeping (mg)'
 
     # plotting the radar graph based on the user-specified input variables
     # hygiene = df_sleep[radar_features]
 
-    hygiene = df_sleep[['Awakenings', 'Caffeine consumption', 'Alcohol consumption', 'Exercise frequency']]
-    hygiene['Caffeine consumption'] = np.log(hygiene['Caffeine consumption'] + 1)
+    hygiene = df_sleep[['Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol consumption 24 hrs '
+                        'before sleeping (oz)', 'Exercise frequency (in days per week)']]
+    hygiene[CAFFEINE_COL] = np.log(hygiene[CAFFEINE_COL] + 1)
     average_hygiene = hygiene.mean()
-
 
     avg_values = average_hygiene.values.tolist()
     fig = go.Figure()

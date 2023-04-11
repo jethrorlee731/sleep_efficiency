@@ -48,10 +48,12 @@ def parse_times(df_sleep):
         df_sleep (Pandas data frame): a newer version of the data frame with the parsed times
     """
     # parse the bedtime columns to only include hours into the day (military time)
+    df_sleep['Bedtime'] = df_sleep['Bedtime'].astype(str)
     df_sleep['Bedtime'] = df_sleep['Bedtime'].str.split().str[1]
     df_sleep['Bedtime'] = df_sleep['Bedtime'].str[:2].astype(float) + df_sleep['Bedtime'].str[3:5].astype(float) / 60
 
     # parse the wakeup time columns to only include hours into the day (military time)
+    df_sleep['Wakeup time'] = df_sleep['Wakeup time'].astype(str)
     df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str.split().str[1]
     df_sleep['Wakeup time'] = df_sleep['Wakeup time'].str[:2].astype(float) + \
                               df_sleep['Wakeup time'].str[3:5].astype(float) / 60

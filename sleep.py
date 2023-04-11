@@ -190,7 +190,7 @@ app.layout = html.Div([
                                  'Exercise frequency (in days per week)',
                                  'Age',
                                  'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                                value='Sleep duration', id='density-stat1',
+                                value='Awakenings', id='density-stat1',
                                 style={'background-color': 'mediumslateblue',
                                        'color': 'black'}),
 
@@ -370,7 +370,7 @@ app.layout = html.Div([
                          'Exercise frequency (in days per week)',
                          'Age',
                          'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
-                        value='Light sleep percentage', id='density-stat2')
+                        value='Wakeup time', id='density-stat2')
                 ],
                     # Add style parameters to this Div, placing it in the right 49% of the page
                     style={'width': '49%', 'display': 'inline-block', 'float': 'right'}),
@@ -627,13 +627,15 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     cols = ['ID', sleep_stat1, sleep_stat2, SLEEP_EFFICIENCY_COL]
     filt_efficiency = utils.filt_vals(df_sleep, slider_values, SLEEP_EFFICIENCY_COL, cols)
 
-    print(filt_efficiency)
-
     # plot the sleep statistics in a density contour plot
     fig = px.density_contour(filt_efficiency, x=sleep_stat1, y=sleep_stat2, z=SLEEP_EFFICIENCY_COL, histfunc="avg",
                              template='plotly_dark')
     fig.update_traces(contours_coloring="fill", contours_showlabels=True)
 
+    # update the x and y axis labels
+    fig.update_layout(xaxis_title=sleep_stat1, yaxis_title=sleep_stat2)
+
+    print(filt_efficiency)
     return fig
 
 

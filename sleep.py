@@ -16,7 +16,6 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import utils
 
-
 # read in the file as a dataframe and perform basic cleaning
 EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
 
@@ -268,14 +267,12 @@ app.layout = html.Div([
                                         ])
 
                                     ])]),
-
-
-
                                 # plots the radar graph on the dashboard
                                 dcc.Graph(id="sleep-hygiene", style={'display': 'inline-block', 'width': '100%'})
+
                             ],
                                 # Add style parameters to this Div
-                                style={'width': '25%', 'display': 'inline-block', 'float': 'left',
+                                style={'width': '30%', 'display': 'inline-block', 'float': 'left',
                                        'background-color': 'darkviolet', 'height': '58vw'}
                             ),
 
@@ -315,10 +312,11 @@ app.layout = html.Div([
                                 html.P(
                                     'Filter by gender in the 3D scatter by clicking in the legend on the gender '
                                     'that you do not want to focus on.'),
-                                dcc.Graph(id="three-dim-plot", style={'display': 'inline-block'})
+                                dcc.Graph(id="three-dim-plot", style={'display': 'inline-block', 'width': '50vw',
+                                                                      'height': '50vw'})
                             ],
                                 # Add style parameters to this Div
-                                style={'width': '50%', 'display': 'inline-block', 'float': 'right',
+                                style={'width': '45%', 'display': 'inline-block', 'float': 'right',
                                        'background-color': 'darkviolet', 'height': '58vw'}
                             ),
                         ])
@@ -427,6 +425,7 @@ app.layout = html.Div([
         ], style={'background-color': 'black', 'color': 'white'})
     ])
 ], style={'font-family': 'Courier New'})
+
 
 @app.callback(
     Output('sleep-scatter', 'figure'),
@@ -742,7 +741,7 @@ def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
 
     # plot the 3d scatter plot
     fig = px.scatter_3d(df_sleep, x=sleep_stat_x, y=sleep_stat_y, z=sleep_stat_z, color='Gender',
-                        template='plotly_dark', width=710, height=350)
+                        template='plotly_dark', width=633, height=455)
 
     return fig
 
@@ -757,12 +756,12 @@ def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
 def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
     """ Makes a radar graph of sleep hygiene
     Args:
-        awakenings - how many times the user wakes up during sleep
-        caffeine - the amount of caffeine the user takes in 24 hrs prior to bedtime (in mg)
-        alcohol - the amount of alcohol the user drinks in 24 hrs prior to bedtime (in oz)
-        exercise - the number of times the user exercises per week
+        awakenings (int) - how many times the user wakes up during sleep
+        caffeine (int) - the amount of caffeine the user takes in 24 hrs prior to bedtime (in mg)
+        alcohol (int) - the amount of alcohol the user drinks in 24 hrs prior to bedtime (in oz)
+        exercise (int) - the number of times the user exercises per week
     Returns:
-        fig: None, just plots the radar graph
+        fig: the radar graph itself
     """
     # saving the sleep efficiency data frame into a variable
     df_sleep = EFFICIENCY.copy()
@@ -772,7 +771,8 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
 
     # Getting the necessary columns for measuring hygiene
     hygiene = df_sleep[['Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol consumption 24 hrs '
-                        'before sleeping (oz)', 'Exercise frequency (in days per week)']]
+                                                                                          'before sleeping (oz)',
+                        'Exercise frequency (in days per week)']]
     hygiene[CAFFEINE_COL] = np.log(hygiene[CAFFEINE_COL] + 1)
 
     # getting average values of all columns
@@ -809,7 +809,9 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
                 range=[0, 10]
             )),
         showlegend=False,
-        template='plotly_dark'
+        template='plotly_dark',
+        width=427,
+        height=347
     )
 
     return fig

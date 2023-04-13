@@ -71,7 +71,7 @@ app.layout = html.Div([
                              'Light sleep percentage', 'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)',
                              'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
                              'Age', 'Wakeup time', 'Bedtime'],
-                            value='Sleep duration', id='sleep-stat-dep', style={'background-color': 'royalblue',
+                            value='Sleep duration', id='sleep-stat-dep', style={'background-color': 'white',
                                                                                 'color': 'black'})
                     ], style={'background-color': 'midnightblue', 'color': 'white'}
                     )
@@ -100,7 +100,7 @@ app.layout = html.Div([
                                 value='Age', clearable=False, id='sleep-stat-ind', style={'display': 'inline-block',
                                                                                           'width': '100%',
                                                                                           'background-color':
-                                                                                              'royalblue',
+                                                                                              'white',
                                                                                           'color': 'black'}),
 
                             # Add instructors that tell users how to control how much data gets represented
@@ -193,7 +193,7 @@ app.layout = html.Div([
                                  'Exercise frequency (in days per week)',
                                  'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Awakenings', id='density-stat1',
-                                style={'background-color': 'mediumslateblue',
+                                style={'background-color': 'white',
                                        'color': 'black'}),
 
                             # drop down menu to choose the second independent variable for the density contour plot
@@ -208,7 +208,7 @@ app.layout = html.Div([
                                  'Exercise frequency (in days per week)',
                                  'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Light sleep percentage', id='density-stat2',
-                                style={'background-color': 'mediumslateblue', 'color': 'black'})
+                                style={'background-color': 'white', 'color': 'black'})
                         ],
                             # Add style parameters to this Div
                             style={'width': '50%', 'display': 'inline-block', 'float': 'right',
@@ -225,7 +225,7 @@ app.layout = html.Div([
                                 html.P('Indicate the dependent variable you are interested in looking at.'),
                                 dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                                              value='Sleep efficiency',
-                                             clearable=False, id='feature', style={'background-color': 'mediumpurple',
+                                             clearable=False, id='feature', style={'background-color': 'white',
                                                                                    'color': 'black'}),
 
                                 # display the feature importance chart
@@ -294,7 +294,7 @@ app.layout = html.Div([
                                                                                         'frequency (in days per week)',
                                      'Age', 'Wakeup time', 'Bedtime', 'Smoking status'],
                                     value='Age', clearable=False, id='independent-3D-feat1',
-                                    style={'background-color': 'mediumpurple', 'color': 'black'}),
+                                    style={'background-color': 'white', 'color': 'black'}),
                                 dcc.Dropdown(
                                     ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption 24 hrs before '
                                                                             'sleeping (mg)',
@@ -302,14 +302,14 @@ app.layout = html.Div([
                                                                                         'frequency (in days per week)',
                                      'Age', 'Wakeup time', 'Bedtime', 'Smoking status'],
                                     value='Awakenings', clearable=False, id='independent-3D-feat2',
-                                    style={'background-color': 'mediumpurple', 'color': 'black'}),
+                                    style={'background-color': 'white', 'color': 'black'}),
 
                                 # allows users to control the dependent variable of the scatter plot
                                 html.P('Select dependent variable you are interested in looking at.'),
                                 dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
                                              value='Sleep efficiency',
                                              clearable=False, id='dependent-feature',
-                                             style={'background-color': 'mediumpurple', 'color': 'black'}),
+                                             style={'background-color': 'white', 'color': 'black'}),
 
                                 # instructs users as to how they can filter the scatter plot by gender
                                 html.P(
@@ -343,8 +343,7 @@ app.layout = html.Div([
                                        style={'background-color': 'white'},
                                        target='_blank',
                                        href='https://www.healthline.com/health/how-much-deep-sleep-do-you-need#takeaway',
-                                       title='HealthLine Healthy Sleep Article')],
-                               style={'textAlign': 'center'}),
+                                       title='HealthLine Healthy Sleep Article')]),
 
                     # Ask user for information that are going to be inputs for the random forest regressor
 
@@ -428,9 +427,27 @@ app.layout = html.Div([
                         html.H2(id='sleep-deep', style={'textAlign': 'center'})])
                 ])
             ], style={'background-color': 'darkslateblue', 'color': 'white'})
+        ], style={'background-color': 'black', 'color': 'white'}),
+
+        # a tab displaying the information about the tools and how to use them
+        dcc.Tab(label='Need Help?', children=[
+            html.H1('Help me understand...', style={'font-family': 'Courier New', 'background-color': '#CBC3E3'}),
+                html.Div([
+                    dcc.Dropdown(
+                        options=[
+                            {'label': '... how certain factors affect my sleep quality', 'value':'scatterplot-help'},
+                            {'label': '... sleep statistics across genders', 'value':'violin-help'},
+                            {'label': '... how smoking affects my sleep quality', 'value':'smoking-help'},
+                            {'label': '... how various features affect sleep efficiency', 'value': 'contour-help'},
+                            {'label': '... which variables are most important in determining sleep efficiency, '
+                                      'REM sleep percentage, or deep sleep percentage', 'value': 'bar-help'},
+                            {'label': '... comparing sleep hygiene', 'value': 'hygiene-help'},
+                            {'label': '... two independent variables versus one dependent', 'value': '3d-help'},
+                            {'label': '... the sleep scores calculator', 'value': 'ml-help'}], id='help-options',
+                                )], style= {'font-family': 'Courier New'}),
+                html.Div([], id='helper-div', style={'background-color': 'lightblue', 'font-family': 'Courier New'})
         ], style={'background-color': 'black', 'color': 'white'})
-    ])
-], style={'font-family': 'Courier New'})
+    ], style={'font-family': 'Courier New', 'background-color': 'black'})])
 
 
 @app.callback(
@@ -824,6 +841,76 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
     )
 
     return fig
+
+# show the help on dropdown
+@app.callback(
+    Output('helper-div', 'children'),
+    Input('help-options', 'value')
+)
+def show_help(val):
+    """ Show the helpful hints in the "Need Help?" tab on dropdown selection
+    Args:
+        val (string) - the value of the dropdown for which to display the help
+
+    Returns:
+        helper-div : div that displays the paragraph and header of the specified selection
+    """
+    if val == 'scatterplot-help':
+        return [html.H3('...how certain factors affect my sleep quality (scatterplot)'),
+                html.P('Choose the independent and dependent variables from two drop '
+                           'downs to see how different factors correlate with each other. '
+                           'For example, the default independent and dependent variables '
+                           'are age and sleep duration, so the scatter plot and trendline '
+                           'displays how age affects sleep duration. You can also toggle '
+                           'between showing and hiding the trend line.')]
+    elif val == 'violin-help':
+        return [html.H3('...sleep statistics across genders (histogram & violin plot)'),
+                html.P('Choose the independent and dependent variables from two drop '
+                       'downs to see how different factors correlate with each other. '
+                       'For example, the default independent and dependent variables '
+                       'are age and sleep duration, so the scatter plot and trendline '
+                       'displays how age affects sleep duration. You can also toggle '
+                       'between showing and hiding the trend line.')]
+    elif val == 'smoking-help':
+        return [html.H3('... how smoking affects my sleep quality (strip chart)'),
+                html.P('In this chart, explore the impacts of smoking on sleep efficiency. '
+                       'The strip plot displays a green strip of all data from smokers and '
+                       'a red strip of data from non-smokers. Use the slider to adjust which '
+                       'sleep percentages are plotted on the strip chart for both smokers and '
+                       'non-smokers.')]
+    elif val == 'contour-help':
+        return [html.H3('... how various features affect sleep efficiency (contour plot)'),
+                html.P('Choose two sleep variables. In tandem with the sleep efficiency slider, '
+                       'this plot will display the correlations of the two selected variables '
+                       'against each other, with the colors displaying the sleep efficiency. '
+                       'Yellow is ideal, whereas blue and purple are not.')]
+    elif val == 'bar-help':
+        return [html.H3('... which variables are most important in determining sleep efficiency, '
+                        'REM sleep percentage, or deep sleep percentage'),
+                html.P('Select which outcome-- sleep efficiency, REM sleep percentage, or '
+                       'deep sleep percentage-- you would like to see the feature importances '
+                       'for. The importances are determined by how much they aid the random '
+                       'forest regressor in predicting the outcome selected.')]
+    elif val == 'hygiene-help':
+        return [html.H3('... comparing sleep hygiene (radar plot)'),
+                html.P('Adjust the sliders to answer the questions and receive a chart'
+                       'that allows you to compare the average person’s sleep hygiene to yours based on '
+                       'your awakenings, caffeine consumption, alcohol consumption, and exercise frequency.')]
+    elif val == '3d-help':
+        return [html.H3('... two independent variables versus one dependent (3d plot)'),
+                html.P('Choose two independent sleep variables and a dependent sleep variable. '
+                       'The points are color-coded by biological gender, with the '
+                       'blue points representing biological females and the red points representing biological males.'
+                       'Click the gender you do not want to see if you want to filter the data. '
+                       'Then, look at the plot to compare the two independent variables to'
+                       'the dependent.')]
+    elif val == 'ml-help':
+        return [html.H3('... the sleep scores calculator'),
+                html.P('Input your age, bedtime, wakeup time, caffeine consumption habits, '
+                       'biological gender, awakenings in a given night, alcohol consumption habits, '
+                       'smoking habits, and exercise habits. Then, a random forest regressor '
+                       'will use those inputs to predict your sleep efficiency, REM sleep percentage, '
+                       'and deep sleep percentage.')]
 
 
 def main():

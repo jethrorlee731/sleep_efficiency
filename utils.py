@@ -166,7 +166,7 @@ def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
 
     # plot the feature importance bar chart
     fig = px.bar(x=feat_list, y=feat_import, labels={'x': 'Features', 'y': 'feature importance'},
-                 template='plotly_dark', height=548)
+                 template='plotly_dark', height=600)
 
     return fig
 

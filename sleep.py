@@ -287,19 +287,19 @@ app.layout = html.Div([
                                        'background-color': 'darkviolet', 'height': '58vw'}
                             ),
 
-                            # div for a 3D scatter plot showing relationship between 2 independent sleep variables
-                            # and 1 dependent sleep variable
+                            # div for a 3D scatter plot showing relationship between 3 independent sleep variables
                             html.Div([
                                 html.Div(id='three-dim-title'),
 
-                                # allows the users to control the two independent variables on the scatter plot
-                                html.P('Select two independent variables you are interested in looking at.'),
+                                # allows the users to control the three independent variables on the scatter plot
+                                html.P('Select three independent variables you are interested in looking at.'),
                                 dcc.Dropdown(
                                     ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption 24 hrs before '
                                                                             'sleeping (mg)',
                                      'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise '
                                                                                         'frequency (in days per week)',
-                                     'Age', 'Wakeup time', 'Bedtime', 'Smoking status'],
+                                     'Age', 'Wakeup time', 'Bedtime', 'Smoking status', 'Sleep efficiency',
+                                     'REM sleep percentage', 'Deep sleep percentage'],
                                     value='Age', clearable=False, id='independent-3D-feat1',
                                     style={'color': 'black'}),
                                 dcc.Dropdown(
@@ -307,16 +307,19 @@ app.layout = html.Div([
                                                                             'sleeping (mg)',
                                      'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise '
                                                                                         'frequency (in days per week)',
-                                     'Age', 'Wakeup time', 'Bedtime', 'Smoking status'],
+                                     'Age', 'Wakeup time', 'Bedtime', 'Smoking status', 'Sleep efficiency',
+                                     'REM sleep percentage', 'Deep sleep percentage'],
                                     value='Awakenings', clearable=False, id='independent-3D-feat2',
                                     style={'color': 'black'}),
-
-                                # allows users to control the dependent variable of the scatter plot
-                                html.P('Select dependent variable you are interested in looking at.'),
-                                dcc.Dropdown(['Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage'],
-                                             value='Sleep efficiency',
-                                             clearable=False, id='dependent-feature',
-                                             style={'color': 'black'}),
+                                dcc.Dropdown(
+                                    ['Age', 'Sleep duration', 'Awakenings', 'Caffeine consumption 24 hrs before '
+                                                                            'sleeping (mg)',
+                                     'Alcohol consumption 24 hrs before sleeping (oz)', 'Exercise '
+                                                                                        'frequency (in days per week)',
+                                     'Age', 'Wakeup time', 'Bedtime', 'Smoking status', 'Sleep efficiency',
+                                     'REM sleep percentage', 'Deep sleep percentage'],
+                                    value='Sleep efficiency', clearable=False, id='independent-3D-feat3',
+                                    style={'color': 'black'}),
 
                                 # instructs users as to how they can filter the scatter plot by gender
                                 html.P(
@@ -737,14 +740,17 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
     Output('three-dim-title', 'children'),
     Input('independent-3D-feat1', 'value'),
     Input('independent-3D-feat2', 'value'),
-    Input('dependent-feature', 'value')
+    Input('independent-3D-feat3', 'value')
 )
 def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
     """ Plot a 3d scatter plot showing the relationship between 3 sleep variables
     Args:
-        sleep_stat_x (str): one independent sleep variable of interest
-        sleep_stat_y (str): another independent sleep variable of interest
-        sleep_stat_z (str): a dependent sleep variable of interest
+        sleep_stat_x (str): one independent sleep variable of interest (except for sleep efficiency, REM sleep
+        percentage, or Deep sleep percentage)
+        sleep_stat_y (str): another independent sleep variable of interest (except for sleep efficiency, REM sleep
+        percentage, or Deep sleep percentage)
+        sleep_stat_z (str): another independent sleep variable of interest (sleep efficiency, REM sleep percentage,
+        or Deep sleep percentage)
     Returns:
         fig: a 3D scatter plot showing the relationship between 2 independent sleep variables and 1 independent sleep
              variable
@@ -758,7 +764,7 @@ def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
     fig = px.scatter_3d(df_sleep, x=sleep_stat_x, y=sleep_stat_y, z=sleep_stat_z, color='Gender',
                         template='plotly_dark', width=633, height=455)
 
-    return fig, html.H2('3D View of ' + sleep_stat_x + ' and ' + sleep_stat_y + ' Against ' + sleep_stat_z,
+    return fig, html.H2('3D View of ' + sleep_stat_x + ' vs ' + sleep_stat_y + ' vs ' + sleep_stat_z,
                         style={'textAlign': 'center'})
 
 

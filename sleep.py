@@ -647,17 +647,7 @@ def plot_eff_forest(focus_col):
     # Establish the theme of the visualization
     sns.set()
 
-    # Establish the features not used by the random forest regressor
-    unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
-                      'Light sleep percentage']
-
-    # we can represent binary categorical variables in single indicator tags via one-hot encoding
-    df_sleep = pd.get_dummies(data=EFFICIENCY, columns=['Gender', 'Smoking status'], drop_first=True)
-
-    # the x features for the regressor should be quantitative
-    x_feat_list = list(df_sleep.columns)
-    for feat in unwanted_feats:
-        x_feat_list.remove(feat)
+    df_sleep, x_feat_list = utils.get_x_feat(EFFICIENCY)
 
     # Builds the random forest regressor model that predicts the user-specified y-variable for a user
     random_forest_reg = utils.forest_reg(focus_col, EFFICIENCY)

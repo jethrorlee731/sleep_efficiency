@@ -80,26 +80,36 @@ def filt_vals(df, vals, col, lcols):
     # return the updated dataframe to user
     return df_updated
 
-
-def forest_reg(focus_col, data):
-    """ Builds a random forest regressor model that predicts a y-variable
+def get_x_feat(df):
+    """ Get desired x-features as a list - remove all other irrelevant ; encode categorical variables and return new df
     Args:
-        focus_col (str): name of the y-variable of interest
-        data (pd.DataFrame): dataframe of interest that contains data used to train the regressor
+        df (pd.Dataframe): dataframe with all the data
     Returns:
-        random_forest_reg: fitted random forest regressor that makes predictions based on the inputted dataset
+        df_sleep (pd.Dataframe): dataframe with categorical data encoded
+        x_feat_list (list): list of desired x-variables
     """
     # Establish the features not used by the random forest regressor
     unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                       'Light sleep percentage']
 
     # we can represent binary categorical variables in single indicator tags via one-hot encoding
-    df_sleep = pd.get_dummies(data=data, columns=['Gender', 'Smoking status'], drop_first=True)
+    df_sleep = pd.get_dummies(data=df, columns=['Gender', 'Smoking status'], drop_first=True)
 
     # the x features for the regressor should be quantitative
     x_feat_list = list(df_sleep.columns)
     for feat in unwanted_feats:
         x_feat_list.remove(feat)
+    return df_sleep, x_feat_list
+
+def forest_reg(focus_col, df):
+    """ Builds a random forest regressor model that predicts a y-variable
+    Args:
+        focus_col (str): name of the y-variable of interest
+        df (pd.DataFrame): dataframe of interest that contains data used to train the regressor
+    Returns:
+        random_forest_reg: fitted random forest regressor that makes predictions based on the inputted dataset
+    """
+    df_sleep, x_feat_list = get_x_feat(df)
 
     # extract data from dataframe
     x = df_sleep.loc[:, x_feat_list].values

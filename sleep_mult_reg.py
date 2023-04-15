@@ -20,6 +20,7 @@ from sklearn.metrics import r2_score
 import pandas as pd
 import utils
 
+
 def mult_reg(df, x_feat_list, y_feat):
     # initialize regression object
     reg = LinearRegression()
@@ -41,6 +42,7 @@ def mult_reg(df, x_feat_list, y_feat):
 
     return r_squared
 
+
 def main():
     # read in the sleep efficiency data frame, which contains information about the sleep quality of multiple subjects
     EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
@@ -60,11 +62,11 @@ def main():
 
     # try to only use top 3 features (based on random forest regressor) from each initial model
     i_r2_eff = mult_reg(df_sleep, ['Awakenings', 'Age', 'Alcohol consumption 24 hrs before'
-                                                                           ' sleeping (oz)'], 'Sleep efficiency')
+                                                        ' sleeping (oz)'], 'Sleep efficiency')
     i_r2_rem = mult_reg(df_sleep, ['Age', 'Wakeup time', 'Bedtime'],
-                                                     'REM sleep percentage')
+                        'REM sleep percentage')
     i_r2_deep = mult_reg(df_sleep, ['Alcohol consumption 24 hrs before sleeping (oz)', 'Age',
-                                                        'Awakenings'], 'Deep sleep percentage')
+                                    'Awakenings'], 'Deep sleep percentage')
 
     print('The improved r2 for predicting Sleep efficiency is', i_r2_eff)
     print('The improved r2 for predicting REM sleep percentage is', i_r2_rem)

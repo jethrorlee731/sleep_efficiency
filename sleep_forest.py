@@ -68,6 +68,7 @@ def make_feature_import_dict(feat_list, feat_import, sort=True, limit=None):
     # return the feature importance dictionary
     return feature_dict
 
+
 def random_forest(x_feat_list, df, y_feat):
     """ Build a random forest regressor by training and testing it and computed cross-validated r2 score
     Args:
@@ -115,6 +116,7 @@ def random_forest(x_feat_list, df, y_feat):
 
     return r_squared, sleep_important
 
+
 def main():
     # read in the sleep efficiency data frame, which contains information about the sleep quality of multiple subjects
     EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
@@ -136,15 +138,18 @@ def main():
                                                                                          'of the x-variables in '
                                                                                          'descending order is',
           importance_rem)
-    print('The cross-validated r2 for predicting Deep sleep percentage is', r2_deep_sleep, 'and the feature importance, '
-                                                                                           'of the x-variables in '
-                                                                                           'descending order is',
+    print('The cross-validated r2 for predicting Deep sleep percentage is', r2_deep_sleep,
+          'and the feature importance, '
+          'of the x-variables in '
+          'descending order is',
           importance_deep)
 
     # random forest using the top 3 features from each initial model
     i_r2_sleep_eff, i_importance_eff = random_forest(['Awakenings', 'Age', 'Alcohol consumption 24 hrs before'
-                                                                           ' sleeping (oz)'], df_sleep, 'Sleep efficiency')
-    i_r2_rem_sleep, i_importance_rem = random_forest(['Age', 'Wakeup time', 'Bedtime'], df_sleep, 'REM sleep percentage')
+                                                                           ' sleeping (oz)'], df_sleep,
+                                                     'Sleep efficiency')
+    i_r2_rem_sleep, i_importance_rem = random_forest(['Age', 'Wakeup time', 'Bedtime'], df_sleep,
+                                                     'REM sleep percentage')
     i_r2_deep_sleep, i_importance_deep = random_forest(['Alcohol consumption 24 hrs before sleeping (oz)', 'Age',
                                                         'Awakenings'], df_sleep, 'Deep sleep percentage')
 
@@ -154,6 +159,7 @@ def main():
 
     # It appears that just using the top 3 features actually makes the models worse. Therefore, we will stick with
     # using all the variables in the random forest regressor when we make the sleep predictor in sleep.py and utils.py
+
 
 if __name__ == '__main__':
     main()

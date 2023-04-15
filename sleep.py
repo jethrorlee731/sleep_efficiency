@@ -9,7 +9,6 @@ sleep.py: runs the general code for the dashboard
 # import statements
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
-import pandas as pd
 import seaborn as sns
 import numpy as np
 import dash_bootstrap_components as dbc

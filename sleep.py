@@ -44,7 +44,7 @@ app.layout = html.Div([
                     html.P('Sleep efficiency refers to the ratio of time that one rests in bed while actually asleep.'),
 
                     # Explain the importance of sleep efficiency, REM sleep percentage, and deep sleep percentage and
-                    # a brief insight into our motivations for this project
+                    # add a brief insight into our motivations for this project
                     html.P('Allowing people to sleep the most efficiently is essential as the amount of rest we get '
                            'impacts our health and well-being every day. As college students, sleep is even more '
                            'precious and limited. We are all very interested in learning how to make the most of our '
@@ -168,10 +168,6 @@ app.layout = html.Div([
 
                         # div for smoking status strip chart
                         html.Div([
-
-                            # creating a strip chart showing the relationship between one's smoking status and sleep
-                            # efficiency
-
                             # add a title above the plot
                             html.H2('How Smoking Affects Your Sleep Quality', style={'textAlign': 'center'}),
 
@@ -201,7 +197,7 @@ app.layout = html.Div([
                             # show the density contour plot
                             dcc.Graph(id='efficiency-contour', style={'display': 'inline-block', 'height': '45vh'}),
 
-                            # drop down menu to choose the first independent variable for the density contour plot
+                            # drop down menu for choosing the first independent variable for the density contour plot
                             html.P(
                                 'Choose one independent variable for the density contour plot',
                                 style={'textAlign': 'center'}),
@@ -214,7 +210,7 @@ app.layout = html.Div([
                                 value='Awakenings', id='density-stat1',
                                 style={'color': 'black'}),
 
-                            # drop down menu to choose the second independent variable for the density contour plot
+                            # drop down menu for choosing the second independent variable for the density contour plot
                             html.P(
                                 'Choose another variable to be represented in the density contour plot',
                                 style={'textAlign': 'center'}),
@@ -303,7 +299,7 @@ app.layout = html.Div([
                                        'background-color': 'darkviolet', 'height': '58vw'}
                             ),
 
-                            # div for a 3D scatter plot showing relationship between 3 independent sleep variables
+                            # div for a 3D scatter plot showing the relationship between 3 independent sleep variables
                             html.Div([
                                 # add a dynamic title above the 3D scatter plot
                                 html.Div(id='three-dim-title'),
@@ -362,9 +358,6 @@ app.layout = html.Div([
         # and deep sleep percentages with a random forest regressor
         dcc.Tab(label='Sleep Quality Predictor', children=[
             html.Div([
-
-                # div for calculating sleep efficiency, REM sleep percentage, and deep sleep percentage based on a
-                # random forest regressor
                 html.Div([
                     # title at the top of the section
                     html.H2('Find your sleep efficiency, REM sleep percentage, and deep sleep percentage!',

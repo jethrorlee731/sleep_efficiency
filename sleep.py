@@ -427,6 +427,10 @@ app.layout = html.Div([
         # a tab displaying the information about the tools and how to use them
         dcc.Tab(label='Need Help?', children=[
             html.H1('Help me understand...', style={'font-family': 'Courier New', 'background-color': '#CBC3E3'}),
+
+            # help the user understand how to use the "help" tab
+            html.P('Use the dropdown to select which visualization you need help with, using or understanding. '
+                   'This will give you a brief explanation.'),
                 html.Div([
                     dcc.Dropdown(
                         options=[
@@ -440,7 +444,21 @@ app.layout = html.Div([
                             {'label': '... two independent variables versus one dependent', 'value': '3d-help'},
                             {'label': '... the sleep scores calculator', 'value': 'ml-help'}], id='help-options',
                                 )], style= {'font-family': 'Courier New'}),
-                html.Div([], id='helper-div', style={'background-color': 'lightblue', 'font-family': 'Courier New'})
+                html.Div([], id='helper-div', style={'background-color': 'lightblue', 'font-family': 'Courier New'}),
+            html.Div([
+                # intro video
+                html.H2('Introduction to the Dashboard'),
+                html.Video(
+                    controls=True,
+                    src='videos/intro.mp4'),
+
+                # conclusion video / how to use help tab
+                html.H2('How to Use the Help Tab & Conclusion'),
+                html.Video(
+                    controls=True,
+                    src='videos/help_end.mp4'),
+
+            ])
         ], style={'background-color': 'black', 'color': 'white'})
     ], style={'font-family': 'Courier New', 'background-color': 'black'})])
 
@@ -857,55 +875,106 @@ def show_help(val):
                            'For example, the default independent and dependent variables '
                            'are age and sleep duration, so the scatter plot and trendline '
                            'displays how age affects sleep duration. You can also toggle '
-                           'between showing and hiding the trend line.')]
+                           'between showing and hiding the trend line.'),
+                html.Video(
+                    controls=True,
+                    id='scatter-diagrams',
+                    src='videos/first_diagrams.mp4',
+                )]
     elif val == 'violin-help':
         return [html.H3('...sleep statistics across genders (histogram & violin plot)'),
                 html.P('Choose the independent and dependent variables from two drop '
                        'downs to see how different factors correlate with each other. '
-                       'For example, the default independent and dependent variables '
-                       'are age and sleep duration, so the scatter plot and trendline '
-                       'displays how age affects sleep duration. You can also toggle '
-                       'between showing and hiding the trend line.')]
+                       ' You can also toggle the genders to remove the one you would not like to see.'
+                       'between showing and hiding the trend line. Both the histogram '
+                       'and violin plot display the distribution for each biological gender '
+                       'for the previously specified dependent variable. Hover over either plot '
+                       'to receive statistics about that gender and its relationship to '
+                       'the dependent variable.'),
+                html.Video(
+                    controls=True,
+                    id='violin-diagrams',
+                    src='videos/first_diagrams.mp4',
+                )]
     elif val == 'smoking-help':
         return [html.H3('... how smoking affects my sleep quality (strip chart)'),
                 html.P('In this chart, explore the impacts of smoking on sleep efficiency. '
                        'The strip plot displays a green strip of all data from smokers and '
                        'a red strip of data from non-smokers. Use the slider to adjust which '
                        'sleep percentages are plotted on the strip chart for both smokers and '
-                       'non-smokers.')]
+                       'non-smokers. You can view the amount of smokers and non-smokers '
+                       'within the specified sleep efficiency range, and you are also able to '
+                       'toggle which group you view by clicking on the legend.'),
+                html.Video(
+                    controls=True,
+                    id='smoking-diagrams',
+                    src='videos/second_diagrams.mp4',
+                )]
     elif val == 'contour-help':
         return [html.H3('... how various features affect sleep efficiency (contour plot)'),
                 html.P('Choose two sleep variables. In tandem with the sleep efficiency slider, '
                        'this plot will display the correlations of the two selected variables '
                        'against each other, with the colors displaying the sleep efficiency. '
-                       'Yellow is ideal, whereas blue and purple are not.')]
+                       'Yellow is ideal, whereas blue and purple are not. Hover over areas to display '
+                       'what the factor values are (eg. looking at deep sleep and sleep duration, '
+                       'hover over the yellow areas to display the sleep efficiency percentage, '
+                       'value of deep sleep, and value of sleep duration).'),
+                html.Video(
+                    controls=True,
+                    id='contour-diagrams',
+                    src='videos/second_diagrams.mp4',
+                )]
     elif val == 'bar-help':
         return [html.H3('... which variables are most important in determining sleep efficiency, '
                         'REM sleep percentage, or deep sleep percentage'),
                 html.P('Select which outcome-- sleep efficiency, REM sleep percentage, or '
                        'deep sleep percentage-- you would like to see the feature importances '
                        'for. The importances are determined by how much they aid the random '
-                       'forest regressor in predicting the outcome selected.')]
+                       'forest regressor in predicting the outcome selected.'),
+                html.Video(
+                    controls=True,
+                    id='bar-diagrams',
+                    src='videos/third_diagrams.mp4',
+                )]
     elif val == 'hygiene-help':
         return [html.H3('... comparing sleep hygiene (radar plot)'),
-                html.P('Adjust the sliders to answer the questions and receive a chart'
-                       'that allows you to compare the average person’s sleep hygiene to yours based on '
-                       'your awakenings, caffeine consumption, alcohol consumption, and exercise frequency.')]
+                html.P('Adjust the sliders to answer the questions and view the display '
+                       'that allows you to compare the average person’s sleep hygiene in this dataset to yours '
+                       'based on your awakenings, caffeine consumption, alcohol consumption, and exercise frequency. '
+                       'The blue represents the average person in the dataset, and the red represents '
+                       'your sleep hygiene. You can see where you are above, below, or at average '
+                       'based on where the colors overlap.'),
+                html.Video(
+                    controls=True,
+                    id='radar-diagrams',
+                    src='videos/third_diagrams.mp4',
+                )]
     elif val == '3d-help':
         return [html.H3('... two independent variables versus one dependent (3d plot)'),
                 html.P('Choose two independent sleep variables and a dependent sleep variable. '
                        'The points are color-coded by biological gender, with the '
-                       'blue points representing biological females and the red points representing biological males.'
+                       'blue points representing biological females and the red points representing biological males. '
                        'Click the gender you do not want to see if you want to filter the data. '
-                       'Then, look at the plot to compare the two independent variables to'
-                       'the dependent.')]
+                       'Then, look at the plot to compare the two independent variables to '
+                       'the dependent.'),
+                html.Video(
+                    controls=True,
+                    id='3d-diagrams',
+                    src='videos/third_diagrams.mp4',
+                )]
     elif val == 'ml-help':
-        return [html.H3('... the sleep scores calculator'),
+        return [html.H3('... the sleep scores calculator (tab 2)'),
                 html.P('Input your age, bedtime, wakeup time, caffeine consumption habits, '
                        'biological gender, awakenings in a given night, alcohol consumption habits, '
                        'smoking habits, and exercise habits. Then, a random forest regressor '
                        'will use those inputs to predict your sleep efficiency, REM sleep percentage, '
-                       'and deep sleep percentage.')]
+                       'and deep sleep percentage. Click on the link in the upper left corner for an '
+                       'article explaining the percentages.'),
+                html.Video(
+                    controls=True,
+                    id='ml-diagrams',
+                    src='videos/tab2.mp4',
+                )]
 
 
 def main():

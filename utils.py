@@ -20,7 +20,7 @@ def read_file(filename):
     Returns:
         file_copy (Pandas data frame): cleaned dataframe
     """
-    # read the csv files into dataframes
+    # read the CSV files into dataframes
     file = pd.read_csv(filename)
 
     # make a copy of the file
@@ -41,7 +41,7 @@ def read_file(filename):
 
 
 def parse_times(df_sleep):
-    """ Parses the bedtime and wakeup time columns in the sleep data frame to contain decimals that represent times
+    """ Parses the bedtime and wakeup time columns in the sleep data frame so they contain decimals that represent times
     Args:
         df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
     Returns:
@@ -61,7 +61,7 @@ def parse_times(df_sleep):
 
 
 def filt_vals(df, vals, col, lcols):
-    """ Filter the user-selected values from the dataframe
+    """ Filter a dataframe by user-selected values
     Args:
         df: (Pandas dataframe) a dataframe with the values we are seeking and additional attributes
         vals (list): two user-defined values, a min and max for "col"
@@ -70,40 +70,54 @@ def filt_vals(df, vals, col, lcols):
     Returns:
         df_updated (dataframe): the dataframe filtered, with just the values for "col" within the user specified range
     """
-    # identify the beginning and end of the range user-specified range for "col"
+    # identify the beginning and end of the user-specified range for "col"
     least = vals[0]
     most = vals[1]
 
-    # filter out the rows for which the column values are within the range
+    # filter out the rows for which the column values are not within the range
     df_updated = df[df[col].between(least, most)][lcols]
 
     # return the updated dataframe to user
     return df_updated
 
 
-def forest_reg(focus_col, data):
-    """ Builds a random forest regressor model that predicts a y-variable
+def get_x_feat(df_sleep):
+    """ Get desired x-features as a list - remove all other irrelevant; encode categorical variables and return new df
     Args:
-        focus_col (str): name of the y-variable of interest
-        data (pd.DataFrame): dataframe of interest that contains data used to train the regressor
+        df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
     Returns:
-        random_forest_reg: fitted random forest regressor that makes predictions based on the inputted dataset
+        df_sleep (pd.Dataframe): dataframe with categorical data encoded
+        x_feat_list (list): list of desired x-variables
     """
     # Establish the features not used by the random forest regressor
     unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',
                       'Light sleep percentage']
 
     # we can represent binary categorical variables in single indicator tags via one-hot encoding
-    df_sleep = pd.get_dummies(data=data, columns=['Gender', 'Smoking status'], drop_first=True)
+    df_sleep = pd.get_dummies(data=df_sleep, columns=['Gender', 'Smoking status'], drop_first=True)
 
     # the x features for the regressor should be quantitative
     x_feat_list = list(df_sleep.columns)
     for feat in unwanted_feats:
         x_feat_list.remove(feat)
 
+    return df_sleep, x_feat_list
+
+
+def forest_reg(focus_col, df):
+    """ Builds a random forest regressor model that predicts a y-variable
+    Args:
+        focus_col (str): name of the y-variable of interest
+        df (pd.DataFrame): dataframe of interest that contains data used to train the regressor
+    Returns:
+        random_forest_reg: fitted random forest regressor that makes predictions based on the inputted dataset
+    """
+    # retrieve the x features for the random forest regressor
+    df, x_feat_list = get_x_feat(df)
+
     # extract data from dataframe
-    x = df_sleep.loc[:, x_feat_list].values
-    y = df_sleep.loc[:, focus_col].values
+    x = df.loc[:, x_feat_list].values
+    y = df.loc[:, focus_col].values
 
     # initialize a random forest regressor
     random_forest_reg = RandomForestRegressor()
@@ -115,21 +129,21 @@ def forest_reg(focus_col, data):
 
 
 def convert(gender, smoke):
-    """ Encode the passed-in variables to match the encoding in the random forest regressor
+    """ Encode passed-in variables to match the encoding of the random forest regressor
     Args:
-        gender (str): indicates whether the user is a Biological Male or Biological Female
+        gender (str): indicates whether the user is a biological male or biological female
         smoke (str): indicates whether the user smokes or not
     Returns:
         gender_value (int): encoded variable representing the biological gender of the user
         smoke_value (int): encoded variable representing whether the user smokes
     """
-    # encode the passed-in variable indicating the user's biological gender
+    # encode the passed-in variable indicating a user's biological gender
     if gender == 'Biological Male':
         gender_value = 1
     else:
         gender_value = 0
 
-    # encode the passed-in variable indicating the user's smoking status
+    # encode the passed-in variable indicating a user's smoking status
     if smoke == 'Yes':
         smoke_value = 1
     else:
@@ -146,12 +160,10 @@ def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
     Args:
         feat_list (list): str names of features
         feat_import (np.array): feature importance values (mean MSE reduce)
-        sort (bool): if True, sorts features in decreasing importance
-            from top to bottom of plot
-        limit (int): if passed, limits the number of features shown
-            to this value
+        sort (bool): if True, sorts features in decreasing importance from top to bottom of plot
+        limit (int): if passed, limits the number of features shown to this value
     Returns:
-        None, just plots the feature importance bar chart
+        fig (px.bar): the feature importance bar chart
     """
     if sort:
         # sort features by decreasing importance
@@ -166,14 +178,14 @@ def plot_feat_import_rf_reg(feat_list, feat_import, sort=True, limit=None):
 
     # plot the feature importance bar chart
     fig = px.bar(x=feat_list, y=feat_import, labels={'x': 'Features', 'y': 'feature importance'},
-                 template='plotly_dark', height=548)
+                 template='plotly_dark', height=600)
 
     return fig
 
 
-def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime, awakenings, caffeine,
-                          alcohol, exercise, gender, smoke):
-    """ Allow users to get their predicted sleep quality given information about a user
+def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime, awakenings, caffeine, alcohol,
+                          exercise, gender, smoke):
+    """ Allow users to get their predicted sleep quality given information about them
     Args:
         sleep_quality_stat (str): the sleep statistic to be predicted for the user
         df_sleep (Pandas df): data frame containing information about the sleep quality of multiple individuals
@@ -187,13 +199,13 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
     Returns:
-        y_pred (float): predicted sleep efficiency
+        y_pred (float): predicted sleep efficiency/REM sleep percentage/deep sleep percentage
     """
     # Builds the random forest regressor model that predicts a user's sleep efficiency, REM sleep percentage, or deep
     # sleep percentage
     random_forest_reg = forest_reg(sleep_quality_stat, df_sleep)
 
-    # Encode the passed-in values for gender and smoking status to match the encoding in the random forest regressor
+    # Encode the passed-in values for gender and smoking status to match the encoding of the random forest regressor
     gender_value, smoke_value = convert(gender, smoke)
 
     # calculate the sleep duration of a user based on their inputted bedtime and wakeup time
@@ -206,7 +218,7 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
     data = np.array([[age, bedtime, wakeuptime, duration, awakenings, caffeine, alcohol, exercise,
                       gender_value, smoke_value]])
 
-    # predict sleep efficiency, REM sleep percentage, or deep sleep percentage based on user inputs from the dropdown
+    # predict sleep efficiency, REM sleep percentage, or deep sleep percentage based on user inputs from the dropdowns
     # and sliders
     y_pred = random_forest_reg.predict(data)
 
@@ -214,28 +226,28 @@ def predict_sleep_quality(sleep_quality_stat, df_sleep, age, bedtime, wakeuptime
 
 
 def encode(var1, var2, df_sleep):
-    """ Encodes quantitative binary variables to qualitative variables via one-hot encoding
+    """ Encodes quantitative binary variables as qualitative variables via one-hot encoding
 
     Args:
-        var1 (str): one variable that may contain binary data in a dataframe
-        var2 (str): another variable that may contain binary data in the dataframe
+        var1 (str): one variable for a column that may contain binary data in a dataframe
+        var2 (str): another variable for a column that may contain binary data in the dataframe
         df_sleep (Pandas df): data frame containing information about the sleep quality of multiple individuals
 
     Returns:
-        df (Pandas df): a new version of the data frame that contains any encoded columns
+        df (Pandas df): a new version of the data frame that contains any newly encoded columns
     """
     # saving column names into constants
     GENDER_COL = 'Gender'
     SMOKING_COL = 'Smoking status'
 
     # performing one hot encoding on the gender column (a binary variable) to make it quantitative instead of
-    # qualitative if it's needed for the plot
+    # qualitative if needed
     if var1 == GENDER_COL or var2 == GENDER_COL:
         df_sleep = pd.get_dummies(data=df_sleep, columns=[GENDER_COL], drop_first=True)
         df_sleep = df_sleep.rename(columns={'Gender_Male': 'Gender'})
 
     # performing one hot encoding on the smoking status column (a binary variable) to make it quantitative instead of
-    # qualitative if it's needed for the plot
+    # qualitative if needed
     if var1 == SMOKING_COL or var2 == SMOKING_COL:
         df_sleep = pd.get_dummies(data=df_sleep, columns=[SMOKING_COL], drop_first=True)
         df_sleep = df_sleep.rename(columns={'Smoking status_Yes': 'Smoking status'})

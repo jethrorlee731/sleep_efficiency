@@ -7,17 +7,17 @@ April 19, 2023
 sleep_mult_reg.py: Using a multiple linear regression model to predict sleep efficiency, REM sleep percentages, and deep
                    sleep percentages
 
-This file presents how the r2 for when the multiple linear regression model predicts sleep efficiency,
+This file presents how the R^2 value for when the multiple linear regression model predicts sleep efficiency,
 REM sleep percentage, and deep sleep percentage is lower than that for the random forest regressor
 
-The r^2 value of the multiple regression model hovers around 0.52 for predicting sleep efficiency, 0.08 for predicting
+The R^2 value of the multiple regression model hovers around 0.52 for predicting sleep efficiency, 0.08 for predicting
 REM sleep percentage, and 0.27 for predicting deep sleep percentage
 
 It appears that just using the top 3 features indicated by a random forest regressor for predicting sleep efficiency,
-REM sleep percentage, and deep sleep percentage actually makes the regression models worse (lower r^2). Additionally,
-all the created multiple linear regression models yield lower r^2 values than a corresponding random forest regressor
-that predicts the same value. Therefore, for our sleep predictors in utils.py and sleep.py, we will only use a random
-forest regressor. """
+REM sleep percentage, and deep sleep percentage actually makes the regression models worse (lower R^2 values).
+Additionally, all the created multiple linear regression models yield lower R^2 values than a corresponding random
+forest regressor that predicts the same value. Therefore, for our sleep predictors in utils.py and sleep.py,
+only used a random forest regressor. """
 
 # import statements
 from sklearn.linear_model import LinearRegression
@@ -52,7 +52,7 @@ def mult_reg(df, x_feat_list, y_feat):
     # the machine learning model makes predictions based on the values inputted by the user
     y_pred = reg.predict(x)
 
-    # compute r2, which will get returned
+    # compute r^2, which will get returned
     r_squared = r2_score(y_true=y, y_pred=y_pred)
 
     return r_squared
@@ -65,11 +65,11 @@ def main():
     # parse the bedtime and wakeup time columns to have them represented in military time
     EFFICIENCY = utils.parse_times(EFFICIENCY)
 
-    # extract the values used to help a multiple regression models predict sleep efficiency, REM sleep percentage, and
+    # extract the values used to help multiple regression models predict sleep efficiency, REM sleep percentage, and
     # deep sleep percentage
     df_sleep, x_feat_list = utils.get_x_feat(EFFICIENCY)
 
-    # calculated the r^2 values associated with the ability of multiple regression models to predict a user's sleep
+    # calculate the r^2 values associated with the ability of multiple regression models to predict a user's sleep
     # efficiency, REM sleep percentage, and deep sleep percentage
     r2_eff = mult_reg(df_sleep, x_feat_list, 'Sleep efficiency')
     r2_rem = mult_reg(df_sleep, x_feat_list, 'REM sleep percentage')
@@ -80,7 +80,7 @@ def main():
     print('The r2 for predicting REM sleep percentage is', r2_rem)
     print('The r2 for predicting deep sleep percentage is', r2_deep)
 
-    # using to only the top 3 features (based on random forest regressor) for the multiple regression model to predict a
+    # using only the top 3 features (based on a random forest regressor) for the multiple regression model to predict a
     # user's sleep efficiency, REM sleep percentage, and deep sleep percentage
     i_r2_eff = mult_reg(df_sleep, ['Awakenings', 'Age', 'Alcohol consumption 24 hrs before'
                                                         ' sleeping (oz)'], 'Sleep efficiency')

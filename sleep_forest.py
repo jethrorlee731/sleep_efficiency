@@ -12,16 +12,14 @@ regressor predicts sleep efficiency, REM sleep percentage, and deep sleep percen
 linear regression models predicting the same values.
 
 Note that the random forest regressor used for the project is directly implemented in the sleep.py and utils.py file.
-This file just provides why favored using a random forest regressor (higher r2) over multiple linear regression.
+This file just provides why we favored using a random forest regressor (higher r^2) over multiple linear regression.
 
 The r^2 value of this random forest regressor hovers around 0.67 for predicting sleep efficiency, 0.16 for predicting
 REM sleep percentage, and 0.35 for predicting deep sleep percentage.
 
 It appears that just using the top 3 important features to make predictions actually makes the random forest
-regressors worse (lower cross-validated r^2). Therefore, we will stick with using all the variables in the random
-forest regressors when we make the sleep predictor in sleep.py and utils.py
-
-"""
+regressors worse (lower cross-validated r^2). Therefore, we used all the variables in the random forest regressors when
+we made the sleep predictor in sleep.py and utils.py"""
 
 # Import statements
 import numpy as np
@@ -68,13 +66,13 @@ def map_feature_import_vals(feat_list, feat_import, sort=True, limit=None):
 
 
 def random_forest(x_feat_list, df, y_feat):
-    """ Build a random forest regressor by training and testing it and compute its cross-validated r2 score
+    """ Build a random forest regressor by training and testing it and compute its cross-validated r^2 score
     Args:
-        x_feat_list (list): list of x-variables of interest
+        x_feat_list (list): list of x-variables of interest (basis of training data)
         df (Pandas dataframe): a data frame containing data used to help the random forest regressor make predictions
         y_feat (str): y-variable of interest (the testing value)
     Return:
-        r_squared (float): cross-validated r2 score of the model
+        r_squared (float): cross-validated r^2 score of the model
         sleep_important (list): has tuples that map certain features to their feature importance (mean MSE reduce)
                                 values
     """
@@ -125,8 +123,8 @@ def main():
     # parse the bedtime and wakeup time columns to have them represented in military time
     EFFICIENCY = utils.parse_times(EFFICIENCY)
 
-    # retrieve the values used to help the random forest regressors make predict sleep efficiency, REM sleep percentage,
-    # and deep sleep percentage
+    # retrieve the values used to help the random forest regressors predict sleep efficiency, REM sleep percentage, and
+    # deep sleep percentage
     df_sleep, x_feat_list = utils.get_x_feat(EFFICIENCY)
 
     # retrieve the r^2 values and the feature importance values associated with the random forest regressors and their
@@ -149,8 +147,8 @@ def main():
                                                                                            'in descending order is',
           importance_deep)
 
-    # random forest using the top 3 features from each initial model to predict sleep efficiency, REM sleep percentage,
-    # and deep sleep percentage
+    # random forest regressor using the top 3 features from each initial model to predict sleep efficiency, REM sleep
+    # percentage, and deep sleep percentage
     i_r2_sleep_eff, i_importance_eff = random_forest(['Awakenings', 'Age', 'Alcohol consumption 24 hrs before'
                                                       ' sleeping (oz)'], df_sleep, 'Sleep efficiency')
     i_r2_rem_sleep, i_importance_rem = random_forest(['Age', 'Wakeup time', 'Bedtime'], df_sleep,

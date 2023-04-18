@@ -313,7 +313,7 @@ app.layout = html.Div([
 
                                 # add instructions for how to see the graph properly
                                 html.Div([
-                                    html.P('Rotate the graph to properly see all the labels',
+                                    html.P('Rotate or zoom out of the graph to properly see all the labels',
                                            style={'textAlign': 'center', 'font-weight': 'bold'})]),
 
                                 # allows the users to control the three independent variables on the scatter plot

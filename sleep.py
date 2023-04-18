@@ -468,33 +468,35 @@ app.layout = html.Div([
             # help the user understand how to use the "help" tab
             html.P('Use the dropdown to select which visualization you need help with, using or understanding. '
                    'This will give you a brief explanation.'),
-                html.Div([
-                    # create a dropdown for the help categories
-                    dcc.Dropdown(
-                        options=[
-                            {'label': '... how certain factors affect my sleep quality', 'value':'scatterplot-help'},
-                            {'label': '... sleep statistics across genders', 'value':'violin-help'},
-                            {'label': '... how smoking affects my sleep quality', 'value':'smoking-help'},
-                            {'label': '... how various features affect sleep efficiency', 'value': 'contour-help'},
-                            {'label': '... which variables are most important in determining sleep efficiency, '
-                                      'REM sleep percentage, or deep sleep percentage', 'value': 'bar-help'},
-                            {'label': '... comparing sleep hygiene', 'value': 'hygiene-help'},
-                            {'label': '... two independent variables versus one dependent', 'value': '3d-help'},
-                            {'label': '... the sleep scores calculator', 'value': 'ml-help'}], id='help-options',
-                                )], style= {'font-family': 'Courier New'}),
-                html.Div([], id='helper-div', style={'background-color': 'lightblue', 'font-family': 'Courier New'}),
+            html.Div([
+                # create a dropdown for the help categories
+                dcc.Dropdown(
+                    options=[
+                        {'label': '... how certain factors affect my sleep quality', 'value': 'scatterplot-help'},
+                        {'label': '... sleep statistics across genders', 'value': 'violin-help'},
+                        {'label': '... how smoking affects my sleep quality', 'value': 'smoking-help'},
+                        {'label': '... how various features affect sleep efficiency', 'value': 'contour-help'},
+                        {'label': '... which variables are most important in determining sleep efficiency, '
+                                  'REM sleep percentage, or deep sleep percentage', 'value': 'bar-help'},
+                        {'label': '... comparing sleep hygiene', 'value': 'hygiene-help'},
+                        {'label': '... two independent variables versus one dependent', 'value': '3d-help'},
+                        {'label': '... the sleep scores calculator', 'value': 'ml-help'}], id='help-options',
+                )], style={'font-family': 'Courier New'}),
+            html.Div([], id='helper-div', style={'background-color': 'lightblue', 'font-family': 'Courier New'}),
             html.Div([
                 # intro video
                 html.H2('Introduction to the Dashboard'),
                 html.Video(
                     controls=True,
-                    src='videos/intro.mp4'),
+                    src='assets/intro.mp4',
+                    style={'height': '50%', 'width': '50%'}),
 
                 # conclusion video / how to use help tab
                 html.H2('How to Use the Help Tab & Conclusion'),
                 html.Video(
                     controls=True,
-                    src='videos/help_end.mp4'),
+                    src='assets/help_end.mp4',
+                    style={'height': '50%', 'width': '50%'}),
 
             ]),
         ], style={'background-color': 'black', 'color': 'white'})
@@ -915,16 +917,20 @@ def show_help(query):
     if query == 'scatterplot-help':
         return [html.H3('...how certain factors affect my sleep quality (scatterplot)'),
                 html.P('Choose the independent and dependent variables from two drop '
-                           'downs to see how different factors correlate with each other. '
-                           'For example, the default independent and dependent variables '
-                           'are age and sleep duration, so the scatter plot and trendline '
-                           'displays how age affects sleep duration. You can also toggle '
-                           'between showing and hiding the trend line.'),
+                       'downs to see how different factors correlate with each other. '
+                       'For example, the default independent and dependent variables '
+                       'are age and sleep duration, so the scatter plot and trendline '
+                       'displays how age affects sleep duration. You can also toggle '
+                       'between showing and hiding the trend line.'),
+
+                # a video that helps users navigate through the scatter plot
                 html.Video(
                     controls=True,
                     id='scatter-diagrams',
-                    src='videos/first_diagrams.mp4',
+                    src='assets/first_diagrams.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
+
     # helps the user to navigate through the violin plot and histogram
     elif query == 'violin-help':
         return [html.H3('...sleep statistics across genders (histogram & violin plot)'),
@@ -938,11 +944,15 @@ def show_help(query):
                        'sleep duration values between genders, in which taller bars indicate a sleep duration value '
                        'that is more prominent for people of a certain gender. If users only want to see one gender, '
                        '‘Male’ or ‘Female’ can be unchecked.'),
+
+                # a video that helps the user to navigate through the violin plot and histogram
                 html.Video(
                     controls=True,
                     id='violin-diagrams',
-                    src='videos/first_diagrams.mp4',
+                    src='assets/first_diagrams.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
+
     # helps the user to navigate through the strip chart
     elif query == 'smoking-help':
         return [html.H3('... how smoking affects my sleep quality (strip chart)'),
@@ -955,11 +965,15 @@ def show_help(query):
                        'toggle which group you view by clicking on the legend. The points for the '
                        'smokers are slightly skewed toward the left, '
                        'indicating they tend to experience lower sleep efficiencies.'),
+
+                # a video that helps the user to navigate through the strip chart
                 html.Video(
                     controls=True,
                     id='smoking-diagrams',
-                    src='videos/second_diagrams.mp4',
+                    src='assets/second_diagrams.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
+
     # helps the user to navigate through the density contour plot
     elif query == 'contour-help':
         return [html.H3('... how various features affect sleep efficiency (contour plot)'),
@@ -970,11 +984,15 @@ def show_help(query):
                        'what the factor values are (eg. looking at deep sleep and sleep duration, '
                        'hover over the yellow areas to display the sleep efficiency percentage, '
                        'value of deep sleep, and value of sleep duration).'),
+
+                # a video that helps the user to navigate through the density contour plot
                 html.Video(
                     controls=True,
                     id='contour-diagrams',
-                    src='videos/second_diagrams.mp4',
+                    src='assets/second_diagrams.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
+
     # helps the user to navigate through the feature importance bar plot
     elif query == 'bar-help':
         return [html.H3('... which variables are most important in determining sleep efficiency, '
@@ -983,11 +1001,15 @@ def show_help(query):
                        'deep sleep percentage-- you would like to see the feature importances '
                        'for. The importances are determined by how much they aid the random '
                        'forest regressor in predicting the outcome selected.'),
+
+                # a video that helps the user to navigate through the feature importance bar plot
                 html.Video(
                     controls=True,
                     id='bar-diagrams',
-                    src='videos/third_diagrams.mp4',
+                    src='assets/third_diagrams.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
+
     # helps the user to navigate through the radar chart
     elif query == 'hygiene-help':
         return [html.H3('... comparing sleep hygiene (radar plot)'),
@@ -999,11 +1021,15 @@ def show_help(query):
                        'closely aligns with the blue diamond, which represents the average test subject for the study '
                        'that provided the data for this dashboard, then the chart indicates that your habits '
                        'generally align with the average participant in the study.'),
+
+                # a video that helps the user to navigate through the radar chart
                 html.Video(
                     controls=True,
                     id='radar-diagrams',
-                    src='videos/third_diagrams.mp4',
+                    src='assets/third_diagrams.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
+
     # helps the user to navigate through the 3D scatter plot
     elif query == '3d-help':
         return [html.H3('... two independent variables versus one dependent (3d plot)'),
@@ -1013,11 +1039,15 @@ def show_help(query):
                        'Click the gender you do not want to see if you want to filter the data. '
                        'Then, look at the plot to compare the two independent variables to '
                        'the dependent.'),
+
+                # a video that helps the user to navigate through the 3D scatter plot
                 html.Video(
                     controls=True,
                     id='3d-diagrams',
-                    src='videos/third_diagrams.mp4',
+                    src='assets/third_diagrams.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
+
     # helps the user to navigate through the sleep predictor tab
     elif query == 'ml-help':
         return [html.H3('... the sleep scores calculator (tab 2)'),
@@ -1027,10 +1057,13 @@ def show_help(query):
                        'will use those inputs to predict your sleep efficiency, REM sleep percentage, '
                        'and deep sleep percentage. Click on the link in the upper left corner for an '
                        'article explaining the percentages.'),
+
+                # a video that helps the user to navigate through the sleep predictor tab
                 html.Video(
                     controls=True,
                     id='ml-diagrams',
-                    src='videos/tab2.mp4',
+                    src='assets/tab2.mp4',
+                    style={'height': '50%', 'width': '50%'}
                 )]
 
 

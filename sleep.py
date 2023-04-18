@@ -205,7 +205,8 @@ app.layout = html.Div([
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
                                  'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
-                                 'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
+                                                                                                   'consumption 24 hrs before sleeping (oz)',
+                                 'Exercise frequency (in days per week)',
                                  'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Awakenings', id='density-stat1',
                                 style={'color': 'black'}),
@@ -218,7 +219,8 @@ app.layout = html.Div([
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
                                  'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
-                                 'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
+                                                                                                   'consumption 24 hrs before sleeping (oz)',
+                                 'Exercise frequency (in days per week)',
                                  'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Light sleep percentage', id='density-stat2',
                                 style={'color': 'black'})
@@ -258,6 +260,11 @@ app.layout = html.Div([
                                 html.H2('Sleep Hygiene', style={'textAlign': 'center'}),
                                 dbc.Col([
                                     html.Div([
+                                        html.Div([
+                                            # add instructions for how to see the graph properly
+                                            html.P('Rotate the graph to properly see all the labels',
+                                                   style={'textAlign': 'center', 'font-weight': 'bold'})]),
+
                                         # Ask user for how many times they wake up in their sleep
                                         html.Div([
                                             html.P('How many times do you wake up during your sleep?',
@@ -303,6 +310,11 @@ app.layout = html.Div([
                             html.Div([
                                 # add a dynamic title above the 3D scatter plot
                                 html.Div(id='three-dim-title'),
+
+                                # add instructions for how to see the graph properly
+                                html.Div([
+                                    html.P('Rotate the graph to properly see all the labels',
+                                           style={'textAlign': 'center', 'font-weight': 'bold'})]),
 
                                 # allows the users to control the three independent variables on the scatter plot
                                 html.P('Select three independent variables you are interested in looking at.'),
@@ -759,7 +771,7 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
         showlegend=False,
         template='plotly_dark',
         width=427,
-        height=367
+        height=333
     )
 
     return fig
@@ -791,7 +803,7 @@ def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
 
     # plot the 3D scatter plot
     fig = px.scatter_3d(df_sleep, x=sleep_stat_x, y=sleep_stat_y, z=sleep_stat_z, color='Gender',
-                        template='plotly_dark', width=633, height=455)
+                        template='plotly_dark', width=633, height=499)
 
     return fig, html.H2('3D View of ' + sleep_stat_x + ' vs ' + sleep_stat_y + ' vs ' + sleep_stat_z,
                         style={'textAlign': 'center'})

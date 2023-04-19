@@ -84,6 +84,7 @@ app.layout = html.Div([
                     html.Div([
                         # div for a scatter plot comparing the relationship between two sleep variables
                         html.Div([
+
                             # add a dynamic title above the scatter plot
                             html.Div(id='sleep-qual-title'),
 
@@ -124,6 +125,7 @@ app.layout = html.Div([
 
                         # div for comparing sleep statistic distributions between genders
                         html.Div([
+
                             # add a dynamic title above the gender vs. sleep metric distribution plots
                             html.Div(id='gender-plots-title'),
 
@@ -156,6 +158,7 @@ app.layout = html.Div([
                 # div for strip and density plots
                 dbc.Row([
                     html.Div([
+
                         # a slider that allows users to adjust the range of sleep efficiency values on the strip and
                         # contour plots
                         html.Div([
@@ -168,6 +171,7 @@ app.layout = html.Div([
 
                         # div for smoking status strip chart
                         html.Div([
+
                             # add a title above the plot
                             html.H2('How Smoking Affects Your Sleep Quality', style={'textAlign': 'center'}),
 
@@ -186,6 +190,7 @@ app.layout = html.Div([
 
                         # div for density contour plot (comparing a combination of variables with sleep efficiency)
                         html.Div([
+
                             # add a dynamic title above the density contour plot
                             html.Div(id='mult-feat-eff'),
 
@@ -205,8 +210,7 @@ app.layout = html.Div([
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
                                  'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
-                                                                                                   'consumption 24 hrs before sleeping (oz)',
-                                 'Exercise frequency (in days per week)',
+                                 'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
                                  'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Awakenings', id='density-stat1',
                                 style={'color': 'black'}),
@@ -219,8 +223,7 @@ app.layout = html.Div([
                                 ['Sleep duration', 'REM sleep percentage', 'Deep sleep percentage',
                                  'Light sleep percentage',
                                  'Awakenings', 'Caffeine consumption 24 hrs before sleeping (mg)', 'Alcohol '
-                                                                                                   'consumption 24 hrs before sleeping (oz)',
-                                 'Exercise frequency (in days per week)',
+                                 'consumption 24 hrs before sleeping (oz)', 'Exercise frequency (in days per week)',
                                  'Age', 'Wakeup time', 'Bedtime', 'Gender', 'Smoking status'],
                                 value='Light sleep percentage', id='density-stat2',
                                 style={'color': 'black'})
@@ -233,8 +236,10 @@ app.layout = html.Div([
                     # div for the feature importance graph, sleep hygiene radial chart, and 3D scatter plot
                     dbc.Row([
                         html.Div([
+
                             # div for the feature importance bar chart
                             html.Div([
+
                                 # add a dynamic title above the feature importance bar chart
                                 html.Div(id='feature-importance-title'),
 
@@ -256,10 +261,12 @@ app.layout = html.Div([
 
                             # div for radar graph of sleep hygiene
                             html.Div([
+
                                 # add a title above the graph
                                 html.H2('Sleep Hygiene', style={'textAlign': 'center'}),
                                 dbc.Col([
                                     html.Div([
+
                                         html.Div([
                                             # add instructions for how to see the graph properly
                                             html.P('Rotate the graph to properly see all the labels',
@@ -289,9 +296,9 @@ app.layout = html.Div([
 
                                         # Ask user for how many times they exercise per week
                                         html.Div([
-                                            html.P('How many times do you exercise per week?',
+                                            html.P('How many days do you exercise per week?',
                                                    style={'textAlign': 'center'}),
-                                            dcc.Slider(0, 10, 1, value=1, marks=None, id='hygiene-exercise',
+                                            dcc.Slider(0, 7, 1, value=1, marks=None, id='hygiene-exercise',
                                                        tooltip={'placement': 'bottom', 'always_visible': True})
                                         ])
                                     ])]),
@@ -308,6 +315,7 @@ app.layout = html.Div([
 
                             # div for a 3D scatter plot showing the relationship between 3 independent sleep variables
                             html.Div([
+
                                 # add a dynamic title above the 3D scatter plot
                                 html.Div(id='three-dim-title'),
 
@@ -371,6 +379,7 @@ app.layout = html.Div([
         dcc.Tab(label='Sleep Quality Predictor', children=[
             html.Div([
                 html.Div([
+
                     # title at the top of the section
                     html.H2('Find your sleep efficiency, REM sleep percentage, and deep sleep percentage!',
                             style={'textAlign': 'center'}),
@@ -387,6 +396,7 @@ app.layout = html.Div([
                     # Div for sliders
                     dbc.Col([
                         html.Div([
+
                             # Ask a user for their age
                             html.Div([
                                 html.P('How old are you?', style={'textAlign': 'center'}),
@@ -423,6 +433,7 @@ app.layout = html.Div([
                     # Div for drop down menus
                     dbc.Col([
                         html.Div([
+
                             # Ask a user for their biological gender
                             html.Div([
                                 html.P("What's your biological gender?", style={'textAlign': 'center'}),
@@ -463,7 +474,7 @@ app.layout = html.Div([
                             # Add style parameters for the Div
                             style={'width': '50%', 'float': 'right', 'height': '35vw'})]),
 
-                    # display the predicted sleep efficiency, REM sleep percentages, and deep sleep percentages
+                    # display the predicted sleep efficiency, REM sleep percentage, and deep sleep percentage
                     dbc.Row([
                         html.H2(id='sleep-eff', style={'textAlign': 'center'}),
                         html.H2(id='sleep-rem', style={'textAlign': 'center'}),
@@ -474,13 +485,16 @@ app.layout = html.Div([
 
         # a tab displaying information about the dashboard's tools and how to use them
         dcc.Tab(label='Need Help?', children=[
+
             # header for the tab
             html.H1('Help me understand...', style={'font-family': 'Courier New', 'background-color': '#CBC3E3'}),
 
             # help the user understand how to use the "help" tab
             html.P('Use the dropdown to select which visualization you need help with, using or understanding. '
                    'This will give you a brief explanation.'),
+
             html.Div([
+
                 # create a dropdown for the help categories
                 dcc.Dropdown(
                     options=[
@@ -495,6 +509,7 @@ app.layout = html.Div([
                         {'label': '... the sleep scores calculator', 'value': 'ml-help'}], id='help-options',
                 )], style={'font-family': 'Courier New'}),
             html.Div([], id='helper-div', style={'background-color': 'lightblue', 'font-family': 'Courier New'}),
+
             html.Div([
                 # intro video
                 html.H2('Introduction to the Dashboard'),
@@ -614,7 +629,7 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
     Args:
         sleep_stat1 (str): One statistic to be portrayed on the density contour plot
         sleep_stat2 (str): Another statistic to be portrayed on the density contour plot
-        slider_values (list of floats): a range of average sleep efficiencies to be represented on the plot
+        slider_values (list of two floats): a range of average sleep efficiencies to be represented on the plot
     Returns:
         fig (px.density_contour): the density contour plot
         html.H2: the contour plot's title, which changes based on the user's input for the represented variables
@@ -655,7 +670,7 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
 def show_sleep_strip(smoker_slider):
     """ Shows a strip chart that presents the relationship between sleep efficiency and smoking status
     Args:
-        smoker_slider (list of ints): a range of sleep efficiencies to be represented on the plot
+        smoker_slider (list of two ints): a range of sleep efficiencies to be represented on the plot
     Returns:
         fig (px.strip): the strip chart itself
     """
@@ -680,12 +695,13 @@ def show_sleep_strip(smoker_slider):
     Input('feature', 'value')
 )
 def plot_eff_forest(focus_col):
-    """ Plot the feature importance graph for the y-variable that the user chooses in the purple section
+    """ Plot the feature importance graph for a y-variable of interest (sleep efficiency, REM sleep percentage, or deep
+        sleep percentage)
     Args:
         focus_col (str): y-variable of interest (sleep efficiency, REM sleep percentage, or deep sleep percentage)
     Return:
         fig (px.bar): a bar chart containing the feature importance values for the random forest regressor
-        html.H2: the bar plot's title, which changes based on the user's input for the represented variables
+        html.H2: the bar plot's title, which changes based on the user's input for the y variable of interest
     """
     # Establish the theme of the visualization
     sns.set()
@@ -717,7 +733,7 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
         awakenings (int) - how many times the user wakes up during sleep
         caffeine (int) - the amount of caffeine the user takes in the 24 hrs prior to bedtime (in mg)
         alcohol (int) - the amount of alcohol the user drinks in the 24 hrs prior to bedtime (in oz)
-        exercise (int) - the number of times the user exercises per week
+        exercise (int) - the number of times the user exercises per week (days)
     Returns:
         fig: the radar graph itself
     """
@@ -787,18 +803,15 @@ def plot_sleep_hygiene(awakenings, caffeine, alcohol, exercise):
 def plot_three_dim_scatter(sleep_stat_x, sleep_stat_y, sleep_stat_z):
     """ Plot a 3D scatter plot showing the relationship between 3 sleep variables
     Args:
-        sleep_stat_x (str): one independent sleep variable of interest (cannot be sleep efficiency, REM sleep
-        percentage, or deep sleep percentage)
-        sleep_stat_y (str): another independent sleep variable of interest (cannot be sleep efficiency, REM sleep
-        percentage, or deep sleep percentage)
-        sleep_stat_z (str): another independent sleep variable of interest (sleep efficiency, REM sleep percentage, or
-        deep sleep percentage)
+        sleep_stat_x (str): one independent sleep variable of interest
+        sleep_stat_y (str): another independent sleep variable of interest
+        sleep_stat_z (str): another independent sleep variable of interest
     Returns:
-        fig: a 3D scatter plot showing the relationship between 3 independent sleep variables
+        fig (px.scatter_3d): a 3D scatter plot showing the relationship between 3 independent sleep variables
         html.H2: the title for the 3D scatter plot, which changes based on the user's input for the represented
                  variables
     """
-    # performing one hot encoding if gender or smoking status needs to be shown on the plot
+    # performing one hot encoding if gender and/or smoking status needs to be shown on the plot
     df_sleep = utils.encode(sleep_stat_x, sleep_stat_y, EFFICIENCY)
 
     # plot the 3D scatter plot
@@ -875,7 +888,7 @@ def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
     y_pred = utils.predict_sleep_quality('REM sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, awakenings,
                                          caffeine, alcohol, exercise, gender, smoke)
 
-    # display the user's predicted sleep REM sleep percentage
+    # display the user's predicted REM sleep percentage
     return 'Your predicted REM sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
 
@@ -910,7 +923,7 @@ def calc_deep_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerc
     y_pred = utils.predict_sleep_quality('Deep sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, awakenings,
                                          caffeine, alcohol, exercise, gender, smoke)
 
-    # display the user's predicted sleep deep sleep percentage
+    # display the user's predicted deep sleep percentage
     return 'Your predicted deep sleep percentage is \n{}'.format(round(float(y_pred), 2))
 
 

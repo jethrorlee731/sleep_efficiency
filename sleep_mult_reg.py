@@ -16,8 +16,8 @@ REM sleep percentage, and 0.27 for predicting deep sleep percentage
 It appears that just using the top 3 features indicated by a random forest regressor for predicting sleep efficiency,
 REM sleep percentage, and deep sleep percentage actually makes the regression models worse (lower R^2 values).
 Additionally, all the created multiple linear regression models yield lower R^2 values than a corresponding random
-forest regressor that predicts the same value. Therefore, for our sleep predictors in utils.py and sleep.py,
-only used a random forest regressor. """
+forest regressor that predicts the same value. Therefore, our sleep predictors in random_forest_assets.py and sleep.py
+only use a random forest regressor. """
 
 # import statements
 from sklearn.linear_model import LinearRegression
@@ -65,7 +65,7 @@ def main():
     # parse the bedtime and wakeup time columns to have them represented in military time
     EFFICIENCY = utils.parse_times(EFFICIENCY)
 
-    # extract the values used to help multiple regression models predict sleep efficiency, REM sleep percentage, and
+    # extract the values used to help the multiple regression models predict sleep efficiency, REM sleep percentage, and
     # deep sleep percentage
     df_sleep, x_feat_list = utils.get_x_feat(EFFICIENCY)
 
@@ -82,12 +82,11 @@ def main():
 
     # using only the top 3 features (based on a random forest regressor) for the multiple regression model to predict a
     # user's sleep efficiency, REM sleep percentage, and deep sleep percentage
-    i_r2_eff = mult_reg(df_sleep, ['Awakenings', 'Age', 'Alcohol consumption 24 hrs before'
-                                                        ' sleeping (oz)'], 'Sleep efficiency')
-    i_r2_rem = mult_reg(df_sleep, ['Age', 'Wakeup time', 'Bedtime'],
-                        'REM sleep percentage')
-    i_r2_deep = mult_reg(df_sleep, ['Alcohol consumption 24 hrs before sleeping (oz)', 'Age',
-                                    'Awakenings'], 'Deep sleep percentage')
+    i_r2_eff = mult_reg(df_sleep, ['Awakenings', 'Age', 'Alcohol consumption 24 hrs before sleeping (oz)'],
+                                   'Sleep efficiency')
+    i_r2_rem = mult_reg(df_sleep, ['Age', 'Wakeup time', 'Bedtime'], 'REM sleep percentage')
+    i_r2_deep = mult_reg(df_sleep, ['Alcohol consumption 24 hrs before sleeping (oz)', 'Age', 'Awakenings'],
+                                    'Deep sleep percentage')
 
     # print the r^2 values for the models just using the critical features
     print('The r2 for predicting sleep efficiency with just the critical features is', i_r2_eff)

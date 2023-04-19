@@ -14,6 +14,7 @@ import numpy as np
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import utils
+import random_forest_assets as rf
 
 # read in the file as a dataframe and perform basic cleaning
 EFFICIENCY = utils.read_file('data/Sleep_Efficiency.csv')
@@ -710,11 +711,11 @@ def plot_eff_forest(focus_col):
     df_sleep, x_feat_list = utils.get_x_feat(EFFICIENCY)
 
     # Builds the random forest regressor model that predicts the user-specified y-variable for a user
-    random_forest_reg = utils.forest_reg(focus_col, EFFICIENCY)
+    random_forest_reg = rf.forest_reg(focus_col, EFFICIENCY)
 
     # plots the importance of features in determining the user-specified y variable for a person by the random forest
     # regressor
-    fig = utils.plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
+    fig = rf.plot_feat_import_rf_reg(x_feat_list, random_forest_reg.feature_importances_)
 
     return fig, html.H2('Which variables are most important in determining your ' + focus_col + '?',
                         style={'textAlign': 'center'})
@@ -1023,8 +1024,8 @@ def show_help(query):
         return [html.H3('... which variables are most important in determining sleep efficiency, '
                         'REM sleep percentage, or deep sleep percentage'),
                 html.P('Select which outcome-- sleep efficiency, REM sleep percentage, or '
-                       'deep sleep percentage-- you would like to see the feature importances '
-                       'for. The importances are determined by how much they aid the random '
+                       'deep sleep percentage-- you would like to see the feature importance values '
+                       'for. The importance values are determined by how much they aid the random '
                        'forest regressor in predicting the outcome selected.'),
 
                 # a video that helps the user to navigate through the feature importance bar plot

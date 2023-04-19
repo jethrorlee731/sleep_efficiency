@@ -7,19 +7,19 @@ April 19, 2023
 sleep_forest.py: Building a random forest regressor to determine the attributes that best determine one's sleep
                  efficiency, REM sleep percentage, and deep sleep percentage
 
-A random forest regressor is already built in the utils.py file. This file presents how the r^2 value for when the
-regressor predicts sleep efficiency, REM sleep percentage, and deep sleep percentage is higher than that for multiple
-linear regression models predicting the same values.
+This file presents how the r^2 value for when the regressor predicts sleep efficiency, REM sleep percentage,
+and deep sleep percentage is higher than that for multiple linear regression models predicting the same values.
 
-Note that the random forest regressor used for the project is directly implemented in the sleep.py and utils.py file.
-This file just provides why we favored using a random forest regressor (higher r^2) over multiple linear regression.
+Note that the random forest regressor used for the project is directly implemented in the sleep.py and random_forest_assets.py
+file. This file just provides why we favored using a random forest regressor (higher r^2) over multiple linear
+regression.
 
 The r^2 value of this random forest regressor hovers around 0.67 for predicting sleep efficiency, 0.16 for predicting
 REM sleep percentage, and 0.35 for predicting deep sleep percentage.
 
 It appears that just using the top 3 important features to make predictions actually makes the random forest
 regressors worse (lower cross-validated r^2). Therefore, we used all the variables in the random forest regressors when
-we made the sleep predictor in sleep.py and utils.py"""
+we made the sleep predictor in sleep.py and random_forest_assets.py"""
 
 # Import statements
 import numpy as np
@@ -73,8 +73,8 @@ def random_forest(x_feat_list, df, y_feat):
         y_feat (str): y-variable of interest (the testing value)
     Return:
         r_squared (float): cross-validated r^2 score of the model
-        sleep_important (list): has tuples that map certain features to their feature importance (mean MSE reduce)
-                                values
+        importance_metrics (list): has tuples that map certain features to their feature importance (mean MSE reduce)
+                                   values
     """
     # define the testing value
     y_feat = y_feat
@@ -111,9 +111,9 @@ def random_forest(x_feat_list, df, y_feat):
     r_squared = r2_score(y_true=y_true, y_pred=y_pred)
 
     # creates a list of tuples that map features to their importance value
-    sleep_important = map_feature_import_vals(x_feat_list, random_forest_reg.feature_importances_)
+    importance_metrics = map_feature_import_vals(x_feat_list, random_forest_reg.feature_importances_)
 
-    return r_squared, sleep_important
+    return r_squared, importance_metrics
 
 
 def main():

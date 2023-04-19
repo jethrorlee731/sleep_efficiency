@@ -10,9 +10,9 @@ sleep_forest.py: Building a random forest regressor to determine the attributes 
 This file presents how the r^2 value for when the regressor predicts sleep efficiency, REM sleep percentage,
 and deep sleep percentage is higher than that for multiple linear regression models predicting the same values.
 
-Note that the random forest regressor used for the project is directly implemented in the sleep.py and random_forest_assets.py
-file. This file just provides why we favored using a random forest regressor (higher r^2) over multiple linear
-regression.
+Note that the random forest regressor used for the project is directly implemented in the sleep.py and
+random_forest_assets.py file. This file just provides why we favored using a random forest regressor (higher r^2)
+over multiple linear regression.
 
 The r^2 value of this random forest regressor hovers around 0.67 for predicting sleep efficiency, 0.16 for predicting
 REM sleep percentage, and 0.35 for predicting deep sleep percentage.

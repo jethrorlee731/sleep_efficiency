@@ -1,7 +1,7 @@
 """
 Colbe Chang, Jocelyn Ju, Jethro R. Lee, Michelle Wang, and Ceara Zhang
 DS3500
-Final Project: Sleep Efficiency Dashboard (utils.py)
+Final Project: Sleep Efficiency Dashboard (random_forest_assets.py)
 April 19, 2023
 
 random_forest_assets.py: Generic functions associated with random forest regressors and feature importance metrics

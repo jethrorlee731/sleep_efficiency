@@ -18,7 +18,7 @@ def read_file(filename):
     Args:
         filename (str): name of file of interest
     Returns:
-        file_copy (Pandas data frame): cleaned dataframe
+        file_copy (Pandas data frame): cleaned dataframe containing the file's data
     """
     # read the CSV files into dataframes
     file = pd.read_csv(filename)
@@ -66,7 +66,7 @@ def filt_vals(df, vals, col, lcols):
         df: (Pandas dataframe) a dataframe with the values we are seeking and additional attributes
         vals (list): two user-defined values, a min and max for "col"
         col (str): the column to filter by
-        lcols (list): a list of column names to return
+        lcols (list of str): a list of column names to return
     Returns:
         df_updated (dataframe): the dataframe filtered, with just the values for "col" within the user specified range
     """
@@ -110,7 +110,7 @@ def forest_reg(focus_col, df):
         focus_col (str): name of the y-variable of interest
         df (pd.DataFrame): dataframe of interest that contains data used to train the regressor
     Returns:
-        random_forest_reg: fitted random forest regressor that makes predictions based on the inputted dataset
+        random_forest_reg: fitted random forest regressor that predicts the y-variable based on the inputted data set
     """
     # retrieve the x features for the random forest regressor
     df, x_feat_list = get_x_feat(df)
@@ -234,7 +234,7 @@ def encode(var1, var2, df_sleep):
         df_sleep (Pandas df): data frame containing information about the sleep quality of multiple individuals
 
     Returns:
-        df (Pandas df): a new version of the data frame that contains any newly encoded columns
+        df_sleep (Pandas df): a new version of the sleep data frame that contains any newly encoded columns
     """
     # saving column names into constants
     GENDER_COL = 'Gender'

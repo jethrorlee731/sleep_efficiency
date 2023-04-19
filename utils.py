@@ -64,7 +64,7 @@ def filt_vals(df, vals, col, lcols):
     """ Filter a dataframe by user-selected values
     Args:
         df: (Pandas dataframe) a dataframe with the values we are seeking and additional attributes
-        vals (list): two user-defined values, a min and max for "col"
+        vals (list of floats): two user-defined values, a min and max for "col"
         col (str): the column to filter by
         lcols (list of str): a list of column names to return
     Returns:
@@ -87,7 +87,7 @@ def get_x_feat(df_sleep):
         df_sleep (Pandas data frame): a data frame containing sleep statistics for test subjects
     Returns:
         df_sleep (pd.Dataframe): dataframe with categorical data encoded
-        x_feat_list (list): list of desired x-variables
+        x_feat_list (list of str): list of desired x-variables
     """
     # Establish the features not used by the random forest regressor
     unwanted_feats = ['ID', 'Sleep efficiency', 'REM sleep percentage', 'Deep sleep percentage',

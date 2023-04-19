@@ -670,7 +670,7 @@ def show_efficiency_contour(sleep_stat1, sleep_stat2, slider_values):
 def show_sleep_strip(smoker_slider):
     """ Shows a strip chart that presents the relationship between sleep efficiency and smoking status
     Args:
-        smoker_slider (list of two ints): a range of sleep efficiencies to be represented on the plot
+        smoker_slider (list of two floats): a range of sleep efficiencies to be represented on the plot
     Returns:
         fig (px.strip): the strip chart itself
     """
@@ -847,7 +847,7 @@ def calc_eff_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
     Returns:
-        y_pred (float): predicted sleep efficiency
+        a message containing the user's predicted sleep efficiency
     """
     # predict sleep efficiency based on user inputs from the dropdown and sliders
     y_pred = utils.predict_sleep_quality('Sleep efficiency', EFFICIENCY, age, bedtime, wakeuptime, awakenings, caffeine,
@@ -882,7 +882,7 @@ def calc_rem_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerci
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
     Returns:
-        y_pred (float): predicted REM sleep percentage
+        a message with the user's predicted REM sleep percentage
     """
     # predict REM sleep percentage based on user inputs from the dropdown and sliders
     y_pred = utils.predict_sleep_quality('REM sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, awakenings,
@@ -917,7 +917,7 @@ def calc_deep_reg(age, bedtime, wakeuptime, awakenings, caffeine, alcohol, exerc
         gender (str): biological gender of the user
         smoke (str): whether the user smokes
     Returns:
-        y_pred (float): predicted deep sleep percentage
+        a message with the user's predicted deep sleep percentage
     """
     # predict deep sleep percentage based on user inputs from the dropdown and sliders
     y_pred = utils.predict_sleep_quality('Deep sleep percentage', EFFICIENCY, age, bedtime, wakeuptime, awakenings,
@@ -936,7 +936,7 @@ def show_help(query):
     Args:
         query (string) - the value of the dropdown indicating what the user needs help with
     Returns:
-        helper-div : div that displays a paragraph and header with assistance for the user
+        div that displays a paragraph, header, and video with assistance for the user
     """
     # helps the user to navigate through the scatter plot
     if query == 'scatterplot-help':
